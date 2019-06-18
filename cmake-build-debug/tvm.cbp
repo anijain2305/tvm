@@ -1,0 +1,1533 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6"/>
+	<Project>
+		<Option title="tvm"/>
+		<Option makefile_is_custom="1"/>
+		<Option compiler="gcc"/>
+		<Option virtualFolders="CMake Files\;CMake Files\cmake\;CMake Files\cmake\util\;CMake Files\cmake\modules\;CMake Files\cmake\modules\contrib\;"/>
+		<Build>
+			<Target title="all">
+				<Option working_dir="/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="install/strip">
+				<Option working_dir="/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 install/strip"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="install/local">
+				<Option working_dir="/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 install/local"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="install">
+				<Option working_dir="/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 install"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="runtime">
+				<Option working_dir="/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 runtime"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="tvm_runtime">
+				<Option output="/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/libtvm_runtime.dylib" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="3"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DDMLC_USE_FOPEN64=0"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/include"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/3rdparty/dlpack/include"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/3rdparty/dmlc-core/include"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/3rdparty/rang/include"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/3rdparty/compiler-rt"/>
+					<Add directory="/System/Library/Frameworks/OpenCL.framework"/>
+					<Add directory="/Library/Developer/CommandLineTools/usr/include/c++/v1"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/Library/Developer/CommandLineTools/usr/lib/clang/10.0.0/include"/>
+					<Add directory="/Library/Developer/CommandLineTools/usr/include"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/System/Library/Frameworks"/>
+					<Add directory="/Library/Frameworks"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 tvm_runtime"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="tvm_runtime/fast">
+				<Option output="/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/libtvm_runtime.dylib" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="3"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DDMLC_USE_FOPEN64=0"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/include"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/3rdparty/dlpack/include"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/3rdparty/dmlc-core/include"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/3rdparty/rang/include"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/3rdparty/compiler-rt"/>
+					<Add directory="/System/Library/Frameworks/OpenCL.framework"/>
+					<Add directory="/Library/Developer/CommandLineTools/usr/include/c++/v1"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/Library/Developer/CommandLineTools/usr/lib/clang/10.0.0/include"/>
+					<Add directory="/Library/Developer/CommandLineTools/usr/include"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/System/Library/Frameworks"/>
+					<Add directory="/Library/Frameworks"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 tvm_runtime/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="list_install_components">
+				<Option working_dir="/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 list_install_components"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="tvm_topi">
+				<Option output="/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/libtvm_topi.dylib" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="3"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DDMLC_USE_FOPEN64=0"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/include"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/3rdparty/dlpack/include"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/3rdparty/dmlc-core/include"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/3rdparty/rang/include"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/3rdparty/compiler-rt"/>
+					<Add directory="/System/Library/Frameworks/OpenCL.framework"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/topi/include"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/3rdparty/HalideIR/src"/>
+					<Add directory="/Library/Developer/CommandLineTools/usr/include/c++/v1"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/Library/Developer/CommandLineTools/usr/lib/clang/10.0.0/include"/>
+					<Add directory="/Library/Developer/CommandLineTools/usr/include"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/System/Library/Frameworks"/>
+					<Add directory="/Library/Frameworks"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 tvm_topi"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="tvm_topi/fast">
+				<Option output="/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/libtvm_topi.dylib" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="3"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DDMLC_USE_FOPEN64=0"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/include"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/3rdparty/dlpack/include"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/3rdparty/dmlc-core/include"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/3rdparty/rang/include"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/3rdparty/compiler-rt"/>
+					<Add directory="/System/Library/Frameworks/OpenCL.framework"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/topi/include"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/3rdparty/HalideIR/src"/>
+					<Add directory="/Library/Developer/CommandLineTools/usr/include/c++/v1"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/Library/Developer/CommandLineTools/usr/lib/clang/10.0.0/include"/>
+					<Add directory="/Library/Developer/CommandLineTools/usr/include"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/System/Library/Frameworks"/>
+					<Add directory="/Library/Frameworks"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 tvm_topi/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="rebuild_cache">
+				<Option working_dir="/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="nnvm_compiler">
+				<Option output="/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/libnnvm_compiler.dylib" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="3"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DDMLC_USE_FOPEN64=0"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/include"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/3rdparty/dlpack/include"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/3rdparty/dmlc-core/include"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/3rdparty/rang/include"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/3rdparty/compiler-rt"/>
+					<Add directory="/System/Library/Frameworks/OpenCL.framework"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/nnvm/include"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/topi/include"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/3rdparty/HalideIR/src"/>
+					<Add directory="/Library/Developer/CommandLineTools/usr/include/c++/v1"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/Library/Developer/CommandLineTools/usr/lib/clang/10.0.0/include"/>
+					<Add directory="/Library/Developer/CommandLineTools/usr/include"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/System/Library/Frameworks"/>
+					<Add directory="/Library/Frameworks"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 nnvm_compiler"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="nnvm_compiler/fast">
+				<Option output="/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/libnnvm_compiler.dylib" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="3"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DDMLC_USE_FOPEN64=0"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/include"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/3rdparty/dlpack/include"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/3rdparty/dmlc-core/include"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/3rdparty/rang/include"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/3rdparty/compiler-rt"/>
+					<Add directory="/System/Library/Frameworks/OpenCL.framework"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/nnvm/include"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/topi/include"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/3rdparty/HalideIR/src"/>
+					<Add directory="/Library/Developer/CommandLineTools/usr/include/c++/v1"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/Library/Developer/CommandLineTools/usr/lib/clang/10.0.0/include"/>
+					<Add directory="/Library/Developer/CommandLineTools/usr/include"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/System/Library/Frameworks"/>
+					<Add directory="/Library/Frameworks"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 nnvm_compiler/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="edit_cache">
+				<Option working_dir="/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="tvm">
+				<Option output="/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/libtvm.dylib" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="3"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DDMLC_USE_FOPEN64=0"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/include"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/3rdparty/dlpack/include"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/3rdparty/dmlc-core/include"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/3rdparty/rang/include"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/3rdparty/compiler-rt"/>
+					<Add directory="/System/Library/Frameworks/OpenCL.framework"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/3rdparty/HalideIR/src"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/topi/include"/>
+					<Add directory="/Library/Developer/CommandLineTools/usr/include/c++/v1"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/Library/Developer/CommandLineTools/usr/lib/clang/10.0.0/include"/>
+					<Add directory="/Library/Developer/CommandLineTools/usr/include"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/System/Library/Frameworks"/>
+					<Add directory="/Library/Frameworks"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 tvm"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="tvm/fast">
+				<Option output="/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/libtvm.dylib" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="3"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DDMLC_USE_FOPEN64=0"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/include"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/3rdparty/dlpack/include"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/3rdparty/dmlc-core/include"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/3rdparty/rang/include"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/3rdparty/compiler-rt"/>
+					<Add directory="/System/Library/Frameworks/OpenCL.framework"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/3rdparty/HalideIR/src"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/topi/include"/>
+					<Add directory="/Library/Developer/CommandLineTools/usr/include/c++/v1"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/Library/Developer/CommandLineTools/usr/lib/clang/10.0.0/include"/>
+					<Add directory="/Library/Developer/CommandLineTools/usr/include"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/System/Library/Frameworks"/>
+					<Add directory="/Library/Frameworks"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 tvm/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="vta">
+				<Option output="/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/libvta.dylib" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="3"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DTA_TARGET=sim"/>
+					<Add option="-DVTA_HW_FREQ=100"/>
+					<Add option="-DVTA_HW_CLK_TARGET=7"/>
+					<Add option="-DVTA_HW_VER=0.0.0"/>
+					<Add option="-DVTA_LOG_INP_WIDTH=3"/>
+					<Add option="-DVTA_LOG_WGT_WIDTH=3"/>
+					<Add option="-DVTA_LOG_ACC_WIDTH=5"/>
+					<Add option="-DVTA_LOG_OUT_WIDTH=3"/>
+					<Add option="-DVTA_LOG_BATCH=0"/>
+					<Add option="-DVTA_LOG_BLOCK_IN=4"/>
+					<Add option="-DVTA_LOG_BLOCK_OUT=4"/>
+					<Add option="-DVTA_LOG_UOP_BUFF_SIZE=15"/>
+					<Add option="-DVTA_LOG_INP_BUFF_SIZE=15"/>
+					<Add option="-DVTA_LOG_WGT_BUFF_SIZE=18"/>
+					<Add option="-DVTA_LOG_ACC_BUFF_SIZE=17"/>
+					<Add option="-DDMLC_USE_FOPEN64=0"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/include"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/3rdparty/dlpack/include"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/3rdparty/dmlc-core/include"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/3rdparty/rang/include"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/3rdparty/compiler-rt"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/vta/include"/>
+					<Add directory="/System/Library/Frameworks/OpenCL.framework"/>
+					<Add directory="/Library/Developer/CommandLineTools/usr/include/c++/v1"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/Library/Developer/CommandLineTools/usr/lib/clang/10.0.0/include"/>
+					<Add directory="/Library/Developer/CommandLineTools/usr/include"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/System/Library/Frameworks"/>
+					<Add directory="/Library/Frameworks"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 vta"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="vta/fast">
+				<Option output="/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/libvta.dylib" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="3"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DTA_TARGET=sim"/>
+					<Add option="-DVTA_HW_FREQ=100"/>
+					<Add option="-DVTA_HW_CLK_TARGET=7"/>
+					<Add option="-DVTA_HW_VER=0.0.0"/>
+					<Add option="-DVTA_LOG_INP_WIDTH=3"/>
+					<Add option="-DVTA_LOG_WGT_WIDTH=3"/>
+					<Add option="-DVTA_LOG_ACC_WIDTH=5"/>
+					<Add option="-DVTA_LOG_OUT_WIDTH=3"/>
+					<Add option="-DVTA_LOG_BATCH=0"/>
+					<Add option="-DVTA_LOG_BLOCK_IN=4"/>
+					<Add option="-DVTA_LOG_BLOCK_OUT=4"/>
+					<Add option="-DVTA_LOG_UOP_BUFF_SIZE=15"/>
+					<Add option="-DVTA_LOG_INP_BUFF_SIZE=15"/>
+					<Add option="-DVTA_LOG_WGT_BUFF_SIZE=18"/>
+					<Add option="-DVTA_LOG_ACC_BUFF_SIZE=17"/>
+					<Add option="-DDMLC_USE_FOPEN64=0"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/include"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/3rdparty/dlpack/include"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/3rdparty/dmlc-core/include"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/3rdparty/rang/include"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/3rdparty/compiler-rt"/>
+					<Add directory="/Users/rankyunh/Desktop/quant/tvm/vta/include"/>
+					<Add directory="/System/Library/Frameworks/OpenCL.framework"/>
+					<Add directory="/Library/Developer/CommandLineTools/usr/include/c++/v1"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/Library/Developer/CommandLineTools/usr/lib/clang/10.0.0/include"/>
+					<Add directory="/Library/Developer/CommandLineTools/usr/include"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/System/Library/Frameworks"/>
+					<Add directory="/Library/Frameworks"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 vta/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/3rdparty/HalideIR/src/arithmetic/Deinterleave.cpp">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/3rdparty/HalideIR/src/arithmetic/Deinterleave.h">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/3rdparty/HalideIR/src/arithmetic/Interval.cpp">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/3rdparty/HalideIR/src/arithmetic/Interval.h">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/3rdparty/HalideIR/src/arithmetic/ModulusRemainder.cpp">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/3rdparty/HalideIR/src/arithmetic/ModulusRemainder.h">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/3rdparty/HalideIR/src/arithmetic/Simplify.cpp">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/3rdparty/HalideIR/src/arithmetic/Simplify.h">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/3rdparty/HalideIR/src/arithmetic/Substitute.cpp">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/3rdparty/HalideIR/src/arithmetic/Substitute.h">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/3rdparty/HalideIR/src/base/Debug.cpp">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/3rdparty/HalideIR/src/base/Debug.h">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/3rdparty/HalideIR/src/base/Error.cpp">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/3rdparty/HalideIR/src/base/Error.h">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/3rdparty/HalideIR/src/base/Float16Opt.cpp">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/3rdparty/HalideIR/src/base/Type.cpp">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/3rdparty/HalideIR/src/base/Type.h">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/3rdparty/HalideIR/src/base/Util.cpp">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/3rdparty/HalideIR/src/base/Util.h">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/3rdparty/HalideIR/src/ir/IR.cpp">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/3rdparty/HalideIR/src/ir/IR.h">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/3rdparty/HalideIR/src/ir/IREquality.cpp">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/3rdparty/HalideIR/src/ir/IREquality.h">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/3rdparty/HalideIR/src/ir/IRMutator.cpp">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/3rdparty/HalideIR/src/ir/IRMutator.h">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/3rdparty/HalideIR/src/ir/IROperator.cpp">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/3rdparty/HalideIR/src/ir/IROperator.h">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/3rdparty/HalideIR/src/ir/IRPrinter.cpp">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/3rdparty/HalideIR/src/ir/IRPrinter.h">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/3rdparty/HalideIR/src/ir/IRVisitor.cpp">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/3rdparty/HalideIR/src/ir/IRVisitor.h">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/3rdparty/HalideIR/src/tvm/node/node.cpp">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/3rdparty/HalideIR/src/tvm/node/node.h">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/3rdparty/bfloat16/bfloat16.cc">
+			<Option target="tvm_runtime"/>
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/nnvm/src/c_api/c_api_error.cc">
+			<Option target="nnvm_compiler"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/nnvm/src/c_api/c_api_graph.cc">
+			<Option target="nnvm_compiler"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/nnvm/src/c_api/c_api_symbolic.cc">
+			<Option target="nnvm_compiler"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/nnvm/src/compiler/alter_op_layout.cc">
+			<Option target="nnvm_compiler"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/nnvm/src/compiler/compile_engine.cc">
+			<Option target="nnvm_compiler"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/nnvm/src/compiler/compile_engine.h">
+			<Option target="nnvm_compiler"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/nnvm/src/compiler/fold_scale_axis.cc">
+			<Option target="nnvm_compiler"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/nnvm/src/compiler/graph_compile.cc">
+			<Option target="nnvm_compiler"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/nnvm/src/compiler/graph_fuse.cc">
+			<Option target="nnvm_compiler"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/nnvm/src/compiler/graph_fuse.h">
+			<Option target="nnvm_compiler"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/nnvm/src/compiler/graph_hash.cc">
+			<Option target="nnvm_compiler"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/nnvm/src/compiler/graph_hash.h">
+			<Option target="nnvm_compiler"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/nnvm/src/compiler/graph_runtime.cc">
+			<Option target="nnvm_compiler"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/nnvm/src/compiler/graph_runtime.h">
+			<Option target="nnvm_compiler"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/nnvm/src/compiler/packed_func_ext.cc">
+			<Option target="nnvm_compiler"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/nnvm/src/compiler/precompute_prune.cc">
+			<Option target="nnvm_compiler"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/nnvm/src/compiler/simplify_inference.cc">
+			<Option target="nnvm_compiler"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/nnvm/src/core/graph.cc">
+			<Option target="nnvm_compiler"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/nnvm/src/core/node.cc">
+			<Option target="nnvm_compiler"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/nnvm/src/core/op.cc">
+			<Option target="nnvm_compiler"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/nnvm/src/core/pass.cc">
+			<Option target="nnvm_compiler"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/nnvm/src/core/symbolic.cc">
+			<Option target="nnvm_compiler"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/nnvm/src/pass/correct_layout.cc">
+			<Option target="nnvm_compiler"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/nnvm/src/pass/gradient.cc">
+			<Option target="nnvm_compiler"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/nnvm/src/pass/infer_shape_type.cc">
+			<Option target="nnvm_compiler"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/nnvm/src/pass/order_mutation.cc">
+			<Option target="nnvm_compiler"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/nnvm/src/pass/place_device.cc">
+			<Option target="nnvm_compiler"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/nnvm/src/pass/plan_memory.cc">
+			<Option target="nnvm_compiler"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/nnvm/src/pass/print_graph_ir.cc">
+			<Option target="nnvm_compiler"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/nnvm/src/pass/saveload_json.cc">
+			<Option target="nnvm_compiler"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/nnvm/src/top/image/resize.cc">
+			<Option target="nnvm_compiler"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/nnvm/src/top/image/resize.h">
+			<Option target="nnvm_compiler"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/nnvm/src/top/nn/convolution.cc">
+			<Option target="nnvm_compiler"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/nnvm/src/top/nn/nn.cc">
+			<Option target="nnvm_compiler"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/nnvm/src/top/nn/pooling.cc">
+			<Option target="nnvm_compiler"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/nnvm/src/top/nn/upsampling.cc">
+			<Option target="nnvm_compiler"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/nnvm/src/top/tensor/broadcast.cc">
+			<Option target="nnvm_compiler"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/nnvm/src/top/tensor/elemwise.cc">
+			<Option target="nnvm_compiler"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/nnvm/src/top/tensor/matrix_op.cc">
+			<Option target="nnvm_compiler"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/nnvm/src/top/tensor/reduce.cc">
+			<Option target="nnvm_compiler"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/nnvm/src/top/tensor/state_op.cc">
+			<Option target="nnvm_compiler"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/nnvm/src/top/tensor/transform.cc">
+			<Option target="nnvm_compiler"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/nnvm/src/top/vision/nms.cc">
+			<Option target="nnvm_compiler"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/nnvm/src/top/vision/ssd/mutibox_op.cc">
+			<Option target="nnvm_compiler"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/nnvm/src/top/vision/yolo/reorg.cc">
+			<Option target="nnvm_compiler"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/nnvm/src/top/vision/yolo/reorg.h">
+			<Option target="nnvm_compiler"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/api/api_arith.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/api/api_base.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/api/api_codegen.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/api/api_ir.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/api/api_lang.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/api/api_pass.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/api/api_schedule.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/api/api_test.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/api/dsl_api.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/arithmetic/analyzer.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/arithmetic/bound_deducer.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/arithmetic/canonical_simplify.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/arithmetic/const_int_bound.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/arithmetic/detect_linear_equation.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/arithmetic/domain_touched.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/arithmetic/int_set.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/arithmetic/modular_set.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/arithmetic/rewrite_simplify.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/arithmetic/rewrite_simplify.h">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/arithmetic/stmt_simplify.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/autotvm/feature_visitor.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/autotvm/feature_visitor.h">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/autotvm/touch_extractor.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/autotvm/touch_extractor.h">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/codegen/build_module.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/codegen/codegen.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/codegen/codegen_aocl.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/codegen/codegen_c.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/codegen/codegen_c.h">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/codegen/codegen_c_host.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/codegen/codegen_c_host.h">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/codegen/codegen_cuda.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/codegen/codegen_cuda.h">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/codegen/codegen_metal.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/codegen/codegen_metal.h">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/codegen/codegen_opencl.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/codegen/codegen_opencl.h">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/codegen/codegen_opengl.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/codegen/codegen_opengl.h">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/codegen/codegen_source_base.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/codegen/codegen_source_base.h">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/codegen/codegen_vhls.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/codegen/codegen_vhls.h">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/codegen/datatype/registry.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/codegen/datatype/registry.h">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/codegen/intrin_rule.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/codegen/intrin_rule.h">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/codegen/intrin_rule_aocl.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/codegen/intrin_rule_cuda.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/codegen/intrin_rule_metal.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/codegen/intrin_rule_opencl.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/codegen/intrin_rule_opengl.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/codegen/intrin_rule_vhls.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/codegen/opt/build_aocl_off.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/codegen/opt/build_cuda_off.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/codegen/opt/build_metal_off.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/codegen/opt/build_opencl_off.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/codegen/opt/build_opengl_off.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/codegen/opt/build_rocm_off.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/codegen/opt/build_sdaccel_off.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/codegen/source_module.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/codegen/stackvm/codegen_stackvm.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/codegen/stackvm/codegen_stackvm.h">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/contrib/hybrid/codegen_hybrid.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/contrib/hybrid/codegen_hybrid.h">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/lang/api_registry.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/lang/attrs.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/lang/buffer.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/lang/channel.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/lang/data_layout.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/lang/expr.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/lang/expr_operator.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/lang/ir.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/lang/lowered_func.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/lang/reflection.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/lang/target_info.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/lang/tensor.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/op/compute_op.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/op/compute_op.h">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/op/cross_thread_reduction.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/op/extern_op.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/op/hybrid_op.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/op/hybrid_op.h">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/op/op_util.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/op/op_util.h">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/op/placeholder_op.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/op/scan_op.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/op/tensor_compute_op.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/op/tensorize.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/pass/arg_binder.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/pass/arg_binder.h">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/pass/bound_checker.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/pass/combine_context_call.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/pass/coproc_sync.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/pass/detect_device.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/pass/inject_copy_intrin.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/pass/inject_double_buffer.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/pass/inject_prefetch.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/pass/inject_virtual_thread.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/pass/inline.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/pass/ir_deep_compare.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/pass/ir_mutator.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/pass/ir_util.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/pass/ir_util.h">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/pass/ir_visitor.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/pass/lift_attr_scope.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/pass/loop_partition.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/pass/lower_custom_datatypes.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/pass/lower_intrin.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/pass/lower_thread_allreduce.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/pass/lower_tvm_builtin.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/pass/lower_warp_memory.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/pass/make_api.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/pass/narrow_channel_access.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/pass/remap_thread_axis.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/pass/remove_no_op.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/pass/rewrite_unsafe_select.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/pass/simple_passes.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/pass/split_host_device.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/pass/split_pipeline.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/pass/ssa.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/pass/storage_access.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/pass/storage_access.h">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/pass/storage_flatten.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/pass/storage_rewrite.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/pass/storage_sync.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/pass/unroll_loop.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/pass/vectorize_loop.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/pass/verify_gpu_code.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/pass/verify_memory.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/backend/build_module.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/backend/compile_engine.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/backend/compile_engine.h">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/backend/graph_plan_memory.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/backend/graph_runtime_codegen.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/backend/interpreter.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/backend/param_dict.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/backend/param_dict.h">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/backend/vm/compiler.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/backend/vm/inline_primitives.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/backend/vm/lambda_lift.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/backend/vm/vm.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/ir/adt.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/ir/alpha_equal.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/ir/base.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/ir/doc.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/ir/doc.h">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/ir/error.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/ir/expr.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/ir/expr_functor.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/ir/hash.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/ir/module.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/ir/op.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/ir/pattern_functor.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/ir/pretty_printer.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/ir/type.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/ir/type_functor.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/ir/type_functor.h">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/op/algorithm/argsort.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/op/algorithm/topk.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/op/annotation/annotation.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/op/debug.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/op/device_copy.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/op/image/resize.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/op/nn/convolution.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/op/nn/nn.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/op/nn/pad.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/op/nn/pooling.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/op/nn/upsampling.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/op/tensor/binary.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/op/tensor/reduce.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/op/tensor/transform.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/op/tensor/unary.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/op/type_relations.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/op/type_relations.h">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/op/vision/multibox_op.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/op/vision/nms.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/op/vision/rcnn_op.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/op/vision/yolo.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/pass/alter_op_layout.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/pass/alter_op_layout.h">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/pass/canonicalize_ops.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/pass/combine_parallel_conv2d.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/pass/dead_code.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/pass/dependency_graph.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/pass/dependency_graph.h">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/pass/device_annotation.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/pass/eliminate_common_subexpr.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/pass/eta_expand.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/pass/expr_subst.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/pass/expr_subst.h">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/pass/fold_constant.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/pass/fold_scale_axis.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/pass/forward_rewrite.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/pass/fuse_ops.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/pass/gradient.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/pass/kind_check.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/pass/mac_count.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/pass/partial_eval.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/pass/pass_manager.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/pass/quantize.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/pass/quantize.h">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/pass/simplify_inference.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/pass/to_a_normal_form.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/pass/to_graph_normal_form.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/pass/type_infer.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/pass/type_solver.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/pass/type_solver.h">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/pass/util.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/relay/pass/well_formed.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/runtime/builtin_fp16.cc">
+			<Option target="tvm_runtime"/>
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/runtime/c_dsl_api.cc">
+			<Option target="tvm_runtime"/>
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/runtime/c_runtime_api.cc">
+			<Option target="tvm_runtime"/>
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/runtime/cpu_device_api.cc">
+			<Option target="tvm_runtime"/>
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/runtime/dso_module.cc">
+			<Option target="tvm_runtime"/>
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/runtime/file_util.cc">
+			<Option target="tvm_runtime"/>
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/runtime/file_util.h">
+			<Option target="tvm_runtime"/>
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/runtime/graph/graph_runtime.cc">
+			<Option target="tvm_runtime"/>
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/runtime/graph/graph_runtime.h">
+			<Option target="tvm_runtime"/>
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/runtime/module.cc">
+			<Option target="tvm_runtime"/>
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/runtime/module_util.cc">
+			<Option target="tvm_runtime"/>
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/runtime/module_util.h">
+			<Option target="tvm_runtime"/>
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/runtime/ndarray.cc">
+			<Option target="tvm_runtime"/>
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/runtime/registry.cc">
+			<Option target="tvm_runtime"/>
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/runtime/rpc/rpc_device_api.cc">
+			<Option target="tvm_runtime"/>
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/runtime/rpc/rpc_event_impl.cc">
+			<Option target="tvm_runtime"/>
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/runtime/rpc/rpc_module.cc">
+			<Option target="tvm_runtime"/>
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/runtime/rpc/rpc_server_env.cc">
+			<Option target="tvm_runtime"/>
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/runtime/rpc/rpc_session.cc">
+			<Option target="tvm_runtime"/>
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/runtime/rpc/rpc_session.h">
+			<Option target="tvm_runtime"/>
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/runtime/rpc/rpc_socket_impl.cc">
+			<Option target="tvm_runtime"/>
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/runtime/stackvm/stackvm.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/runtime/stackvm/stackvm.h">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/runtime/stackvm/stackvm_module.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/runtime/stackvm/stackvm_module.h">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/runtime/system_lib_module.cc">
+			<Option target="tvm_runtime"/>
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/runtime/thread_pool.cc">
+			<Option target="tvm_runtime"/>
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/runtime/threading_backend.cc">
+			<Option target="tvm_runtime"/>
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/runtime/vm/memory_manager.cc">
+			<Option target="tvm_runtime"/>
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/runtime/vm/memory_manager.h">
+			<Option target="tvm_runtime"/>
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/runtime/vm/object.cc">
+			<Option target="tvm_runtime"/>
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/runtime/vm/vm.cc">
+			<Option target="tvm_runtime"/>
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/runtime/workspace_pool.cc">
+			<Option target="tvm_runtime"/>
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/runtime/workspace_pool.h">
+			<Option target="tvm_runtime"/>
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/schedule/auto_inline_elem_wise.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/schedule/bound.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/schedule/graph.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/schedule/graph.h">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/schedule/message_passing.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/schedule/message_passing.h">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/schedule/schedule_dataflow_rewrite.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/schedule/schedule_lang.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/src/schedule/schedule_ops.cc">
+			<Option target="tvm"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/topi/src/topi.cc">
+			<Option target="tvm_topi"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/vta/src/device_api.cc">
+			<Option target="vta"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/vta/src/runtime.cc">
+			<Option target="vta"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/vta/src/sim/sim_driver.cc">
+			<Option target="vta"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/cmake/util/FindCUDA.cmake">
+			<Option virtualFolder="CMake Files\cmake\util\"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/cmake/util/FindLLVM.cmake">
+			<Option virtualFolder="CMake Files\cmake\util\"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/cmake/util/FindROCM.cmake">
+			<Option virtualFolder="CMake Files\cmake\util\"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/cmake/util/FindVulkan.cmake">
+			<Option virtualFolder="CMake Files\cmake\util\"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/cmake/util/Util.cmake">
+			<Option virtualFolder="CMake Files\cmake\util\"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/cmake/modules/ANTLR.cmake">
+			<Option virtualFolder="CMake Files\cmake\modules\"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/cmake/modules/CUDA.cmake">
+			<Option virtualFolder="CMake Files\cmake\modules\"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/cmake/modules/LLVM.cmake">
+			<Option virtualFolder="CMake Files\cmake\modules\"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/cmake/modules/Metal.cmake">
+			<Option virtualFolder="CMake Files\cmake\modules\"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/cmake/modules/OpenCL.cmake">
+			<Option virtualFolder="CMake Files\cmake\modules\"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/cmake/modules/OpenGL.cmake">
+			<Option virtualFolder="CMake Files\cmake\modules\"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/cmake/modules/ROCM.cmake">
+			<Option virtualFolder="CMake Files\cmake\modules\"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/cmake/modules/SGX.cmake">
+			<Option virtualFolder="CMake Files\cmake\modules\"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/cmake/modules/VTA.cmake">
+			<Option virtualFolder="CMake Files\cmake\modules\"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/cmake/modules/Vulkan.cmake">
+			<Option virtualFolder="CMake Files\cmake\modules\"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/cmake/modules/contrib/BLAS.cmake">
+			<Option virtualFolder="CMake Files\cmake\modules\contrib\"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/cmake/modules/contrib/HybridDump.cmake">
+			<Option virtualFolder="CMake Files\cmake\modules\contrib\"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/cmake/modules/contrib/NNPack.cmake">
+			<Option virtualFolder="CMake Files\cmake\modules\contrib\"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/cmake/modules/contrib/Random.cmake">
+			<Option virtualFolder="CMake Files\cmake\modules\contrib\"/>
+		</Unit>
+		<Unit filename="/Users/rankyunh/Desktop/quant/tvm/cmake/modules/contrib/Sort.cmake">
+			<Option virtualFolder="CMake Files\cmake\modules\contrib\"/>
+		</Unit>
+	</Project>
+</CodeBlocks_project_file>

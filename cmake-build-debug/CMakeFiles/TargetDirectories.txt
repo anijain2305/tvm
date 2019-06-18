@@ -1,0 +1,12 @@
+/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/CMakeFiles/install/strip.dir
+/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/CMakeFiles/install/local.dir
+/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/CMakeFiles/install.dir
+/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/CMakeFiles/runtime.dir
+/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/CMakeFiles/tvm_runtime.dir
+/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/CMakeFiles/list_install_components.dir
+/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/CMakeFiles/tvm_topi.dir
+/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/CMakeFiles/nnvm_compiler.dir
+/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/CMakeFiles/tvm.dir
+/Users/rankyunh/Desktop/quant/tvm/cmake-build-debug/CMakeFiles/vta.dir

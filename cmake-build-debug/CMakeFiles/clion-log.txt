@@ -1,0 +1,25 @@
+/Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" /Users/rankyunh/Desktop/quant/tvm
+-- The C compiler identification is AppleClang 10.0.0.10001044
+-- The CXX compiler identification is AppleClang 10.0.0.10001044
+-- Check for working C compiler: /Library/Developer/CommandLineTools/usr/bin/cc
+-- Check for working C compiler: /Library/Developer/CommandLineTools/usr/bin/cc -- works
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Check for working CXX compiler: /Library/Developer/CommandLineTools/usr/bin/c++
+-- Check for working CXX compiler: /Library/Developer/CommandLineTools/usr/bin/c++ -- works
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Performing Test SUPPORT_CXX11
+-- Performing Test SUPPORT_CXX11 - Success
+Build in Debug mode
+-- Build with RPC support...
+-- Build with Graph runtime support...
+-- Build VTA runtime with target: sim
+-- Build with contrib.hybriddump
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /Users/rankyunh/Desktop/quant/tvm/cmake-build-debug
