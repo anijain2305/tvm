@@ -31,8 +31,8 @@
 namespace tvm {
     namespace relay {
 
-        Expr ConvolveQuantizedTensors(const Expr& quantized_data,
-                                      const Expr& quantized_kernel, const QuantizedConv2DAttrs*& param) {
+        Expr ConvolveQuantizedTensors(const Expr &quantized_data,
+                                      const Expr &quantized_kernel, const QuantizedConv2DAttrs *&param) {
             // TODO (janimesh) - Who should decide the accumulation dtype?
             if (param->input_zero_point == 0 && param->kernel_zero_point == 0) {
                 Expr int8_conv = Conv2D(quantized_data,
@@ -53,8 +53,8 @@ namespace tvm {
             return Expr(); // to hide the warning.
         }
 
-        Expr ScaleHandling(const Expr& convolved_tensor,
-                           const QuantizedConv2DAttrs*& param) {
+        Expr ScaleHandling(const Expr &convolved_tensor,
+                           const QuantizedConv2DAttrs *&param) {
             // The scale handling can be done in many ways.
             // 1) Floating point handling
             //    Here we can multiply the scale to the convolved_tensor, round to nearest
@@ -78,19 +78,19 @@ namespace tvm {
             return Expr(); // to hide the warning.
         }
 
-        Expr ReQuantize(const Expr& scaled_output,
-                        const QuantizedConv2DAttrs*& param) {
+        Expr ReQuantize(const Expr &scaled_output,
+                        const QuantizedConv2DAttrs *&param) {
             Expr requantized_output = Cast(scaled_output, param->out_dtype);
             return requantized_output;
         }
 
-        Expr QuantizedConv2DForwardRewrite(const Call& ref_call,
-                                           const Array<Expr>& new_args,
-                                           const NodeRef& ctx) {
+        Expr QuantizedConv2DForwardRewrite(const Call &ref_call,
+                                           const Array<Expr> &new_args,
+                                           const NodeRef &ctx) {
             CHECK_EQ(new_args.size(), 2);
             Expr quantized_data = new_args[0];
             Expr quantized_kernel = new_args[1];
-            const auto* param = ref_call->attrs.as<QuantizedConv2DAttrs>();
+            const auto *param = ref_call->attrs.as<QuantizedConv2DAttrs>();
 
             // Check for current quantization support.
             CHECK_EQ(param->input_zero_point, 0)
@@ -159,11 +159,50 @@ namespace tvm {
         .set_attr<FForwardRewrite>("FQuantizeForwardRewrite", QuantizedConv2DForwardRewrite);
 
         TVM_REGISTER_API("relay._quantize.quantize_rewrite")
-        .set_body_typed<Expr(Expr)>([](const Expr& e) {
+        .set_body_typed<Expr(Expr)>([](const Expr &e) {
             Expr ret = ForwardRewrite(e, "FQuantizeForwardRewrite", nullptr, nullptr);
             return ret;
         });
 
+
+        /* quantized relu */
+        Expr ReluQuantizedTensors(const Expr &quantized_data, const QuantizedReluAttrs *&param) {
+            if (param->input_zero_point == 0) {
+                Expr int8_relu = Relu(quantized_data);
+                return int8_relu;
+            }
+            LOG(FATAL) << "Only symmetric quantization supported";
+            return Expr(); // to hide the warning.
+        }
+
+        Expr ReQuantize(const Expr &relued_output,
+                        const QuantizedReluAttrs *&param) {
+            Expr requantized_output = Cast(relued_output, param->out_dtype);
+            return requantized_output;
+        }
+
+        Expr QuantizedReluForwardRewrite(const Call &ref_call,
+                                         const Array<Expr> &new_args,
+                                         const NodeRef &ctx) {
+            CHECK_EQ(new_args.size(), 1);
+            Expr quantized_data = new_args[0];
+            const auto *param = ref_call->attrs.as<QuantizedReluAttrs>();
+
+            // Check for current quantization support.
+            CHECK_EQ(param->input_zero_point, 0)
+                << "Encountered non-zero zero point."
+                << " Only symmetric quantization supported for now.";
+            CHECK_EQ(param->output_zero_point, 0)
+                << "Encountered non-zero zero point."
+                << " Only symmetric quantization supported for now.";
+
+            Expr relued_tensor = ReluQuantizedTensors(quantized_data, param);
+            Expr requantized_output = ReQuantize(relued_tensor, param);
+            return relued_tensor;
+        }
+
+        RELAY_REGISTER_OP("nn_quantized.quantized_relu")
+        .set_attr<FForwardRewrite>("FQuantizeForwardRewrite", QuantizedReluForwardRewrite);
 
     }  // namespace relay
 }  // namespace tvm

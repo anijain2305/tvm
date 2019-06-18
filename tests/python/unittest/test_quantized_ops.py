@@ -19,6 +19,22 @@ import tvm
 from tvm import relay
 from tvm.relay.testing import create_workload
 
+def print_details(func):
+    print("###### Original graph starts ######")
+    print(func)
+    print("###### Original graph ends ######")
+
+    func = relay.ir_pass.infer_type(func)
+    print("###### TypeInferred graph starts ######")
+    print(func)
+    print("###### TypeInferred graph ends ######")
+
+    func = relay.quantize.quantize_rewrite(func)
+    func = relay.ir_pass.infer_type(func)
+    print("###### Lowered graph starts ######")
+    print(func)
+    print("###### Lowered graph ends ######")
+
 def test_quantized_conv2d():
     quantized_data = relay.var("quantized_data", shape=(1, 128, 16, 16), dtype='int8')
     quantized_weight = relay.var("weight", shape=(64, 128, 3, 3), dtype='int8')
@@ -33,20 +49,20 @@ def test_quantized_conv2d():
         channels=64,
         kernel_size=(3,3),
         out_dtype="int8")
-    func = relay.Function(relay.ir_pass.free_vars(quantized_output),
-                          quantized_output)
-    print("###### Original graph starts ######")
-    print(func)
-    print("###### Original graph ends ######")
-    func = relay.ir_pass.infer_type(func)
-    print("###### TypeInferred graph starts ######")
-    print(func)
-    print("###### TypeInferred graph ends ######")
-    func = relay.quantize.quantize_rewrite(func)
-    func = relay.ir_pass.infer_type(func)
-    print("###### Lowered graph starts ######")
-    print(func)
-    print("###### Lowered graph ends ######")
+    func = relay.Function(relay.ir_pass.free_vars(quantized_output), quantized_output)
+    print_details(func)
+
+def test_quantized_relu():
+    quantized_data = relay.var("quantized_data", shape=(10, 10), dtype='int8')
+    quantized_output = relay.op.nn._quantize.quantized_relu(quantized_data,
+                                                            input_zero_point=0,
+                                                            output_zero_point=0,
+                                                            input_scale=0.5,
+                                                            output_scale=0.5,
+                                                            out_dtype="int8")
+    func = relay.Function(relay.ir_pass.free_vars(quantized_output), quantized_output)
+    print_details(func)
 
 if __name__ == "__main__":
-    test_quantized_conv2d()
+    # test_quantized_conv2d()
+    test_quantized_relu()

@@ -113,6 +113,31 @@ namespace tvm {
             }
         };
 
+        struct QuantizedReluAttrs : public tvm::AttrsNode<QuantizedReluAttrs> {
+            // Quantization related attributes.
+            int32_t input_zero_point;
+            int32_t output_zero_point;
+            double input_scale;
+            double output_scale;
+            DataType out_dtype;
+
+            TVM_DECLARE_ATTRS(QuantizedReluAttrs, "relay.attrs.QuantizedReluAttrs") {
+
+                TVM_ATTR_FIELD(input_zero_point)
+                        .describe("The zero point of the input tensor.");
+                TVM_ATTR_FIELD(output_zero_point)
+                        .describe("The zero point of the output tensor.");
+                TVM_ATTR_FIELD(input_scale)
+                        .describe("The scale of the input tensor.");
+                TVM_ATTR_FIELD(output_scale)
+                        .describe("The scale of the output tensor.");
+                // use 0 bits to indicate none.
+                TVM_ATTR_FIELD(out_dtype)
+                        .set_default(NullValue<DataType>())
+                        .describe("Output data type, set to explicit type under mixed precision setting");
+            }
+        };
+
     }  // namespace relay
 }  // namespace tvm
 #endif  // TVM_RELAY_ATTRS_NN_QUANTIZE_H_

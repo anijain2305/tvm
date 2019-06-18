@@ -14,7 +14,7 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-#pylint: disable=invalid-name, too-many-lines
+# pylint: disable=invalid-name, too-many-lines
 """Neural network operations."""
 from __future__ import absolute_import as _abs
 from . import _make_quantize
@@ -131,3 +131,47 @@ def quantized_conv2d(quantized_data,
                                            groups, channels, kernel_size,
                                            data_layout, kernel_layout, out_layout,
                                            out_dtype)
+
+
+def quantized_relu(quantized_data,
+                   input_zero_point,
+                   output_zero_point,
+                   input_scale,
+                   output_scale,
+                   out_dtype=""):
+    r"""Quantized Rectified linear unit (ReLU).
+
+    This operator takes the quantized_data and apply the following function to produce an output.
+
+    .. math::
+        out = max(x,0)
+
+    Parameters
+    ----------
+    quantized_data : tvm.relay.Expr
+        The input quantized_data to the operator.
+
+    input_scale: float
+        The float scalar to scale the quantized_data int8 values back to FP32.
+
+    output_scale: float
+        The float scalar to scale the quantized_output int8 values back to FP32.
+
+    input_zero_point: int
+        The zero point of the quantized_data distribution.
+
+    output_zero_point: int
+        The zero point of the quantized_output distribution.
+
+    out_dtype : str, optional
+        Specifies the output quantized_data type.
+
+    Returns
+    -------
+    result : tvm.relay.Expr
+        The computed result.
+    """
+    return _make_quantize.quantized_relu(quantized_data,
+                                         input_zero_point, output_zero_point,
+                                         input_scale, output_scale,
+                                         out_dtype)
