@@ -198,7 +198,7 @@ namespace tvm {
 
             Expr relued_tensor = ReluQuantizedTensors(quantized_data, param);
             Expr requantized_output = ReQuantize(relued_tensor, param);
-            return relued_tensor;
+            return requantized_output;
         }
 
         RELAY_REGISTER_OP("nn_quantized.quantized_relu")
