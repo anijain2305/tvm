@@ -67,6 +67,12 @@ static inline const int32_t GetQmax(const DataType& dtype) {
   }
 }
 
+static inline int64_t get_const_int(const tvm::Expr& x) {
+  auto* value_ptr = as_const_int(x);
+  CHECK(value_ptr) << "Expr is not a constant int";
+  return value_ptr[0];
+}
+
 }  // namespace qnn
 }  // namespace relay
 }  // namespace tvm
