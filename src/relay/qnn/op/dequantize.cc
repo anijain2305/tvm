@@ -80,7 +80,7 @@ Expr DequantizeLegalize(const Attrs& attrs,
   const auto* dequantize_attrs = attrs.as<DequantizeAttrs>();
   CHECK(dequantize_attrs != nullptr);
   CHECK_EQ(types.size(), 2);
-  return DequantizeLower(data, param);
+  return DequantizeLower(data, dequantize_attrs);
 }
 
 RELAY_REGISTER_OP("qnn.dequantize")

@@ -73,6 +73,9 @@ static inline int64_t get_const_int(const tvm::Expr& x) {
   return value_ptr[0];
 }
 
+Expr RequantizeLower(const Expr& input_tensor, const RequantizeAttrs* param,
+                     const Array<IndexExpr>& input_shape, const DataType& out_dtype);
+
 }  // namespace qnn
 }  // namespace relay
 }  // namespace tvm

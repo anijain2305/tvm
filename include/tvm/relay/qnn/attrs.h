@@ -182,39 +182,66 @@ struct QDenseAttrs : public tvm::AttrsNode<QDenseAttrs> {
         .describe("The zero point of the input tensor.");
     TVM_ATTR_FIELD(kernel_zero_point)
         .describe("The zero point of the kernel tensor.");
+
   }
 };
 
+/*! \brief Attributes used in QNN concatenate operators */
+struct QnnConcatenateAttrs : public tvm::AttrsNode<QnnConcatenateAttrs> {
+  Array<tvm::Expr> input_scales;
+  Array<tvm::Expr> input_zero_points;
+  double output_scale;
+  int32_t output_zero_point;
+  int axis;
 
-/*! \brief Attribute for quantize operator */
-struct QuantizeAttrs : public tvm::AttrsNode<QuantizeAttrs> {
+  TVM_DECLARE_ATTRS(QnnConcatenateAttrs, "relay.attrs.QnnConcatenateAttrs") {
+    TVM_ATTR_FIELD(input_scales)
+        .describe("The list of scales of input quantized tensors.");
+
+    TVM_ATTR_FIELD(input_zero_points)
+        .describe("The list of zero points of input quantized tensors.");
+
+    TVM_ATTR_FIELD(output_zero_point)
+      .describe("The zero_point for the output tensor.");
+
+    TVM_ATTR_FIELD(output_scale)
+      .describe("The scale for the output tensor.");
+
+    TVM_ATTR_FIELD(axis)
+        .describe("The axis at which the input arrays are concatenated."
+                  "Should lie in range `[-ndim, ndim)`.")
+        .set_default(0);
+  }
+};  // struct QnnConcatenateAttrs
+
+/*! \brief Attribute for QNN binary operator */
+struct QnnBinaryOpAttrs : public tvm::AttrsNode<QnnBinaryOpAttrs> {
+  int32_t lhs_zero_point;
+  double lhs_scale;
+  int32_t rhs_zero_point;
+  double rhs_scale;
   int32_t output_zero_point;
   double output_scale;
-  DataType out_dtype;
 
-  TVM_DECLARE_ATTRS(QuantizeAttrs, "relay.attrs.QuantizeAttrs") {
-    TVM_ATTR_FIELD(out_dtype)
-      .describe("Output data type, can be one of [int8 or uint8].");
+  TVM_DECLARE_ATTRS(QnnBinaryOpAttrs, "relay.attrs.QnnBinaryOpAttrs") {
+    TVM_ATTR_FIELD(lhs_zero_point)
+      .describe("The zero_point for the lhs input tensor of this op.");
+
+    TVM_ATTR_FIELD(lhs_scale)
+      .describe("The scale for the lhs input tensor of this op.");
+
+    TVM_ATTR_FIELD(rhs_zero_point)
+      .describe("The zero_point for the rhs input tensor of this op.");
+
+    TVM_ATTR_FIELD(rhs_scale)
+      .describe("The scale for the rhs input tensor of this op.");
 
     TVM_ATTR_FIELD(output_zero_point)
       .describe("The zero_point for the activation of this op.");
 
     TVM_ATTR_FIELD(output_scale)
       .describe("The scale for the activation of this op.");
-  }
-};
 
-/*! \brief Attribute for dequantize operator */
-struct DequantizeAttrs : public tvm::AttrsNode<DequantizeAttrs> {
-  int32_t input_zero_point;
-  double input_scale;
-
-  TVM_DECLARE_ATTRS(QuantizeAttrs, "relay.attrs.QuantizeAttrs") {
-    TVM_ATTR_FIELD(input_zero_point)
-      .describe("The zero_point for the input tensor of this op.");
-
-    TVM_ATTR_FIELD(input_scale)
-      .describe("The scale for the input tensor of this op.");
   }
 };
 

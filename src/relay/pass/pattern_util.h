@@ -484,6 +484,21 @@ inline Expr Dense(Expr data,
   return CallNode::make(op, {data, weight}, Attrs(attrs), {});
 }
 
+inline Expr Tile(Expr data,
+                 Array<Integer> reps) {
+  auto attrs = make_node<TileAttrs>();
+  attrs->reps = reps;
+  static const Op& op = Op::Get("tile");
+  return CallNode::make(op, {data}, Attrs(attrs), {});
+}
+
+static inline Expr Concatenate(Expr data, int axis) {
+  auto attrs = make_node<ConcatenateAttrs>();
+  attrs->axis = axis;
+  static const Op& op = Op::Get("concatenate");
+  return CallNode::make(op, {data}, Attrs(attrs), {});
+}
+
 Expr MakeConcatenate(Expr data, int axis);
 
 Expr MakeStridedSlice(Expr data, Array<Integer> begin, Array<Integer> end, Array<Integer> strides);
