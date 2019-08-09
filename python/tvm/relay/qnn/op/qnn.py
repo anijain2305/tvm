@@ -279,9 +279,67 @@ def conv2d(data,
     result : tvm.relay.Expr
         The computed result.
     """
-
     return _make.conv2d(data, kernel,
                         input_zero_point, kernel_zero_point,
                         strides, padding, dilation,
                         groups, channels, kernel_size,
                         data_layout, kernel_layout, out_layout, out_dtype)
+
+def quantize(input_data,
+             output_scale,
+             output_zero_point,
+             out_dtype='int8'):
+    r""" Quantize op
+    This operator takes float32 as input and produces quantized int8 or unit8 as output.
+    The input tensor can be of any shape. The output shape is the same as input shape.
+
+    Q_output = clamp(round(input_tensor/output_scale) + output_zero_point), out_dtype::min, out_dtype::max)
+
+    Parameters
+    ----------
+    input_data : tvm.relay.Expr
+        The input tensor to be quantized. Can be of type float32.
+    output_zero_point : int
+        The output zero_point.
+    output_scale : float
+        The output scale.
+    input_dtype : str, optional
+        The data type of the input tensor. Can be [int8, uint8]
+    Returns
+    -------
+    result : tvm.relay.Expr
+        The computed result.
+    """
+
+    return _make.quantize(input_data,
+                          output_scale,
+                          output_zero_point,
+                          out_dtype)
+
+
+def dequantize(input_data,
+               input_scale,
+               input_zero_point):
+    r""" Dequantize op
+    This operator takes quantized int8 and unit8 as input and produces
+    dequantized float32 as output. The output shape is the same as input shape. The input
+    tensor can be of any shape.
+
+    Parameters
+    ----------
+    input_data : tvm.relay.Expr
+        The input tensor to be dequantized. Can be of type [int8, uint8].
+    input_zero_point : int
+        The output zero_point.
+    input_scale : float
+        The output scale.
+
+    Returns
+    -------
+    result : tvm.relay.Expr
+        The computed result.
+    """
+
+    return _make.dequantize(input_data,
+                            input_scale,
+                            input_zero_point)
