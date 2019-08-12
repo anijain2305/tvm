@@ -153,10 +153,10 @@ def test_qnn_conv2d():
 
 
         def get_output(func, golden_inputs):
-            with relay.build_config(opt_level=2):
+            with relay.build_config(opt_level=3):
                 golden_data, golden_weight = golden_inputs
                 params = {'kernel': golden_weight}
-                graph, lib, params = relay.build(func, "llvm", params=params)
+                graph, lib, params = relay.build(func, "llvm -mcpu=skylake-avx512", params=params)
                 mod = graph_runtime.create(graph, lib, ctx=tvm.cpu(0))
                 mod.set_input("data", golden_data)
                 # mod.set_input("kernel", golden_weight)
@@ -345,10 +345,10 @@ def test_qnn_conv2d():
 
     def layout_test():
         # uint8 input
-        data_shape = (2, 2, 4, 4) # NHWC
+        data_shape = (1, 16, 16, 64) # NHWC
         data_dtype = 'uint8'
-        kernel_shape = (2, 2, 4, 3) # HWIO
-        kernel_dtype = 'uint8'
+        kernel_shape = (2, 2, 64, 128) # HWIO
+        kernel_dtype = 'int8'
         ref_func, qnn_func = get_funcs(data_shape=data_shape,
                                        data_dtype=data_dtype,
                                        kernel_shape=kernel_shape,
@@ -366,25 +366,25 @@ def test_qnn_conv2d():
                 kernel_shape, kernel_dtype)
 
         # NHWC and HWIO layout. Used in depthwise conv.
-        data_shape = (2, 2, 4, 1) # NHWC
-        data_dtype = 'uint8'
-        kernel_shape = (2, 2, 1, 1) # HWOI
-        kernel_dtype = 'uint8'
-        ref_func, qnn_func = get_funcs(data_shape=data_shape,
-                                       data_dtype=data_dtype,
-                                       kernel_shape=kernel_shape,
-                                       kernel_dtype=kernel_dtype,
-                                       input_zero_point=5,
-                                       kernel_zero_point=3,
-                                       kernel_size=(2, 2),
-                                       padding=(0, 0),
-                                       strides=(1, 1),
-                                       dilation=(1, 1),
-                                       data_layout="NHWC",
-                                       kernel_layout="HWOI",
-                                       out_dtype="int32")
-        verify(ref_func, qnn_func, data_shape, data_dtype,
-                kernel_shape, kernel_dtype)
+        # data_shape = (2, 2, 4, 1) # NHWC
+        # data_dtype = 'uint8'
+        # kernel_shape = (2, 2, 1, 1) # HWOI
+        # kernel_dtype = 'uint8'
+        # ref_func, qnn_func = get_funcs(data_shape=data_shape,
+        #                                data_dtype=data_dtype,
+        #                                kernel_shape=kernel_shape,
+        #                                kernel_dtype=kernel_dtype,
+        #                                input_zero_point=5,
+        #                                kernel_zero_point=3,
+        #                                kernel_size=(2, 2),
+        #                                padding=(0, 0),
+        #                                strides=(1, 1),
+        #                                dilation=(1, 1),
+        #                                data_layout="NHWC",
+        #                                kernel_layout="HWOI",
+        #                                out_dtype="int32")
+        # verify(ref_func, qnn_func, data_shape, data_dtype,
+        #         kernel_shape, kernel_dtype)
 
 
 
@@ -504,7 +504,7 @@ def test_qnn_conv2d():
 
         with relay.build_config(opt_level=2):
             params = {'kernel': golden_weight}
-            graph, lib, params = relay.build(qnn_func, "llvm", params=params)
+            graph, lib, params = relay.build(qnn_func, "llvm -mcpu=skylake-avx512", params=params)
             mod = graph_runtime.create(graph, lib, ctx=tvm.cpu(0))
             mod.set_input("data", golden_data)
             mod.set_input(**params)
@@ -594,17 +594,17 @@ def test_qnn_conv2d():
         golden_output = np.array((124, -92, 164, -132)).reshape(1, 1, 2, 2)
         np.testing.assert_equal(qnn_output, golden_output)
 
-    no_zero_point_test()
-    input_zero_point_test()
-    kernel_zero_point_test()
-    both_zero_point_test()
+    # no_zero_point_test()
+    # input_zero_point_test()
+    # kernel_zero_point_test()
+    # both_zero_point_test()
     layout_test()
-    padding_test()
-    dilation_test()
-    const_folding_test()
-    tflite_large_irregular_test()
-    tflite_output_multiplier_greater_than_one()
-    tflite_anistropic_strides()
+    # padding_test()
+    # dilation_test()
+    # const_folding_test()
+    # tflite_large_irregular_test()
+    # tflite_output_multiplier_greater_than_one()
+    # tflite_anistropic_strides()
 
 if __name__ == "__main__":
     test_qnn_conv2d()

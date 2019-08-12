@@ -309,11 +309,41 @@ class RelayBuildModule : public runtime::ModuleNode {
       pass_seqs.push_back(transform::Legalize());
     }
 
+    {
+      transform::Pass seq = transform::Sequential(pass_seqs);
+      if (targets.size() == 1) {
+        for (const auto& kv : targets) {
+          With<Target> tctx(kv.second);
+          relay_module = seq(relay_module);
+        }
+      } else {
+        relay_module = seq(relay_module);
+      }
+
+      // Get the updated function.
+      auto func = relay_module->Lookup("main");
+      LOG(INFO) << "Final optimized function = " << AsText(func, false);
+    }
+
     // Alter layout transformation is only applied to homogeneous execution yet.
     if (targets.size() == 1) {
       pass_seqs.push_back(transform::AlterOpLayout());
     }
+    {
+      transform::Pass seq = transform::Sequential(pass_seqs);
+      if (targets.size() == 1) {
+        for (const auto& kv : targets) {
+          With<Target> tctx(kv.second);
+          relay_module = seq(relay_module);
+        }
+      } else {
+        relay_module = seq(relay_module);
+      }
+    }
+
+
     pass_seqs.push_back(transform::FoldConstant());
+
 
     // Create a sequential pass and perform optimizations.
     transform::Pass seq = transform::Sequential(pass_seqs);
@@ -326,6 +356,7 @@ class RelayBuildModule : public runtime::ModuleNode {
       relay_module = seq(relay_module);
     }
 
+    
     // Handle heterogeneous compilation.
     transform::PassContext pass_ctx = PassContext::Current();
     if (targets_.size() > 1) {
@@ -336,6 +367,10 @@ class RelayBuildModule : public runtime::ModuleNode {
     // Fuse the operations if it is needed.
     relay_module = transform::FuseOps()(relay_module);
     relay_module = transform::InferType()(relay_module);
+
+      // Get the updated function.
+      auto func = relay_module->Lookup("main");
+      LOG(INFO) << "Final optimized function = " << AsText(func, false);
 
     return relay_module;
   }

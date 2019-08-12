@@ -110,7 +110,7 @@ Expr ConcatenateLegalize(const Attrs& attrs, const Array<Expr>& new_args,
       requantize_attrs->input_zero_point = input_zero_point;
       requantize_attrs->output_scale = output_scale;
       requantize_attrs->output_zero_point = output_zero_point;
-      requantize_attrs->rounding = "TONEAREST";
+      requantize_attrs->rounding = "UPWARD";
       requantize_attrs->out_dtype = input_dtype;
 
       auto requantized_expr =

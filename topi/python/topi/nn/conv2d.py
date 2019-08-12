@@ -139,6 +139,7 @@ def conv2d_infer_layout(workload, cfg):
 
 def _get_workload(data, kernel, stride, padding, out_dtype, data_layout='NCHW'):
     """ Get the workload structure. """
+    print(data_layout)
     if data_layout == 'NCHW':
         _, CI, IH, IW = [x.value for x in data.shape]
     elif data_layout == 'NHWC':
@@ -151,7 +152,8 @@ def _get_workload(data, kernel, stride, padding, out_dtype, data_layout='NCHW'):
     if data_layout == 'NCHW':
         CO, CIG, KH, KW = [x.value for x in kernel.shape]
     else:
-        KH, KW, CO, CIG = [x.value for x in kernel.shape]
+        # KH, KW, CO, CIG = [x.value for x in kernel.shape]
+        KH, KW, CIG, CO = [x.value for x in kernel.shape]
 
     HPAD, WPAD, _, _ = get_pad_tuple(padding, kernel)
     GRPS = CI // CIG

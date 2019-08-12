@@ -85,7 +85,7 @@ WorkloadType GetWorkload(const Array<tvm::relay::Type>& arg_types, const QnnConv
 }
 
 /*
- * \brief Fallback to simpler lowering when dilation is present.
+ * \brief Fallback to simpler lowering for dilation or depthwise conv.
  * \param data The input expr.
  * \param weight The weight expr.
  * \param zp_data The data zero point expr.
@@ -172,30 +172,52 @@ Expr Conv2DFirstTerm(const Expr& padded_data, const Expr& weight, const QnnConv2
  *       opportunity to reuse alter_op_layout infrastructure.
  */
 Expr Conv2DSecondTerm(const Expr& padded_data, const Expr& zp_kernel, const QnnConv2DAttrs* param,
-                      int kernel_h, int kernel_w) {
+                      int kernel_h, int kernel_w, int out_channels) {
   auto casted_t2 = Cast(padded_data, Int(32));
 
   // We can reduce the H and W axis by using avg_pool2d. However, avg_pool2d averages the sum.
   // Since, this is integer division (floor), we can first multiply the data by the pool_size and
   // then perform avg_pool2d. Reversing this causes inaccuracy due to floor division.
-  auto multiplied_t2 = Multiply(casted_t2, MakeConstantScalar(Int(32), kernel_h * kernel_w));
-  Array<IndexExpr> padding;
-  padding.push_back(0);
-  padding.push_back(0);
-  auto reduced_hw_t2 =
-      AvgPool2D(multiplied_t2, param->kernel_size, param->strides, padding, param->data_layout,
-                false,   // ceil_mode
-                false);  // count_include_pad
+  auto scaled_hw_t2 = Multiply(casted_t2, MakeConstantScalar(Int(32), kernel_h * kernel_w));
+  Array<IndexExpr> padding({0, 0});
+
+  // If the pool_size is 1x1, we don't need avg_pool2d.
+  auto reduced_hw_t2 = scaled_hw_t2;
+  if (kernel_h * kernel_w != 1) {
+    reduced_hw_t2 =
+        AvgPool2D(scaled_hw_t2, param->kernel_size, param->strides, padding, param->data_layout,
+                  false,   // ceil_mode
+                  false);  // count_include_pad
+  }
+
   // Reduce the C dimension. Find the dimension.
   Array<Integer> axes_t2;
-  // NCHW
-  axes_t2 = {1};
-  if (param->data_layout == "NHWC") {
+  if (param->data_layout == "NCHW") {
+    axes_t2 = {1};
+  } else if (param->data_layout == "NHWC") {
     axes_t2 = {3};
+  } else {
+    LOG(FATAL) << "qnn.conv2d does not support " << param->data_layout << " layout";
   }
   // Keep dims true to retain 4D tensor
   auto reduced_t2 = Sum(reduced_hw_t2, axes_t2, true, false);
-  return Multiply(zp_kernel, reduced_t2);
+  auto multiplied_t2 = reduced_t2;
+  if (param->kernel_zero_point != 1) {
+    multiplied_t2 = Multiply(zp_kernel, reduced_t2);
+  }
+
+  // Replicate to go back to NHWC/NCHW. This is not necessarily needed, but it fails AlterOpLayout.
+  // We can remove this once AlterOpLayout refactoring completes -
+  // https://github.com/dmlc/tvm/issues/3670
+  Array<Integer> reps;
+  if (param->data_layout == "NCHW") {
+    reps = {1, out_channels, 1, 1};
+  } else if (param->data_layout == "NHWC") {
+    reps = {1, 1, 1, out_channels};
+  } else {
+    LOG(FATAL) << "qnn.conv2d does not support " << param->data_layout << " layout";
+  }
+  return Tile(multiplied_t2, reps);
 }
 
 /*
@@ -218,23 +240,32 @@ Expr Conv2DThirdTerm(const Expr& weight, const Expr& zp_data, const QnnConv2DAtt
                      int batch_size, int out_channels) {
   // Find which dimensions are C, R, S.
   Array<Integer> axes_t3;
-  // For OIHW kernel layout, IHW are reduce axis
-  axes_t3 = {1, 2, 3};
-  if (param->kernel_layout == "HWIO") {
+  if (param->kernel_layout == "OIHW") {
+    // For OIHW kernel layout, IHW are reduce axis
+    axes_t3 = {1, 2, 3};
+  } else if (param->kernel_layout == "HWIO") {
     axes_t3 = {0, 1, 2};
   } else if (param->kernel_layout == "HWOI") {
     axes_t3 = {0, 1, 3};
+  } else {
+    LOG(FATAL) << "qnn.conv2d does not support " << param->kernel_layout << " layout";
   }
   auto reduced_t3 = Sum(Cast(weight, Int(32)), axes_t3, false, false);
 
-  // Find the newshape depenging on NCHW/NHWC layout.
+  // Find the newshape depending on NCHW/NHWC layout.
   Array<Integer> newshape;
-  // NCHW layout
-  newshape = {batch_size, out_channels, 1, 1};
-  if (param->data_layout == "NHWC") {
+  if (param->data_layout == "NCHW") {
+    newshape = {batch_size, out_channels, 1, 1};
+  } else if (param->data_layout == "NHWC") {
     newshape = {batch_size, 1, 1, out_channels};
+  } else {
+    LOG(FATAL) << "qnn.conv2d does not support " << param->data_layout << " layout";
   }
   auto reshaped_t3 = Reshape(reduced_t3, newshape);
+
+  if (param->input_zero_point == 1) {
+    return reshaped_t3;
+  }
   return Multiply(zp_data, reshaped_t3);
 }
 
@@ -337,10 +368,10 @@ Expr Conv2DCombineTerms(const Expr& term1, const Expr& term2, const Expr& term3,
  *         gives an opportunity to reuse alter_op_layout infrastructure.
  *         3) For dilated conv, in current lowering, we need dilated pool. So as
  *         a workaround, we fall back to simpler lowering using int32 conv if
- *         the conv is dilated.
+ *         the conv is dilated. We fallback also in case of depthwise conv.
  *
  *       The whole process can be broken down into following steps
- *       * Assertion checks for exisiting support, fallback if dilation
+ *       * Assertion checks for exisiting support, fallback if necessary
  *       * Pad the input.
  *       * Get Term1.
  *       * Get Term2.
@@ -368,17 +399,17 @@ Expr QnnConv2DLegalize(const Attrs& attrs, const Array<Expr>& new_args,
   auto zp_data = MakeConstantScalar(Int(32), param->input_zero_point);
   auto zp_kernel = MakeConstantScalar(Int(32), param->kernel_zero_point);
 
-  // Fallback to int32 conv if there is dilation.
+  // Fallback to int32 conv if there is dilation or depthwise conv2d
   CHECK_EQ(param->dilation.size(), 2) << "qnn.conv2d only supports 2D dilation";
   auto dilation_h = get_const_int(param->dilation[0]);
   auto dilation_w = get_const_int(param->dilation[1]);
-  if (dilation_h != 1 || dilation_w != 1) {
+  if (dilation_h != 1 || dilation_w != 1 || param->groups != 1) {
     return Conv2DFallBack(data, weight, zp_data, zp_kernel, param);
   }
 
   auto padded_data = Conv2DPadInput(data, param);
   auto term1 = Conv2DFirstTerm(padded_data, weight, param);
-  auto term2 = Conv2DSecondTerm(padded_data, zp_kernel, param, kernel_h, kernel_w);
+  auto term2 = Conv2DSecondTerm(padded_data, zp_kernel, param, kernel_h, kernel_w, out_channels);
   auto term3 = Conv2DThirdTerm(weight, zp_data, param, batch_size, out_channels);
   auto term4 = Conv2DFourthTerm(param, batch_size, in_channels, kernel_h, kernel_w);
   return Conv2DCombineTerms(term1, term2, term3, term4, param);

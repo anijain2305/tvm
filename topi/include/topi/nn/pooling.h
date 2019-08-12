@@ -159,6 +159,7 @@ inline Tensor pool_impl(const Tensor& x,
         w_start = ir::Max::make(w_start, make_const(Int(32), 0));
         Expr divide_factor = ir::Max::make((h_end - h_start) * (w_end - w_start),
                                            make_const(Int(32), 1));
+        divide_factor = tvm::cast(x->dtype, divide_factor);
         return pool_sum(indices) / divide_factor;
       }
     }, "tensor", kElementWise);

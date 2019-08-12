@@ -72,11 +72,24 @@ def _qnn_conv2d_legalize(attrs, inputs, types):
         data_modified = relay.cast(data_modified, out_dtype)
         return data_modified
 
-    channels_expr = attrs['channels']
-    if isinstance(channels_expr, tvm.expr.IntImm):
-        channels = channels_expr.value
-        if channels == 1001:
-            return None
+    #########################
+    # HACKS START
+    #########################
+    # channels_expr = attrs['channels']
+    # if isinstance(channels_expr, tvm.expr.IntImm):
+    #     channels = channels_expr.value
+    #     if channels % 16 != 0:
+    #         return None
+     
+    # if (attrs['data_layout'] == "NHWC"):
+    #     input_shape = types[0].shape
+    #     C = input_shape[3].value
+    #     if C % 4 != 0:
+    #         return None
+
+    ##########################
+    # HACK ENDS
+    ##########################
 
     # Collect the dtypes.
     data_dtype = types[0].dtype
