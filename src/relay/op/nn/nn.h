@@ -25,6 +25,13 @@
 #ifndef TVM_RELAY_OP_NN_NN_H_
 #define TVM_RELAY_OP_NN_NN_H_
 
+#include <tvm/relay/qnn/attrs.h>
+#include <tvm/relay/attrs/nn.h>
+#include <tvm/data_layout.h>
+#include "../type_relations.h"
+#include "../../qnn/util.h"
+#include <type_traits>
+
 namespace tvm {
 namespace relay {
 
@@ -33,10 +40,12 @@ bool Conv2DRel(const Array<Type>& types,
                int num_inputs,
                const Attrs& attrs,
                const TypeReporter& reporter) {
+
   CHECK_EQ(types.size(), 3);
   const auto* data = types[0].as<TensorTypeNode>();
   const auto* weight = types[1].as<TensorTypeNode>();
   if (data == nullptr) return false;
+
   static const Layout kNCHW("NCHW");
   static const Layout kOIHW("OIHW");
 
@@ -117,11 +126,65 @@ bool Conv2DRel(const Array<Type>& types,
     out_dtype = data->dtype;
   }
   oshape = trans_out_layout.BackwardShape(oshape);
+
   // assign output type
   reporter->Assign(types[2], TensorTypeNode::make(oshape, out_dtype));
   return true;
 }
 
+// relay.nn.dense
+enum DenseType {
+  kUnquantizedDense,
+  kQnnDense
+};
+
+template <typename AttrType, DenseType mode>
+inline bool DenseRel(const Array<Type>& types,
+                     int num_inputs,
+                     const Attrs& attrs,
+                     const TypeReporter& reporter) {
+  CHECK_EQ(types.size(), 3);
+  const auto* data = types[0].as<TensorTypeNode>();
+  const auto* weight = types[1].as<TensorTypeNode>();
+  if (data == nullptr) return false;
+
+  const auto* param = attrs.as<AttrType>();
+  CHECK(param != nullptr);
+
+  CHECK(static_cast<int>(data->shape.size()) != 0);
+  if(mode == DenseType::kQnnDense) {
+    CHECK(data->dtype == Int(8) || data->dtype == UInt(8))
+      << "Expected quantized dense type(int8, uint8) for input but was " <<  data->dtype;
+    CHECK(weight->dtype == Int(8) || weight->dtype == UInt(8))
+      << "Expected quantized dense type(int8, uint8) for weight but was " <<  weight->dtype;
+    CHECK(data->dtype == weight->dtype) << "Weight and kernel dtypes do not match";
+    CHECK(param->out_dtype == Int(16) || param->out_dtype == Int(32))
+      << "Expected quantized dense type(int32, int16) for output but was " <<  param->out_dtype;
+  }
+  Array<tvm::Expr> oshape = data->shape;
+  if (param->units.defined()) {
+    Array<tvm::Expr> dshape = data->shape;
+    // validate the weight shape is proper if defined
+    // Assign weight type
+    Array<IndexExpr> wshape({param->units, dshape[dshape.size() - 1]});
+    reporter->Assign(types[1], TensorTypeNode::make(wshape, data->dtype));
+    oshape.Set((oshape.size() - 1), param->units);
+  } else {
+    if (weight == nullptr) return false;
+    Array<tvm::Expr> wshape = weight->shape;
+    oshape.Set((oshape.size() - 1), wshape[0]);
+  }
+
+  DataType out_dtype = param->out_dtype;
+  if(mode == DenseType::kUnquantizedDense) {
+    if (out_dtype.bits() == 0) {
+      out_dtype = data->dtype;
+    }
+  }
+  // assign output type
+  reporter->Assign(types[2], TensorTypeNode::make(oshape, out_dtype));
+  return true;
+}
 
 }  // namespace relay
 }  // namespace tvm
