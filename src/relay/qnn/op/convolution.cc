@@ -427,7 +427,7 @@ operator to understand how to scale back the int32 output to (u)int8.
 .add_argument("weight", "Tensor", "The quantized weight tensor.")
 .set_support_level(10)
 .add_type_rel("QnnConv2D", Conv2DRel<QnnConv2DAttrs>)
-.set_attr<FTVMLegalize>("FTVMLegalize", QnnConv2DLegalize);
+.set_attr<FTVMLegalize>("FTVMQnnToRelay", QnnConv2DLegalize);
 
 TVM_REGISTER_API("relay.qnn.op._make.conv2d").set_body_typed(MakeQnnConv2D);
 

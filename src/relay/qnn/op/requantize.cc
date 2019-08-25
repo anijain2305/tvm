@@ -192,7 +192,7 @@ Expr RequantizeLower(const Expr& input_tensor, const RequantizeAttrs* param,
  *
  * Q_output = zp_output +  (scale_input)/(scale_ouptut) * (Q_input - zp_input)
  */
-Expr RequantizeLegalize(const Attrs& attrs, const Array<Expr>& new_args,
+Expr RequantizeQnnToRelay(const Attrs& attrs, const Array<Expr>& new_args,
                         const Array<tvm::relay::Type>& types) {
   CHECK_EQ(new_args.size(), 1);
   auto& quantized_data = new_args[0];
@@ -276,7 +276,7 @@ Q_output = zp_output +  (scale_input)/(scale_output) * (Q_input - zp_input)
 .add_argument("data", "Tensor", "The quantized input tensor.")
 .set_support_level(11)
 .add_type_rel("Requantize", RequantizeRel)
-.set_attr<FTVMLegalize>("FTVMLegalize", RequantizeLegalize);
+.set_attr<FTVMLegalize>("FTVMQnnToRelay", RequantizeQnnToRelay);
 
 TVM_REGISTER_API("relay.qnn.op._make.requantize")
 .set_body_typed(MakeRequantize);

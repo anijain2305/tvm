@@ -85,7 +85,7 @@ def test_qnn_conv2d():
 
         mod = relay.Function(relay.analysis.free_vars(func), func)
         mod = relay.Module.from_expr(mod)
-        mod = relay.transform.Legalize()(mod)
+        mod = relay.qnn.transform.QnnToRelay()(mod)
         return mod
 
     def get_funcs(data_shape,

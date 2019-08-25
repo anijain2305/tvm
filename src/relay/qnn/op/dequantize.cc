@@ -72,7 +72,7 @@ Expr DequantizeLower(const Expr& input_tensor,
   return scaled_output;
 }
 
-Expr DequantizeLegalize(const Attrs& attrs,
+Expr DequantizeQnnToRelay(const Attrs& attrs,
                         const Array<Expr>& new_args,
                         const Array<tvm::relay::Type>& types) {
   CHECK_EQ(new_args.size(), 1);
@@ -93,7 +93,7 @@ The input is always quantized (int8, uint8) and will be converted to float32 giv
 .add_argument("data", "Tensor", "The tensor to dequantize.")
 .set_support_level(11)
 .add_type_rel("Dequantize", DequantizeRel)
-.set_attr<FTVMLegalize>("FTVMLegalize", DequantizeLegalize);
+.set_attr<FTVMLegalize>("FTVMQnnToRelay", DequantizeQnnToRelay);
 
 TVM_REGISTER_API("relay.qnn.op._make.dequantize")
 .set_body_typed(MakeDequantize);

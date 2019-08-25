@@ -132,7 +132,7 @@ RELAY_REGISTER_OP("qnn.concatenate")
 .add_argument("data", "Tensor", "The tensor to concatenate.")
 .set_support_level(11)
 .add_type_rel("QnnConcatenate", ConcatenateRel<QnnConcatenateAttrs>)
-.set_attr<FTVMLegalize>("FTVMLegalize", ConcatenateLegalize);
+.set_attr<FTVMLegalize>("FTVMQnnToRelay", ConcatenateLegalize);
 
 TVM_REGISTER_API("relay.qnn.op._make.concatenate")
 .set_body_typed(MakeQnnConcatenate);

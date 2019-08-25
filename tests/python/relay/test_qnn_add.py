@@ -36,7 +36,7 @@ def test_tflite_same_io_qnn_params():
 
     func = relay.Function([x, y], z)
     mod = relay.Module.from_expr(func)
-    mod = relay.transform.Legalize()(mod)
+    mod = relay.qnn.transform.QnnToRelay()(mod)
     func = mod["main"]
 
     x_datas = [np.array((140, 153, 165, 178)).reshape((1,4)),
@@ -74,7 +74,7 @@ def test_tflite_different_io_qnn_params():
 
     func = relay.Function([x, y], z)
     mod = relay.Module.from_expr(func)
-    mod = relay.transform.Legalize()(mod)
+    mod = relay.qnn.transform.QnnToRelay()(mod)
     func = mod["main"]
 
     x_datas = [np.array((76, 140, 153, 172)).reshape((1,4)),
@@ -112,7 +112,7 @@ def test_saturation():
 
     func = relay.Function([x, y], z)
     mod = relay.Module.from_expr(func)
-    mod = relay.transform.Legalize()(mod)
+    mod = relay.qnn.transform.QnnToRelay()(mod)
     func = mod["main"]
 
     x_data = np.array((255, 1, 1, 0)).reshape((1,4))
@@ -134,7 +134,7 @@ def test_saturation():
 
     func = relay.Function([x, y], z)
     mod = relay.Module.from_expr(func)
-    mod = relay.transform.Legalize()(mod)
+    mod = relay.qnn.transform.QnnToRelay()(mod)
     func = mod["main"]
 
     x_data = np.array((255, 1, 1, 0)).reshape((1,4))
@@ -156,7 +156,7 @@ def test_saturation():
 
     func = relay.Function([x, y], z)
     mod = relay.Module.from_expr(func)
-    mod = relay.transform.Legalize()(mod)
+    mod = relay.qnn.transform.QnnToRelay()(mod)
     func = mod["main"]
 
     x_data = np.array((255, 1, 1, 0)).reshape((1,4))
@@ -178,7 +178,7 @@ def test_saturation():
 
     func = relay.Function([x, y], z)
     mod = relay.Module.from_expr(func)
-    mod = relay.transform.Legalize()(mod)
+    mod = relay.qnn.transform.QnnToRelay()(mod)
     func = mod["main"]
 
     x_data = np.array((255, 0, 1, 0)).reshape((1,4))
