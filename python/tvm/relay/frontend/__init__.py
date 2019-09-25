@@ -27,7 +27,10 @@ from .mxnet import from_mxnet
 from .mxnet_qnn_op_utils import quantize_mxnet_min_max, \
                                 quantize_conv_weights_mkldnn, \
                                 get_mkldnn_int8_scale, \
-                                get_mkldnn_uint8_scale
+                                get_mkldnn_uint8_scale, \
+                                quantize_conv_bias_mkldnn, \
+                                get_conv_mkldnn_requantized_scale_outDtype
+from .qnn_mxnet import from_qnn_mxnet
 from .keras import from_keras
 from .onnx import from_onnx
 from .tflite import from_tflite

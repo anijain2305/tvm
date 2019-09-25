@@ -609,16 +609,75 @@ def tflite_anistropic_strides():
     golden_output = np.array((124, -92, 164, -132)).reshape(1, 1, 2, 2)
     np.testing.assert_equal(qnn_output, golden_output)
 
+def test_mxnet_convolution_without_bias():
+    # uint8 input
+    data_shape = (1, 1, 2, 4)
+    data_dtype = 'uint8'
+    kernel_shape = (5, 1, 2, 2)
+    kernel_dtype = 'int8'
+
+    data = relay.var("data", shape=data_shape,
+                     dtype=data_dtype)
+    kernel = relay.var("kernel", shape=kernel_shape,
+                       dtype=kernel_dtype)
+    data_scale = 255.164
+    kernel_scale = 2252.62
+    input_scale = np.divide(1.0, data_scale * kernel_scale)
+    output_scale = 0.00122858
+
+    conv = relay.qnn.op.conv2d(
+        data, kernel,
+        input_zero_point=0,
+        kernel_zero_point=0,
+        kernel_size=(2, 2),
+        strides=(1, 1),
+        dilation=(1, 1),
+        padding=(0, 0),
+        out_dtype="int32",
+        data_layout="NCHW",
+        kernel_layout="OIHW")
+
+    func = relay.qnn.op.requantize(
+        conv,
+        input_scale=input_scale,
+        input_zero_point=0,
+        output_scale=output_scale,
+        output_zero_point=0,
+        out_dtype='int8')
+
+    mod = relay.Function(relay.analysis.free_vars(func), func)
+    mod = relay.Module.from_expr(mod)
+    qnn_func = relay.qnn.transform.CanonicalizeOps()(mod)
+
+    golden_data = np.array((26, 26, 26, 26, 51, 51, 51, 51)).reshape(data_shape)
+    golden_data = golden_data.astype('uint8')
+    golden_weight = np.array([100, 68, 70, 74,  42, 75, 65, 37, 30, 25, 34, 7, -44, -58,
+                              -60, -60, -117, -127, -106, -93]) \
+        .astype('int8') \
+        .reshape((5, 1, 2, 2))
+
+    with relay.build_config(opt_level=2):
+        params = {'kernel': golden_weight}
+        graph, lib, params = relay.build(qnn_func, "llvm", params=params)
+        mod = graph_runtime.create(graph, lib, ctx=tvm.cpu(0))
+        mod.set_input("data", golden_data)
+        mod.set_input(**params)
+        mod.run()
+        qnn_output = mod.get_output(0).asnumpy()
+        print(qnn_output)
+
+
 if __name__ == "__main__":
-    no_zero_point_test()
-    input_zero_point_test()
-    kernel_zero_point_test()
-    both_zero_point_test()
-    layout_test()
-    padding_test()
-    dilation_test()
-    const_folding_test()
-    kernel_size_1x1_test()
-    tflite_large_irregular_test()
-    tflite_output_multiplier_greater_than_one()
-    tflite_anistropic_strides()
+    # no_zero_point_test()
+    # input_zero_point_test()
+    # kernel_zero_point_test()
+    # both_zero_point_test()
+    # layout_test()
+    # padding_test()
+    # dilation_test()
+    # const_folding_test()
+    # kernel_size_1x1_test()
+    # tflite_large_irregular_test()
+    # tflite_output_multiplier_greater_than_one()
+    # tflite_anistropic_strides()
+    test_mxnet_convolution_without_bias()

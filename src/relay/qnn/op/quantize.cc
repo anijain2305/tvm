@@ -48,8 +48,8 @@ bool QuantizeRel(const Array<Type>& types,
   const auto* quantize_attrs = attrs.as<QuantizeAttrs>();
   const Array<tvm::Expr> oshape = data->shape;
   const DataType out_dtype = quantize_attrs->out_dtype;
-  CHECK(out_dtype == Int(8) || out_dtype == UInt(8))
-    << "Output type should be one of [int8, unit8 ] but was " << out_dtype;
+  CHECK(out_dtype == Int(8) || out_dtype == UInt(8) || out_dtype == Int(32))
+    << "Output type should be one of [int8, unit8, int32 ] but was " << out_dtype;
   // assign output type
   reporter->Assign(types[1], TensorTypeNode::make(oshape, out_dtype));
   return true;

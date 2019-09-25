@@ -154,6 +154,49 @@ def test_mxnet_conv_weight_quantization_mkldnn():
     test_float32_to_int8()
 
 
+def test_mxnet_conv_bias_quantization_mkldnn():
+    def quantize_test_driver(in_data, bias_scale, verify_output_data):
+        quantized_output = relay.frontend.quantize_conv_bias_mkldnn(in_data,
+                                                                          bias_scale,
+                                                                          "input_data")
+        mod = relay.Function(relay.analysis.free_vars(quantized_output), quantized_output)
+        mod = relay.Module.from_expr(mod)
+        mod = relay.qnn.transform.CanonicalizeOps()(mod)
+        with relay.build_config(opt_level=3):
+            graph, lib, params = relay.build(mod, "llvm", params=None)
+            rt_mod = graph_runtime.create(graph, lib, ctx=tvm.cpu(0))
+            rt_mod.set_input(input_data=in_data)
+            rt_mod.set_input(**params)
+            rt_mod.run()
+            res = rt_mod.get_output(0).asnumpy()
+            np.testing.assert_equal(res, verify_output_data)
+            assert res.dtype == 'int32'
+
+    def test_fp32_to_int32():
+        data_scale = 255.078
+        weight_scale = 2364.12
+        bias_scale = np.divide(1, data_scale*weight_scale).astype('float32')
+        bias_data = np.array([0.05864264, 0.03235293, 0.04161578, -0.0402531, -0.09235826])\
+            .astype('float32')\
+            .reshape((5,))
+        expected_output = np.array([35364, 19510, 25096, -24274, -55695])
+        quantize_test_driver(bias_data, bias_scale, expected_output)
+
+    test_fp32_to_int32()
+
+def test_get_conv_mkldnn_requantized_scale_outDtype():
+    data_scale = np.float32(1/255.078)
+    weight_scale = np.float32(1/2364.12)
+    expected_output = np.float32(0.000834749)
+    requantize_scale, out_dtype = \
+        relay.frontend.get_conv_mkldnn_requantized_scale_outDtype(-0.252293,
+                                                                  0.174720,
+                                                                  data_scale,
+                                                                  weight_scale)
+    assert out_dtype == 'int8'
+    np.testing.assert_allclose(expected_output, requantize_scale, rtol=1e-5)
+
+
 def test_get_scale():
 
     def test_uint8_scale():
@@ -175,3 +218,5 @@ if __name__ == "__main__":
     test_mxnet_mkldnn_quantization()
     test_mxnet_conv_weight_quantization_mkldnn()
     test_get_scale()
+    test_mxnet_conv_bias_quantization_mkldnn()
+    test_get_conv_mkldnn_requantized_scale_outDtype()
