@@ -434,6 +434,17 @@ static inline Expr Conv2D(Expr data, Expr weight, Array<IndexExpr> strides,
   return CallNode::make(op, {data, weight}, Attrs(attrs), {});
 }
 
+static inline Expr Dense(Expr data,
+                         Expr weight,
+                         IndexExpr units,
+                         DataType out_dtype) {
+  auto attrs = make_node<DenseAttrs>();
+  attrs->units = units;
+  attrs->out_dtype = out_dtype;
+  static const Op& op = Op::Get("nn.dense");
+  return CallNode::make(op, {data, weight}, Attrs(attrs), {});
+}
+
 static inline Expr Sum(Expr data, Array<Integer> axis, bool keepdims, bool exclude) {
   auto attrs = make_node<ReduceAttrs>();
   attrs->axis = std::move(axis);
@@ -465,10 +476,12 @@ static inline Expr AvgPool2D(Expr data, Array<IndexExpr> pool_size, Array<IndexE
   return CallNode::make(op, {data}, Attrs(attrs), {});
 }
 
-static inline Expr Pad(Expr data, Array<Array<IndexExpr>> pad_width, double pad_value) {
+static inline Expr Pad(Expr data, Array<Array<IndexExpr>> pad_width, double pad_value,
+                       std::string pad_mode) {
   auto attrs = make_node<PadAttrs>();
   attrs->pad_value = pad_value;
   attrs->pad_width = std::move(pad_width);
+  attrs->pad_mode = std::move(pad_mode);
   static const Op& op = Op::Get("nn.pad");
   return CallNode::make(op, {data}, Attrs(attrs), {});
 }
@@ -483,6 +496,14 @@ static inline Expr Tile(Expr data, Array<Integer> reps) {
 Expr MakeConcatenate(Expr data, int axis);
 
 Expr MakeStridedSlice(Expr data, Array<Integer> begin, Array<Integer> end, Array<Integer> strides);
+
+Expr MakeStack(Expr data, int axis);
+
+Expr MakeSplit(Expr data, NodeRef indices_or_sections, int axis);
+
+Expr MakeSqueeze(Expr data, Array<Integer> axis);
+
+Expr MakeExpandDims(Expr data, int axis, int num_newaxis);
 
 Expr StopFusion(Expr data);
 

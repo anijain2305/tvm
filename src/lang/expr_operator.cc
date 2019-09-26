@@ -178,18 +178,32 @@ Expr operator*(Expr a, Expr b) {
   return ir::Mul::make(a, b);
 }
 
-Expr operator/(Expr a, Expr b) {
+Expr div(Expr a, Expr b) {
   BinaryOpMatchTypes(a, b);
   Expr ret = arith::TryConstFold<ir::Div>(a, b);
   if (ret.defined()) return ret;
   return ir::Div::make(a, b);
 }
 
-Expr operator%(Expr a, Expr b) {
+Expr truncdiv(Expr a, Expr b) {
+  CHECK(a.type().is_int() || a.type().is_uint());
+  CHECK(b.type().is_int() || b.type().is_uint());
+  return div(a, b);
+}
+
+Expr truncmod(Expr a, Expr b) {
   BinaryOpMatchTypes(a, b);
   Expr ret = arith::TryConstFold<ir::Mod>(a, b);
   if (ret.defined()) return ret;
   return ir::Mod::make(a, b);
+}
+
+Expr operator/(Expr a, Expr b) {
+  return div(a, b);
+}
+
+Expr operator%(Expr a, Expr b) {
+  return truncmod(a, b);
 }
 
 Expr floordiv(Expr a, Expr b) {
@@ -412,6 +426,30 @@ Expr abs(Expr x) {
   } else {
     LOG(FATAL) << "Data type " << x.type()
                <<" not supported for absolute op. Skipping absolute op...";
+    return x;
+  }
+}
+
+Expr isnan(Expr x) {
+  Type t = Bool(x.type().lanes());
+  if (x.type().is_int() || x.type().is_uint()) {
+    return make_const(t, false);
+  } else if (x.type().is_float()) {
+    using ir::FloatImm;
+    const FloatImm* fx = x.as<FloatImm>();
+    if (fx) {
+      return make_const(t, std::isnan(fx->value));
+    }
+    if (x.type().bits() == 16) {
+      return ir::Call::make(t, ir::Call::isnan,
+                               {cast(Float(32, t.lanes()), std::move(x))},
+                               ir::Call::PureIntrinsic);
+    } else {
+      return ir::Call::make(t, ir::Call::isnan, {x}, ir::Call::PureIntrinsic);
+    }
+  } else {
+    LOG(FATAL) << "Data type " << x.type()
+               <<" not supported for isnan op. Skipping isnan op...";
     return x;
   }
 }

@@ -32,6 +32,7 @@ List of operators
    topi.trunc
    topi.round
    topi.abs
+   topi.isnan
    topi.exp
    topi.tanh
    topi.log
@@ -127,6 +128,7 @@ topi
 .. autofunction:: topi.trunc
 .. autofunction:: topi.round
 .. autofunction:: topi.abs
+.. autofunction:: topi.isnan
 .. autofunction:: topi.exp
 .. autofunction:: topi.tanh
 .. autofunction:: topi.log
@@ -175,6 +177,9 @@ topi
 .. autofunction:: topi.topk
 .. autofunction:: topi.sequence_mask
 .. autofunction:: topi.one_hot
+.. autofunction:: topi.logical_and
+.. autofunction:: topi.logical_or
+.. autofunction:: topi.logical_not
 
 topi.nn
 ~~~~~~~

@@ -323,19 +323,32 @@ def quantize_conv_weights_mkldnn_from_var(weights_var,
                                   out_dtype='int8',
                                   use_mkldnn=True)
 
-# TODO: add support for uint8 type
-def get_conv_mkldnn_requantized_scale_outDtype(min_output_range,
-                                               max_output_range,
-                                               data_scale,
-                                               kernel_scale):
-    out_dtype = 'int8' # later add support for uint8
 
+def get_mkldnn_requantize_scale_outDtype(min_output_range,
+                                         max_output_range,
+                                         data_scale,
+                                         kernel_scale,
+                                         out_dtype):
     quantized_out_range = zero_centered_int8_quantized_range if out_dtype == 'int8' \
         else zero_centered_uint8_quantized_range
     out_range = np.max([np.abs(np.float32(min_output_range)),
                         np.abs(np.float32(max_output_range))])
     output_scale = quantized_out_range / out_range
     requantize_scale = np.float32(output_scale * data_scale * kernel_scale)
+    return requantize_scale
+
+
+# TODO: add support for uint8 type
+def get_conv_mkldnn_requantized_scale_outDtype(min_output_range,
+                                               max_output_range,
+                                               data_scale,
+                                               kernel_scale):
+    out_dtype = 'int8' # later add support for uint8
+    requantize_scale = get_mkldnn_requantize_scale_outDtype(min_output_range,
+                                                            max_output_range,
+                                                            data_scale,
+                                                            kernel_scale,
+                                                            out_dtype)
     return requantize_scale, out_dtype
 
 

@@ -304,6 +304,21 @@ def sin(x):
     """
     return call_pure_intrin(x.dtype, "sin", x)
 
+def atan(x):
+    """Take atan of input x.
+
+    Parameters
+    ----------
+    x : Expr
+        Input argument.
+
+    Returns
+    -------
+    y : Expr
+        The result.
+    """
+    return call_pure_intrin(x.dtype, "atan", x)
+
 def sqrt(x):
     """Take square root of input x.
 
@@ -417,6 +432,22 @@ def round(x):
         The result.
     """
     return _make.round(x)
+
+
+def isnan(x):
+    """Check if input value is Nan.
+
+    Parameters
+    ----------
+    x : Expr
+        Input argument.
+
+    Returns
+    -------
+    y : Expr
+        The result.
+    """
+    return _make.isnan(x)
 
 
 def power(x, y):

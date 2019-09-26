@@ -26,9 +26,11 @@ from .. import expr as _expr
 from .. import op as _op
 from .. import module as _module
 from ... import nd as _nd
+from ...expr import FloatImm
 
 from .common import StrAttrsDict
 from .common import infer_type as _infer_type
+from .common import get_name as _get_name
 from .nnvm_common import _rename, _binop_scalar, _rbinop_scalar, _reduce
 from .nnvm_common import _arg_reduce, _init_op, _softmax_op, _cast
 from .nnvm_common import _clip, _transpose, _upsampling
@@ -39,7 +41,10 @@ from .mxnet_qnn_op_utils import quantize_mxnet_min_max, \
                                 quantize_conv_bias_mkldnn_from_var, \
                                 get_conv_mkldnn_requantized_scale_outDtype, \
                                 get_dtype_from_min_max, \
-                                dequantize_mxnet_min_max
+                                dequantize_mxnet_min_max, \
+                                get_mkldnn_int8_scale, \
+                                get_mkldnn_uint8_scale, \
+                                get_mkldnn_requantize_scale_outDtype
 from tvm import relay
 
 __all__ = ['from_qnn_mxnet']
@@ -925,7 +930,7 @@ def _mx_contrib_quantize(inputs, attrs):
     out_dtype = 'int8'
     out_type = attrs.get_str('out_type')
     if out_type == 'auto':
-        if attrs.is_attr_present('min_calib_range') and attrs.is_attr_present('max_calib_range'):
+        if attrs.has_attr('min_calib_range') and attrs.has_attr('max_calib_range'):
             if attrs.get_float('min_calib_range') >= 0:
                 out_dtype = 'uint8'
             else:
@@ -941,7 +946,80 @@ def _mx_contrib_quantize(inputs, attrs):
                                                                  max_range=max_calib_range,
                                                                  out_dtype=out_dtype,
                                                                  use_mkldnn=True)
-    return [(quantized_output, out_dtype, scale, zero_point), min_calib_range, max_calib_range]
+    return quantized_output, min_calib_range, max_calib_range
+    # return [(quantized_output, out_dtype, scale, zero_point), min_calib_range, max_calib_range]
+
+
+def _mx__sg_mkldnn_fully_connected(inputs, attrs, subgraphs, params):
+    assert subgraphs[0].op.name == 'nn.dense' or subgraphs[0].op.name == "nn.bias_add"
+    data = inputs[0]
+    data_dtype = _infer_type(data).checked_type.dtype
+    assert data_dtype in {'int8', 'uint8'}
+    has_bias = len(inputs) == 9
+    if has_bias:
+        data_min = inputs[3]
+        data_max = inputs[4]
+    else:
+        data_min = inputs[2]
+        data_max = inputs[3]
+    data_scale = get_mkldnn_uint8_scale(data_min, data_max) if data_dtype == 'uint8' \
+        else get_mkldnn_int8_scale(data_min, data_max)
+    kernel = inputs[1]
+    if has_bias:
+        kernel_min_name = _get_name(inputs[5])
+        kernel_min = params[kernel_min_name].asnumpy()[0]
+        kernel_max_name = _get_name(inputs[6])
+        kernel_max = params[kernel_max_name].asnumpy()[0]
+    else:
+        kernel_min_name = _get_name(inputs[4])
+        kernel_min = params[kernel_min_name].asnumpy()[0]
+        kernel_max_name = _get_name(inputs[5])
+        kernel_max = params[kernel_max_name].asnumpy()[0]
+    kernel_dtype = _infer_type(kernel).checked_type.dtype
+    kernel_scale = get_mkldnn_uint8_scale(kernel_min, kernel_max) if kernel_dtype == 'uint8' \
+        else get_mkldnn_int8_scale(kernel_min, kernel_max)
+    if has_bias:
+        dense_attrs = _infer_type(subgraphs[0].args[0]).attrs
+    else:
+        dense_attrs = subgraphs[0].attrs
+    res = relay.qnn.op.quantized_dense(data,
+                                       kernel,
+                                       0,
+                                       0,
+                                       dense_attrs['units'])
+    if has_bias:
+        bias_data = inputs[2]
+        bias_min_name = _get_name(inputs[7])
+        bias_min = params[bias_min_name].asnumpy()[0]
+        bias_max_name = _get_name(inputs[8])
+        bias_max = params[bias_max_name].asnumpy()[0]
+        bias_requantize_scale = 1.0/get_mkldnn_int8_scale(bias_min, bias_max)
+        bias_requantize_scale = \
+            np.float32(1.0 / (bias_requantize_scale *
+                              data_scale * kernel_scale))
+
+        bias_requantize_scale = _expr.const(bias_requantize_scale, dtype="float32")
+        requantized_bias = _op.cast(_op.multiply(_op.cast(bias_data, 'float32'),
+                                                 bias_requantize_scale), 'int32')
+        bias_attrs = subgraphs[0].attrs
+        res = _op.nn.bias_add(res, requantized_bias, axis=bias_attrs['axis'])
+    out_dtype = 'unit8' if attrs.get_bool('with_relu', False) else 'int8'
+    min_output_range = attrs.get_float('min_calib_range')
+    max_output_range = attrs.get_float('max_calib_range')
+    input_scale = np.float32(data_scale * kernel_scale)
+    output_scale = get_mkldnn_requantize_scale_outDtype(min_output_range,
+                                                        max_output_range,
+                                                        data_scale,
+                                                        kernel_scale,
+                                                        out_dtype)
+    res = relay.qnn.op.requantize(
+        res,
+        input_scale=input_scale,
+        input_zero_point=0,
+        output_scale=output_scale,
+        output_zero_point=0,
+        out_dtype=out_dtype)
+    return res, min_output_range, max_output_range
 
 
 def _mx_mkldnn_conv(inputs, attrs, subgraphs, params):
@@ -1207,6 +1285,7 @@ _convert_map = {
     "_contrib_dequantize" : _contrib_dequantize,
     "_contrib_quantized_act" : _contrib_quantized_act,
     "_contrib_quantized_pooling" : _contrib_quantized_pooling,
+    "_sg_mkldnn_fully_connected": _mx__sg_mkldnn_fully_connected,
 
     # Depricated:
     "Crop"              : _mx_crop_like,

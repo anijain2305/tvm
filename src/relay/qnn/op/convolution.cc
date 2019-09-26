@@ -23,7 +23,6 @@
  * \brief Property def of qnn convolution operator.
  */
 #include <tvm/data_layout.h>
-#include <tvm/ir_pass.h>
 #include <tvm/relay/analysis.h>
 #include <tvm/relay/base.h>
 #include <tvm/relay/op.h>
@@ -39,6 +38,26 @@ namespace qnn {
 
 // relay.op.qnn.conv2d
 TVM_REGISTER_NODE_TYPE(QnnConv2DAttrs);
+
+bool QnnConv2DRel(const Array<Type>& types,
+                  int num_inputs,
+                  const Attrs& attrs,
+                  const TypeReporter& reporter) {
+  CHECK_EQ(types.size(), 3);
+  const auto* data = types[0].as<TensorTypeNode>();
+  const auto* weight = types[1].as<TensorTypeNode>();
+  if (data == nullptr || weight == nullptr) return false;
+  const auto* param = attrs.as<QnnConv2DAttrs>();
+  CHECK(param != nullptr) << "QnnConv2DAttrs cannot be nullptr.";
+  CHECK(data->dtype == Int(8) || data->dtype == UInt(8))
+    << "Expected qnn conv2d type(int8, uint8) for input but was " <<  data->dtype;
+  CHECK(weight->dtype == Int(8) || weight->dtype == UInt(8))
+    << "Expected qnn conv2d type(int8, uint8) for weight but was " <<  weight->dtype;
+  CHECK(param->out_dtype == Int(16) || param->out_dtype == Int(32))
+    << "Expected qnn conv2d type(int32, int16) for output but was " <<  param->out_dtype;
+  CHECK(param->out_dtype.bits() > 0) << "Output dtype bits should be greater than 0.";
+  return Conv2DRel<QnnConv2DAttrs>(types, num_inputs, attrs, reporter);
+}
 
 // Workload - batch_size, in_channels, out_channels, kernel_h, kernel_w
 using WorkloadType = std::tuple<int, int, int, int, int>;
@@ -148,7 +167,7 @@ Expr Conv2DPadInput(const Expr& data, const QnnConv2DAttrs* param) {
     } else {
       LOG(FATAL) << "qnn.conv2d does not support " << param->data_layout << " layout";
     }
-    padded_data = Pad(data, pad_width, param->input_zero_point);
+    padded_data = Pad(data, pad_width, param->input_zero_point, "constant");
   }
   return padded_data;
 }
@@ -158,7 +177,7 @@ Expr Conv2DPadInput(const Expr& data, const QnnConv2DAttrs* param) {
  * \param data The input expr.
  * \param weight The weight expr.
  * \param param The qnn conv2d attributes.
- * \return The sequence of Relay operatos for term1.
+ * \return The sequence of Relay operators for term1.
  * \note The term1 is
  *       Sigma(c,r,s) QW(k, c, r, s) * QA(n, c, h + r, w + s)
  *       This is just conv2d on int tensors.
@@ -178,12 +197,12 @@ Expr Conv2DFirstTerm(const Expr& padded_data, const Expr& weight, const QnnConv2
  * \param param The qnn conv2d attributes.
  * \param kernel_h The height of kernel.
  * \param kernel_w The width of kernel.
- * \return The sequence of Relay operatos for term2.
+ * \return The sequence of Relay operators for term2.
  * \note The term2 looks like this
  *
  *       Sigma(c,r,s) zp_w * QA(n, c, h + r, w + s)
  *
- *       Second term is not directly represetable by one Relay operator.
+ *       Second term is not directly representable by one Relay operator.
  *       However, deeper analysis shows that we can reduce r,s using avg_pool2d,
  *       followed by a reduce on the C axis. Using avg_pool2d also gives an
  *       opportunity to reuse alter_op_layout infrastructure.
@@ -293,7 +312,7 @@ Expr Conv2DThirdTerm(const Expr& weight, const Expr& zp_data, const QnnConv2DAtt
  * \param in_channels The number of input channels.
  * \param kernel_h The height of kernel.
  * \param kernel_w The width of kernel.
- * \return The sequence of Relay operatos for term4.
+ * \return The sequence of Relay operators for term4.
  * \note The term4 looks like this
  *
  *       Sigma(c,r,s) zp_a * zp_w
@@ -353,7 +372,7 @@ Expr Conv2DCombineTerms(const Expr& term1, const Expr& term2, const Expr& term3,
  *       where QA is quantized tensor, scale_a and zp_A are quantizations
  *       params.
  *
- *       Quantized convlution convolves two quantized tensors and returns a
+ *       Quantized convolution will convolve two quantized tensors and returns a
  *       quantized tensor of default dtype of int32, with scale equaling to the
  *       product of scales of input tensors, and a zero point of zero.
  *
@@ -379,7 +398,7 @@ Expr Conv2DCombineTerms(const Expr& term1, const Expr& term2, const Expr& term3,
  *         zero point. This might leave some performance opportunity at the
  *         table. Can be avoided by modifying conv2d API to accept the
  *         pad_const_value.
- *         2) Second term is not directly represetable by one Relay operator.
+ *         2) Second term is not directly representable by one Relay operator.
  *         However, deeper analysis shows that we can reduce r,s using
  *         avg_pool2d, followed by a reduce on the C axis. Using avg_pool2d also
  *         gives an opportunity to reuse alter_op_layout infrastructure.
@@ -388,7 +407,7 @@ Expr Conv2DCombineTerms(const Expr& term1, const Expr& term2, const Expr& term3,
  *         the conv is dilated. We fallback also in case of depthwise conv.
  *
  *       The whole process can be broken down into following steps
- *       * Assertion checks for exisiting support, fallback if necessary
+ *       * Assertion checks for existing support, fallback if necessary
  *       * Pad the input.
  *       * Get Term1.
  *       * Get Term2.
@@ -475,7 +494,7 @@ operator to understand how to scale back the int32 output to (u)int8.
 .add_argument("data", "Tensor", "The quantized input data tensor.")
 .add_argument("weight", "Tensor", "The quantized weight tensor.")
 .set_support_level(11)
-.add_type_rel("QnnConv2D", Conv2DRel<QnnConv2DAttrs>)
+.add_type_rel("QnnConv2D", QnnConv2DRel)
 .set_attr<FTVMLegalize>("FTVMQnnCanonicalize", QnnConv2DCanonicalize);
 
 TVM_REGISTER_API("relay.qnn.op._make.conv2d").set_body_typed(MakeQnnConv2D);

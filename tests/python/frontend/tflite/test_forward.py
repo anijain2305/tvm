@@ -249,6 +249,83 @@ def test_forward_tile():
     _test_forward_tile((2, ), (3, ), "int32")
     _test_forward_tile((2, 2), (2, 3), "float32")
 
+######################################################################
+# BatchToSpaceND
+# --------------
+
+
+def _test_batch_to_space_nd(input_shape, block_shape, crops, dtype='int32'):
+    data = np.random.uniform(0, 5, size=input_shape).astype(dtype)
+
+    with tf.Graph().as_default():
+        in_data = array_ops.placeholder(shape=input_shape, dtype=dtype)
+
+        out = array_ops.batch_to_space_nd(in_data, block_shape, crops)
+
+        compare_tflite_with_tvm(data, 'Placeholder:0', [in_data], [out])
+
+
+def test_forward_batch_to_space_nd():
+    # test cases: https://www.tensorflow.org/api_docs/cc/class/tensorflow/ops/batch-to-space-n-d
+    _test_batch_to_space_nd(
+        input_shape=[4, 1, 1, 1],
+        block_shape=[2, 2],
+        crops=[[0, 0], [0, 0]]
+    )
+
+    _test_batch_to_space_nd(
+        input_shape=[4, 1, 1, 3],
+        block_shape=[2, 2],
+        crops=[[0, 0], [0, 0]]
+    )
+
+    _test_batch_to_space_nd(
+        input_shape=[4, 2, 2, 1],
+        block_shape=[2, 2],
+        crops=[[0, 0], [0, 0]]
+    )
+
+######################################################################
+# SpaceToBatchND
+# --------------
+
+
+def _test_space_to_batch_nd(input_shape, block_shape, paddings, dtype='int32'):
+    data = np.random.uniform(0, 5, size=input_shape).astype(dtype)
+
+    with tf.Graph().as_default():
+        in_data = array_ops.placeholder(shape=input_shape, dtype=dtype)
+
+        out = array_ops.space_to_batch_nd(in_data, block_shape, paddings)
+
+        compare_tflite_with_tvm(data, 'Placeholder:0', [in_data], [out])
+
+
+def test_forward_space_to_batch_nd():
+    # test cases: https://www.tensorflow.org/api_docs/python/tf/space_to_batch_nd
+    _test_space_to_batch_nd(
+        input_shape=[1, 2, 2, 1],
+        block_shape=[2, 2],
+        paddings=[[0, 0], [0, 0]]
+    )
+
+    _test_space_to_batch_nd(
+        input_shape=[1, 2, 2, 3],
+        block_shape=[2, 2],
+        paddings=[[0, 0], [0, 0]]
+    )
+
+    _test_space_to_batch_nd(
+        input_shape=[1, 4, 4, 1],
+        block_shape=[2, 2],
+        paddings=[[0, 0], [0, 0]]
+    )
+
+    _test_space_to_batch_nd(
+        input_shape=[2, 2, 4, 1],
+        block_shape=[2, 2],
+        paddings=[[0, 0], [2, 0]]
+    )
 
 #######################################################################
 # Pooling
@@ -520,6 +597,13 @@ def _test_maximum(data):
 def _test_minimum(data):
     """ One iteration of minimum """
     return _test_elemwise(math_ops.minimum, data)
+#######################################################################
+# Greater
+# -------
+
+def _test_greater(data):
+    """ One iteration of greater """
+    return _test_elemwise(math_ops.greater, data)
 
 def _test_forward_elemwise(testop):
     """ Elewise"""
@@ -546,6 +630,7 @@ def test_all_elemwise():
     _test_forward_elemwise(_test_pow)
     _test_forward_elemwise(_test_maximum)
     _test_forward_elemwise(_test_minimum)
+    _test_forward_elemwise(_test_greater)
 
 #######################################################################
 # Reduce
@@ -736,6 +821,20 @@ def test_forward_softmax():
     """ Softmax """
     _test_softmax(np.arange(6.0, dtype=np.float32).reshape((1, 6)))
 
+#######################################################################
+# Tanh
+# --------
+
+def _test_tanh(data):
+    """ One iteration of TANH """
+    with tf.Graph().as_default():
+        in_data = array_ops.placeholder(shape=data.shape, dtype=data.dtype)
+        out = math_ops.sigmoid(in_data)
+        compare_tflite_with_tvm(data, 'Placeholder:0', [in_data], [out])
+
+def test_forward_tanh():
+    """ TANH """
+    _test_tanh(np.arange(6.0, dtype=np.float32).reshape((1, 6)))
 
 #######################################################################
 # Fully Connected
@@ -871,6 +970,12 @@ def test_forward_ssd_mobilenet_v1():
 # Main
 # ----
 if __name__ == '__main__':
+    # BatchToSpaceND
+    test_forward_batch_to_space_nd()
+
+    # SpaceToBatchND
+    test_forward_space_to_batch_nd()
+
     # Split
     test_forward_split()
 
@@ -893,6 +998,7 @@ if __name__ == '__main__':
     test_forward_logistic()
     test_forward_pooling()
     test_forward_softmax()
+    test_forward_tanh()
     test_forward_fully_connected()
 
     # Elemwise
