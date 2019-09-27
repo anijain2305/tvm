@@ -205,7 +205,7 @@ def test_get_scale():
         assert np.allclose(expected_scale, scale)
 
     def test_int8_scale():
-        scale = relay.frontend.get_mkldnn_int8_scale(0.000407, 0.999356)
+        scale = relay.frontend.get_mkldnn_int8_scale(-56.573826, 56.573826)
         expected_scale = 0.007868945
         assert np.allclose(expected_scale, scale)
 
