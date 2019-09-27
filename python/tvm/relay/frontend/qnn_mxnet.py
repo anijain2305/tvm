@@ -1003,15 +1003,19 @@ def _mx__sg_mkldnn_fully_connected(inputs, attrs, subgraphs, params):
                                                  bias_requantize_scale), 'int32')
         bias_attrs = subgraphs[0].attrs
         res = _op.nn.bias_add(res, requantized_bias, axis=bias_attrs['axis'])
+    enable_float_output = attrs.get_bool('enable_float_output', False)
     out_dtype = 'unit8' if attrs.get_bool('with_relu', False) else 'int8'
-    min_output_range = attrs.get_float('min_calib_range')
-    max_output_range = attrs.get_float('max_calib_range')
     input_scale = np.float32(data_scale * kernel_scale)
-    output_scale = get_mkldnn_requantize_scale_outDtype(min_output_range,
-                                                        max_output_range,
-                                                        data_scale,
-                                                        kernel_scale,
-                                                        out_dtype)
+    if not enable_float_output:
+        min_output_range = attrs.get_float('min_calib_range')
+        max_output_range = attrs.get_float('max_calib_range')
+        output_scale = get_mkldnn_requantize_scale_outDtype(min_output_range,
+                                                            max_output_range,
+                                                            data_scale,
+                                                            kernel_scale,
+                                                            out_dtype)
+    else:
+        output_scale = np.float32(data_scale * kernel_scale)
     res = relay.qnn.op.requantize(
         res,
         input_scale=input_scale,
@@ -1019,10 +1023,37 @@ def _mx__sg_mkldnn_fully_connected(inputs, attrs, subgraphs, params):
         output_scale=output_scale,
         output_zero_point=0,
         out_dtype=out_dtype)
-    return res, min_output_range, max_output_range
+    if enable_float_output:
+        res = relay.qnn.op.dequantize(res, output_scale, input_zero_point=0)
+    if enable_float_output:
+        return res
+    else:
+        return res, min_output_range, max_output_range
 
 
 def _mx_mkldnn_conv(inputs, attrs, subgraphs, params):
+    if not attrs.get_bool('quantized', False):
+        has_bias = subgraphs[0].op.name == 'nn.bias_add'
+        if not has_bias:
+            conv_attrs = subgraphs[0].attrs
+        else:
+            conv_attrs = subgraphs[0].args[0].attrs
+        new_attrs = {}
+        new_attrs["channels"] = conv_attrs["channels"]
+        new_attrs["kernel_size"] = conv_attrs["kernel_size"]
+        new_attrs["strides"] = conv_attrs["strides"]
+        new_attrs["padding"] = conv_attrs["padding"]
+        new_attrs["dilation"] = conv_attrs["dilation"]
+        new_attrs["groups"] = conv_attrs["groups"]
+        new_attrs["data_layout"] = conv_attrs["data_layout"]
+        new_attrs["kernel_layout"] = conv_attrs["kernel_layout"]
+        res = _op.nn.conv2d(inputs[0], inputs[1], **new_attrs)
+        if has_bias:
+            assert len(inputs) == 3
+            bias_attrs = subgraphs[0].attrs
+            res = _op.nn.bias_add(res, inputs[2], axis=bias_attrs['axis'])
+
+        return res
     assert len(subgraphs) == 1
 
     subgraph = subgraphs[0]
@@ -1032,11 +1063,23 @@ def _mx_mkldnn_conv(inputs, attrs, subgraphs, params):
         assert subgraph.op.name == "nn.bias_add"
     else:
         raise ValueError("Number of inputs can be 2 or 3 but was %d" % len(inputs))
+    has_bias = len(inputs) == 5
     # input data
-    data = inputs[0][0]
-    data_dtype = inputs[0][1]
-    data_scale = inputs[0][2]
-    data_zero_point = inputs[0][3]
+    data = inputs[0]
+
+    if has_bias:
+        data_min = inputs[3]
+        data_max = inputs[4]
+    else:
+        data_min = inputs[2]
+        data_max = inputs[3]
+    if not isinstance(data, tvm.relay.expr.Call):
+        data_dtype = _infer_type(data).checked_type.dtype
+    else:
+        data_dtype = get_dtype_from_min_max(data_min, data_max)
+    data_scale = get_mkldnn_uint8_scale(data_min, data_max) if data_dtype == 'uint8' \
+        else get_mkldnn_int8_scale(data_min, data_max)
+    data_zero_point = 0
     # kernel
     fp32_kernel = inputs[1]
     fp32_kernel_name = fp32_kernel.name_hint
@@ -1112,10 +1155,9 @@ def _contrib_quantized_act(inputs, attrs):
     return res, range_min, range_max
 
 def _contrib_quantized_pooling(inputs, attrs):
-    data = inputs[0]
     input_min = inputs[1]
     input_max = inputs[2]
-    res = _mx_pooling(data, attrs)
+    res = _mx_pooling(inputs, attrs)
     return res, input_min, input_max
 
 # Note: due to attribute conversion constraint
@@ -1299,7 +1341,7 @@ _convert_map = {
 _convert_map.update({k : _rename(k) for k in _identity_list})
 
 
-def _from_mxnet_nodes(jgraph, shape_dict, dtype_info, mod=None, arg_params=None):
+def _from_mxnet_nodes(jgraph, shape_dict, dtype_info, mod=None, arg_params=None, parent_graph_inputs=None):
     node_map = {}
     jnodes = jgraph["nodes"]
     for nid, node in enumerate(jnodes):
@@ -1309,7 +1351,7 @@ def _from_mxnet_nodes(jgraph, shape_dict, dtype_info, mod=None, arg_params=None)
         op_name = node["op"]
         subgraphs = None
         if "subgraphs" in node:
-            subgraphs = _from_mxnet_nodes(node["subgraphs"][0], shape_dict, dtype_info, mod, arg_params)
+            subgraphs = _from_mxnet_nodes(node["subgraphs"][0], shape_dict, dtype_info, mod, arg_params, children)
         if op_name == "null":
             shape = shape_dict[node_name] if node_name in shape_dict else None
             if node_name in arg_params:
@@ -1323,6 +1365,8 @@ def _from_mxnet_nodes(jgraph, shape_dict, dtype_info, mod=None, arg_params=None)
             if subgraphs is not None:
                 res = _convert_map[op_name](children, attrs, subgraphs, arg_params)
             else:
+                if op_name == "FullyConnected":
+                    children = parent_graph_inputs[:3]
                 res = _convert_map[op_name](children, attrs)
             if res is None:
                 # defer conversion, used in RNN state initialization
