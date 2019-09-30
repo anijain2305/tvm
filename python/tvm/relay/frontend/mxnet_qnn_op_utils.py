@@ -334,7 +334,7 @@ def get_mkldnn_requantize_scale_outDtype(min_output_range,
     out_range = np.max([np.abs(np.float32(min_output_range)),
                         np.abs(np.float32(max_output_range))])
     output_scale = quantized_out_range / out_range
-    requantize_scale = np.float32(output_scale * data_scale * kernel_scale)
+    requantize_scale = np.float32(1/output_scale)
     return requantize_scale
 
 
