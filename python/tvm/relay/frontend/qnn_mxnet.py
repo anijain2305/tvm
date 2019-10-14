@@ -1032,12 +1032,26 @@ def _mx__sg_mkldnn_fully_connected(inputs, attrs, subgraphs, params):
 
 
 def _mx_mkldnn_conv(inputs, attrs, subgraphs, params):
+    if attrs.get_bool('with_bn', False):
+        raise ValueError('Fused batch normalization with convolution is not et supported.')
+    if attrs.get_bool('with_sum', False):
+        raise ValueError('Fused post sum in convolution is not supported.')
     if not attrs.get_bool('quantized', False):
-        has_bias = subgraphs[0].op.name == 'nn.bias_add'
-        if not has_bias:
-            conv_attrs = subgraphs[0].attrs
+        has_fused_relu = False
+        if attrs.get_bool('with_act', False):
+            if subgraphs[0].op.name != 'nn.relu':
+                raise ValueError('Only relu fusion as activation is supported')
+            has_fused_relu = True
+        if has_fused_relu:
+            subgraph = subgraphs[0].args[0]
         else:
-            conv_attrs = subgraphs[0].args[0].attrs
+            subgraph = subgraphs[0]
+
+        has_bias = subgraph.op.name == 'nn.bias_add'
+        if not has_bias:
+            conv_attrs = subgraph.attrs
+        else:
+            conv_attrs = subgraph.args[0].attrs
         new_attrs = {}
         new_attrs["channels"] = conv_attrs["channels"]
         new_attrs["kernel_size"] = conv_attrs["kernel_size"]
@@ -1050,23 +1064,31 @@ def _mx_mkldnn_conv(inputs, attrs, subgraphs, params):
         res = _op.nn.conv2d(inputs[0], inputs[1], **new_attrs)
         if has_bias:
             assert len(inputs) == 3
-            bias_attrs = subgraphs[0].attrs
+            bias_attrs = subgraph.attrs
             res = _op.nn.bias_add(res, inputs[2], axis=bias_attrs['axis'])
-
+        if has_fused_relu:
+            res = _op.nn.relu(res)
         return res
-    assert len(subgraphs) == 1
 
-    subgraph = subgraphs[0]
+    assert len(subgraphs) == 1
+    has_fused_relu = False
+    if attrs.get_bool('with_act', False):
+        if subgraphs[0].op.name != 'nn.relu':
+            raise ValueError('Only relu fusion as activation is supported')
+        has_fused_relu = True
+    if has_fused_relu:
+        subgraph = subgraphs[0].args[0]
+    else:
+        subgraph = subgraphs[0]
     if len(inputs) == 4:
         assert subgraph.op.name == "nn.conv2d"
     elif len(inputs) == 5:
         assert subgraph.op.name == "nn.bias_add"
     else:
-        raise ValueError("Number of inputs can be 2 or 3 but was %d" % len(inputs))
+        raise ValueError("Number of inputs can be 4 or 5 but was %d" % len(inputs))
     has_bias = len(inputs) == 5
     # input data
     data = inputs[0]
-
     if has_bias:
         data_min = inputs[3]
         data_max = inputs[4]
@@ -1075,6 +1097,9 @@ def _mx_mkldnn_conv(inputs, attrs, subgraphs, params):
         data_max = inputs[3]
     if not isinstance(data, tvm.relay.expr.Call):
         data_dtype = _infer_type(data).checked_type.dtype
+        assert data_dtype in {'int8', 'uint8'}
+        if data_min < 0.0:
+            assert data_dtype == 'int8', "Expect int8 when data_min < 0.0, consider quantize model with int8."
     else:
         data_dtype = get_dtype_from_min_max(data_min, data_max)
     data_scale = get_mkldnn_uint8_scale(data_min, data_max) if data_dtype == 'uint8' \
@@ -1125,6 +1150,8 @@ def _mx_mkldnn_conv(inputs, attrs, subgraphs, params):
         output_scale=output_scale,
         output_zero_point=0,
         out_dtype=out_dtype)
+    if has_fused_relu:
+        res = _op.nn.relu(res)
     return res, min_output_range, max_output_range
 
 
