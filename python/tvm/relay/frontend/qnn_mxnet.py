@@ -1029,19 +1029,18 @@ def _mx__sg_mkldnn_fully_connected(inputs, attrs, subgraphs, params):
                                                             out_dtype)
     else:
         output_scale = np.float32(data_scale * kernel_scale)
-    res = relay.qnn.op.requantize(
-        res,
-        input_scale=input_scale,
-        input_zero_point=0,
-        output_scale=output_scale,
-        output_zero_point=0,
-        out_dtype=out_dtype)
-    if enable_float_output:
-        res = relay.qnn.op.dequantize(res, output_scale, input_zero_point=0)
-    if enable_float_output:
-        return res
-    else:
+    if not enable_float_output:
+        res = relay.qnn.op.requantize(
+            res,
+            input_scale=input_scale,
+            input_zero_point=0,
+            output_scale=output_scale,
+            output_zero_point=0,
+            out_dtype=out_dtype)
         return res, min_output_range, max_output_range
+    else:
+        res = relay.qnn.op.dequantize(res, output_scale, input_zero_point=0)
+        return res
 
 
 def _mx_mkldnn_conv(inputs, attrs, subgraphs, params):

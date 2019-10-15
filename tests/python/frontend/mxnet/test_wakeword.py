@@ -113,7 +113,8 @@ def run_intermediate_quantized_layers():
     all_layers = sym.get_internals()
     print(all_layers.list_outputs())
     # layer_to_output = 'quantized_sg_mkldnn_conv_act_1_output'
-    layer_to_output = 'quantized_sg_mkldnn_fully_connected_relu_0_output'
+    layer_to_output = 'quantized_sg_mkldnn_fully_connected_3_output'
+    # layer_to_output = 'quantized_sg_mkldnn_fully_connected_relu_2_output'
     sym3 = all_layers[layer_to_output]
     mod3 = mx.mod.Module(symbol=sym3, label_names=None, context=mx.cpu())
     mod3.bind(for_training=False, data_shapes=[('data', input_shape)])
