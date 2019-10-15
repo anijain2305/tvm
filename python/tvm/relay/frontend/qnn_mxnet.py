@@ -951,7 +951,11 @@ def _mx_contrib_quantize(inputs, attrs):
 
 
 def _mx__sg_mkldnn_fully_connected(inputs, attrs, subgraphs, params):
-    assert subgraphs[0].op.name == 'nn.dense' or subgraphs[0].op.name == "nn.bias_add"
+    if attrs.get_bool('with_relu', False):
+        assert subgraphs[0].op.name == 'nn.relu'
+    else:
+        assert subgraphs[0].op.name == 'nn.dense' or subgraphs[0].op.name == "nn.bias_add"
+    with_relu = attrs.get_bool('with_relu', False)
     data = inputs[0]
     data_dtype = _infer_type(data).checked_type.dtype
     assert data_dtype in {'int8', 'uint8'}
@@ -978,7 +982,13 @@ def _mx__sg_mkldnn_fully_connected(inputs, attrs, subgraphs, params):
     kernel_dtype = _infer_type(kernel).checked_type.dtype
     kernel_scale = get_mkldnn_uint8_scale(kernel_min, kernel_max) if kernel_dtype == 'uint8' \
         else get_mkldnn_int8_scale(kernel_min, kernel_max)
-    if has_bias:
+    if with_relu:
+        relu_input = subgraphs[0].args[0]
+        if has_bias:
+            dense_attrs = relu_input.args[0].attrs
+        else:
+            dense_attrs = relu_input.attrs
+    elif has_bias:
         dense_attrs = _infer_type(subgraphs[0].args[0]).attrs
     else:
         dense_attrs = subgraphs[0].attrs
@@ -1001,10 +1011,13 @@ def _mx__sg_mkldnn_fully_connected(inputs, attrs, subgraphs, params):
         bias_requantize_scale = _expr.const(bias_requantize_scale, dtype="float32")
         requantized_bias = _op.cast(_op.multiply(_op.cast(bias_data, 'float32'),
                                                  bias_requantize_scale), 'int32')
-        bias_attrs = subgraphs[0].attrs
+        if with_relu:
+            bias_attrs = subgraphs[0].args[0].attrs
+        else:
+            bias_attrs = subgraphs[0].attrs
         res = _op.nn.bias_add(res, requantized_bias, axis=bias_attrs['axis'])
     enable_float_output = attrs.get_bool('enable_float_output', False)
-    out_dtype = 'unit8' if attrs.get_bool('with_relu', False) else 'int8'
+    out_dtype = 'uint8' if attrs.get_bool('with_relu', False) else 'int8'
     input_scale = np.float32(data_scale * kernel_scale)
     if not enable_float_output:
         min_output_range = attrs.get_float('min_calib_range')

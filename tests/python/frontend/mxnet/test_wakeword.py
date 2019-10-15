@@ -112,8 +112,8 @@ def run_intermediate_quantized_layers():
     # print(sym.debug_str())
     all_layers = sym.get_internals()
     print(all_layers.list_outputs())
-    layer_to_output = 'quantized_sg_mkldnn_conv_act_1_output'
-    # layer_to_output = 'quantized_hybridsequential0_pool0_fwd_output'
+    # layer_to_output = 'quantized_sg_mkldnn_conv_act_1_output'
+    layer_to_output = 'quantized_sg_mkldnn_fully_connected_relu_0_output'
     sym3 = all_layers[layer_to_output]
     mod3 = mx.mod.Module(symbol=sym3, label_names=None, context=mx.cpu())
     mod3.bind(for_training=False, data_shapes=[('data', input_shape)])
@@ -140,6 +140,7 @@ def run_intermediate_quantized_layers():
         rt_mod.run()
         res = rt_mod.get_output(0).asnumpy()
         print(res)
+        print(np.count_nonzero(res))
 
 def ww_fp32_model_local():
     import os
