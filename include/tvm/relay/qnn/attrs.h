@@ -49,7 +49,7 @@ struct RequantizeAttrs : public tvm::AttrsNode<RequantizeAttrs> {
         .describe("The scale of the output tensor.");
     TVM_ATTR_FIELD(output_zero_point)
         .describe("The zero point of the output tensor.");
-    TVM_ATTR_FIELD(rounding).set_default("TONEAREST")
+    TVM_ATTR_FIELD(rounding).set_default("UPWARD")
         .describe("Defines the rounding direction when the value is midway between"
                   "two representable values. There are two supported modes - UPWARD"
                   "or TONEAREST. Both modes behave exactly same except at the"
@@ -213,7 +213,7 @@ struct QnnDenseAttrs : public tvm::AttrsNode<QnnDenseAttrs> {
   int32_t input_zero_point;
   int32_t kernel_zero_point;
 
-  TVM_DECLARE_ATTRS(QnnDenseAttrs, "relay.attrs.qnn.QnnDenseAttrs") {
+  TVM_DECLARE_ATTRS(QnnDenseAttrs, "relay.attrs.QnnDenseAttrs") {
     TVM_ATTR_FIELD(units)
       .describe("Number of hidden units of the dense transformation.");
     TVM_ATTR_FIELD(out_dtype)

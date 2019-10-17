@@ -329,8 +329,8 @@ def ww_int8_model_local_accuracy_validation():
     import glob
 
     Batch = namedtuple('Batch', ['data'])
-    base_path = '/home/ANT.AMAZON.COM/shoubhik/data/wakeword/sputnik-mxnet-model-wo-ring-buffer/intermediat-layer-outputs/quantized-tuned-model/'
-    ww_quantized_model = 'quantized_wo_fusion_model_wo_ringbuffer'
+    base_path = '/home/ANT.AMAZON.COM/shoubhik/data/wakeword/sputnik-mxnet-model-wo-ring-buffer/model-with-fused-activation'
+    ww_quantized_model = 'quantized_w_fusion_model_wo_ringbuffer'
     ww_quantized_model = os.path.join(base_path, ww_quantized_model)
     input_shape = (1, 1, 76, 64)
     input_dict = {'data': input_shape}
@@ -341,6 +341,8 @@ def ww_int8_model_local_accuracy_validation():
                                             shape=input_dict,
                                             arg_params=arg_params,
                                             aux_params=aux_params)
+    with tvm.target.create('llvm -mcpu=skylake-avx512'):
+        mod = relay.qnn.transform.Legalize()(mod)
     mod = relay.qnn.transform.CanonicalizeOps()(mod)
     print(mod)
     target = 'llvm'
@@ -412,11 +414,13 @@ def cross_compile_for_fp32_model_echo_dot2():
                                             shape=input_dict,
                                             arg_params=arg_params,
                                             aux_params=aux_params)
+    target = 'llvm -target=armv7a-none-linux-android -mfloat-abi=soft -mattr=+neon -mcpu=cortex-a53'
+    with tvm.target.create(target):
+        mod = relay.qnn.transform.Legalize()(mod)
     mod = relay.qnn.transform.CanonicalizeOps()(mod)
     print(mod)
     # For armv7a (32bits)
     # with TVM_NDK_CC=/Users/rankyunh/arm-linux-toolchain/bin/arm-linux-androideabi-g++
-    target = 'llvm -target=armv7a-none-linux-android -mfloat-abi=soft -mattr=+neon -mcpu=cortex-a53'
     with relay.build_config(opt_level=3):
         graph, lib, params = relay.build(mod, target, params=params)
         output_path = '/home/ANT.AMAZON.COM/shoubhik/data/wakeword/sputnik-mxnet-model-wo-ring-buffer/tvm-android-model/tvm-crosscompiled-fp32-sputnik-model/'
@@ -443,8 +447,8 @@ def cross_compile_for_echo_dot2():
     from tvm import relay
 
     Batch = namedtuple('Batch', ['data'])
-    base_path = '/home/ANT.AMAZON.COM/shoubhik/data/wakeword/sputnik-mxnet-model-wo-ring-buffer/intermediat-layer-outputs'
-    ww_quantized_model = 'quantized_wo_fusion_model_wo_ringbuffer'
+    base_path = '/home/ANT.AMAZON.COM/shoubhik/data/wakeword/sputnik-mxnet-model-wo-ring-buffer/model-with-fused-activation'
+    ww_quantized_model = 'quantized_w_fusion_model_wo_ringbuffer'
     ww_quantized_model = os.path.join(base_path, ww_quantized_model)
     input_shape = (1, 1, 76, 64)
     # input_shape = (1,3 , 224, 224)
@@ -458,24 +462,31 @@ def cross_compile_for_echo_dot2():
                                                 shape=input_dict,
                                                 arg_params=arg_params,
                                                 aux_params=aux_params)
+    # with tvm.target.create('llvm -mcpu=skylake-avx512'):
+    target = 'llvm -target=armv7a-none-linux-android -mfloat-abi=soft -mattr=+neon -mcpu=cortex-a53'
+    with tvm.target.create(target):
+        mod = relay.qnn.transform.Legalize()(mod)
     mod = relay.qnn.transform.CanonicalizeOps()(mod)
     print(mod)
     # For armv7a (32bits)
     # with TVM_NDK_CC=/Users/rankyunh/arm-linux-toolchain/bin/arm-linux-androideabi-g++
-    target = 'llvm -target=armv7a-none-linux-android -mfloat-abi=soft -mattr=+neon -mcpu=cortex-a53'
+    # target = 'llvm'
     with relay.build_config(opt_level=3):
         graph, lib, params = relay.build(mod, target, params=params)
+        for param in sorted(params.keys(), key=lambda param: int(param[1:])):
+            print('{} : {} : {}'.format(param, params[param].dtype, params[param].shape))
         output_path = '/home/ANT.AMAZON.COM/shoubhik/data/wakeword/sputnik-mxnet-model-wo-ring-buffer/tvm-android-model/'
-        path_so = output_path + "android_lib.so"
-        path_graph = output_path + "android_graph.json"
-        path_param = output_path + "android_param.params"
-        # lib.export_library(path_so, ndk.create_shared)
-        cc = '/home/ANT.AMAZON.COM/shoubhik/android-toolchain/bin/arm-linux-androideabi-clang++'
-        lib.export_library(path_so, cc=cc, options=['-static-libstdc++'])
-        with open(path_graph, "w") as fo:
-            fo.write(graph)
+        path_so = output_path + "android_graph_int8.so"
+        path_graph = output_path + "android_graph_int8.json"
+        path_param = output_path + "android_graph_int8.params"
         with open(path_param, "wb") as fo:
             fo.write(relay.save_param_dict(params))
+        with open(path_graph, "w") as fo:
+            fo.write(graph)
+        # lib.export_library(path_so)
+        cc = '/home/ANT.AMAZON.COM/shoubhik/android-toolchain/bin/arm-linux-androideabi-clang++'
+        lib.export_library(path_so, cc=cc, options=['-static-libstdc++'])
+
         print("check files in %s" % output_path)
 
 
@@ -761,11 +772,16 @@ if __name__ == '__main__':
     # test_conv_with_bias()
     # test_conv_with_bias()
     # test_quantized_wakeword_model()
-    run_intermediate_quantized_layers()
+    # run_intermediate_quantized_layers()
     # run_intermediate_quantized_layers_uint8()
-    # cross_compile_for_echo_dot2()
+
+    cross_compile_for_echo_dot2()
+
     # cross_compile_for_fp32_model_echo_dot2()
+
     # ww_fp32_model_local()
+
     # ww_int8_model_local_accuracy_validation()
+
     # ww_int8_mxnet_model_local_accuracy_validation()
     # ww_fp32_mxnet_model_local_accuracy_validation()
