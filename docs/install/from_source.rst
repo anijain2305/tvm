@@ -54,7 +54,7 @@ Our goal is to build the shared libraries:
 .. code:: bash
 
     sudo apt-get update
-    sudo apt-get install -y python3 python3-dev python3-setuptools gcc libtinfo-dev zlib1g-dev build-essential cmake
+    sudo apt-get install -y python3 python3-dev python3-setuptools gcc libtinfo-dev zlib1g-dev build-essential cmake libedit-dev libxml2-dev
 
 The minimal building requirements are
 
@@ -86,7 +86,7 @@ The configuration of TVM can be modified by `config.cmake`.
 
 - TVM optionally depends on LLVM. LLVM is required for CPU codegen that needs LLVM.
 
-  - LLVM 4.0 or higher is needed for build with LLVM. Note that verison of LLVM from default apt may lower than 4.0.
+  - LLVM 4.0 or higher is needed for build with LLVM. Note that version of LLVM from default apt may lower than 4.0.
   - Since LLVM takes long time to build from source, you can download pre-built version of LLVM from
     `LLVM Download Page <http://releases.llvm.org/download.html>`_.
 

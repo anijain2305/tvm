@@ -206,7 +206,18 @@ Expr operator%(Expr a, Expr b) {
   return truncmod(a, b);
 }
 
+// TODO(tqchen): switch to floordiv
+Expr indexdiv(Expr a, Expr b) {
+  return floordiv(a, b);
+}
+
+Expr indexmod(Expr a, Expr b) {
+  return floormod(a, b);
+}
+
 Expr floordiv(Expr a, Expr b) {
+  CHECK(a.type().is_int() || a.type().is_uint());
+  CHECK(b.type().is_int() || b.type().is_uint());
   BinaryOpMatchTypes(a, b);
   Expr ret = arith::TryConstFold<ir::FloorDiv>(a, b);
   if (ret.defined()) return ret;
@@ -214,6 +225,8 @@ Expr floordiv(Expr a, Expr b) {
 }
 
 Expr floormod(Expr a, Expr b) {
+  CHECK(a.type().is_int() || a.type().is_uint());
+  CHECK(b.type().is_int() || b.type().is_uint());
   BinaryOpMatchTypes(a, b);
   Expr ret = arith::TryConstFold<ir::FloorMod>(a, b);
   if (ret.defined()) return ret;
@@ -525,6 +538,13 @@ Expr round(Expr x) {
   const FloatImm* fx = x.as<FloatImm>();
   if (fx) return FloatImm::make(x.type(), std::nearbyint(fx->value));
   return ir::Call::make(x.type(), "round", {x}, ir::Call::PureIntrinsic);
+}
+
+Expr nearbyint(Expr x) {
+  using ir::FloatImm;
+  const FloatImm* fx = x.as<FloatImm>();
+  if (fx) return FloatImm::make(x.type(), std::nearbyint(fx->value));
+  return ir::Call::make(x.type(), "nearbyint", {x}, ir::Call::PureIntrinsic);
 }
 
 Expr trunc(Expr x) {

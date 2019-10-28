@@ -21,6 +21,7 @@ from __future__ import absolute_import as _abs
 from numbers import Integral as _Integral
 
 from ._ffi.base import string_types
+from ._ffi.object import register_object, Object
 from ._ffi.node import register_node, NodeBase
 from ._ffi.node import convert_to_node as _convert_to_node
 from ._ffi.node_generic import _scalar_type_inference
@@ -889,6 +890,77 @@ def comm_reducer(fcombine, fidentity, name="reduce"):
               """
     reducer.__doc__ = doc_str.format(name)
     return reducer
+
+def div(a, b):
+    """Compute a / b as in C/C++ semantics.
+
+    Parameters
+    ----------
+    a : Expr
+        The left hand operand, known to be non-negative.
+
+    b : Expr
+        The right hand operand, known to be non-negative.
+
+    Returns
+    -------
+    res : Expr
+        The result expression.
+    Note
+    ----
+    When operands are integers, returns truncdiv(a, b).
+    """
+    return _make._OpDiv(a, b)
+
+
+def indexdiv(a, b):
+    """Compute floor(a / b) where a and b are non-negative.
+
+    Parameters
+    ----------
+    a : Expr
+        The left hand operand, known to be non-negative.
+
+    b : Expr
+        The right hand operand, known to be non-negative.
+
+    Returns
+    -------
+    res : Expr
+        The result expression.
+
+    Note
+    ----
+    Use this function to split non-negative indices.
+    This function may take advantage of operands'
+    non-negativeness.
+    """
+    return _make._OpIndexDiv(a, b)
+
+
+def indexmod(a, b):
+    """Compute the remainder of indexdiv. a and b are non-negative.
+
+    Parameters
+    ----------
+    a : Expr
+        The left hand operand, known to be non-negative.
+
+    b : Expr
+        The right hand operand, known to be non-negative.
+
+    Returns
+    -------
+    res : Expr
+        The result expression.
+
+    Note
+    ----
+    Use this function to split non-negative indices.
+    This function may take advantage of operands'
+    non-negativeness.
+    """
+    return _make._OpIndexMod(a, b)
 
 
 def truncdiv(a, b):

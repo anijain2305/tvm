@@ -54,7 +54,7 @@ bool ArgBinder::Bind_(const Expr& arg,
   if (const Variable* v = arg.as<Variable>()) {
     auto it = def_map_->find(v);
     if (it == def_map_->end()) {
-      Var v_arg(arg.node_);
+      Var v_arg = Downcast<Var>(arg);
       defs_.emplace_back(v_arg);
       if (with_lets) {
         (*def_map_)[v] = arg;
@@ -120,7 +120,8 @@ void ArgBinder::BindBuffer(const Buffer& arg,
       Expr offset = value->elem_offset;
       Expr factor = make_const(offset.type(), arg->offset_factor);
       Expr zero = make_zero(offset.type());
-      BinderAddAssert(offset % factor == zero, arg_name + ".elem_offset", &asserts_);
+      BinderAddAssert(truncmod(offset, factor) == zero,
+                      arg_name + ".elem_offset", &asserts_);
     }
   }
 
@@ -288,7 +289,7 @@ void ArgBinder::BindDLTensor(const Buffer& buffer,
         Expr offset = buffer->elem_offset;
         Expr factor = make_const(offset.type(), buffer->offset_factor);
         Expr zero = make_zero(offset.type());
-        BinderAddAssert(offset % factor == zero, arg_name + ".elem_offset", &asserts_);
+        BinderAddAssert(truncmod(offset, factor) == zero, arg_name + ".elem_offset", &asserts_);
       }
     }
   }

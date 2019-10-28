@@ -22,11 +22,13 @@ from .reduction import *
 from .transform import *
 from .broadcast import *
 from .sort import *
+from .argwhere import *
 from . import nn
 from . import x86
 from . import cuda
 from . import arm_cpu
 from . import mali
+from . import bifrost
 from . import intel_graphics
 from . import opengl
 from . import util

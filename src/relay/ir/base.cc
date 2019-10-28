@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -61,7 +61,7 @@ TVM_STATIC_IR_FUNCTOR_REGISTER(IRPrinter, vtable)
 
 TVM_REGISTER_NODE_TYPE(SourceNameNode)
 .set_creator(GetSourceNameNode)
-.set_global_key([](const Node* n) {
+.set_global_key([](const Object* n) {
     return static_cast<const SourceNameNode*>(n)->name;
   });
 
@@ -88,7 +88,7 @@ TVM_REGISTER_NODE_TYPE(IdNode);
 
 TVM_REGISTER_API("relay._base.set_span")
 .set_body_typed<void(NodeRef, Span)>([](NodeRef node_ref, Span sp) {
-    auto rn = node_ref.as_derived<RelayNode>();
+    auto rn = node_ref.as<RelayNode>();
     CHECK(rn);
     rn->span = sp;
 });

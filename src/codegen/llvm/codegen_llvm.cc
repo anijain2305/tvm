@@ -595,7 +595,11 @@ llvm::Value* CodeGenLLVM::GetConstString(const std::string& str) {
   llvm::Type* type = llvm::ArrayType::get(t_char_, str.length() + 1);
   llvm::GlobalVariable *global = new llvm::GlobalVariable(
       *module_, type, true, llvm::GlobalValue::PrivateLinkage, 0, ".str");
+#if TVM_LLVM_VERSION >= 100
+  global->setAlignment(llvm::Align(1));
+#else
   global->setAlignment(1);
+#endif
   global->setInitializer(llvm::ConstantDataArray::getString(*ctx_, str));
   llvm::Constant* zero = ConstInt32(0);
   llvm::Constant* indices[] = {zero, zero};
@@ -1150,7 +1154,11 @@ void CodeGenLLVM::VisitStmt_(const Allocate* op) {
             LLVMType(op->type), ConstInt32(constant_size));
       });
     if (alloca->getAlignment() < static_cast<uint32_t>(info.alignment)) {
+#if TVM_LLVM_VERSION >= 100
+      alloca->setAlignment(llvm::Align(info.alignment));
+#else
       alloca->setAlignment(info.alignment);
+#endif
     }
     info.alignment = alloca->getAlignment();
     buf = alloca;
@@ -1165,7 +1173,7 @@ void CodeGenLLVM::VisitStmt_(const Allocate* op) {
 
 void CodeGenLLVM::VisitStmt_(const AttrStmt* op) {
   if (op->attr_key == attr::thread_extent) {
-    IterVar iv(op->node.node_);
+    IterVar iv = Downcast<IterVar>(op->node);
     if (iv->thread_tag.length() != 0) {
       if (!var_map_.count(iv->var.get())) {
         var_map_[iv->var.get()] = GetThreadIndex(iv);

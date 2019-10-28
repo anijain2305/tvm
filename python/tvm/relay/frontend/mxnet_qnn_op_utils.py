@@ -465,6 +465,7 @@ def _dequantize_zero_centered(data,
     using the MKLDNN formula `max(abs(data_min, data_max))/quantized_range`.
     Where quantized_range is 255 for uint8 and 127 for int8. The `data_min`
     and `data_max` are the min and max to use for the `data` tensor elements.
+
     Parameters
     ----------
     data : tvm.relay.Expr
@@ -475,6 +476,7 @@ def _dequantize_zero_centered(data,
         The maximum to use for data elements.
     quantized_range : float
         255 for uint8 and 127 for int8. This is the data type range.
+
     Returns
     -------
     result : tvm.relay.Expr
@@ -498,6 +500,7 @@ def _dequantize_mkldnn_min_max_int8(data,
     but compute the `scale` and `zero_point` to fit our equation.
     Unlike in TFLite where we get the scale and zero_point from the model, MKLDNN
     stores the min and max from which we calculate the scale and zero_point.
+
     Parameters
     ----------
     data : tvm.relay.Expr
@@ -506,6 +509,7 @@ def _dequantize_mkldnn_min_max_int8(data,
         The minimum to use data elements.
     imax_range : float
         The maximum to use for data elements.
+
     Returns
     -------
     result : tvm.relay.Expr
@@ -528,6 +532,7 @@ def _dequantize_mkldnn_min_max_uint8(data,
     but compute the `scale` and `zero_point` to fit our equation.
     Unlike in TFLite where we get the scale and zero_point from the model, MKLDNN
     stores the min and max from which we calculate the scale and zero_point.
+
     Parameters
     ----------
     data : tvm.relay.Expr
@@ -536,6 +541,7 @@ def _dequantize_mkldnn_min_max_uint8(data,
         The minimum to use data elements.
     imax_range : float
         The maximum to use for data elements.
+
     Returns
     -------
     result : tvm.relay.Expr
@@ -558,6 +564,7 @@ def _dequantize_mxnet_min_max_int8(data,
     but compute the `scale` and `zero_point` to fit our equation.
     Unlike in TFLite where we get the scale and zero_point from the model, Mxnet
     stores the min and max from which we calculate the scale and zero_point.
+
     Parameters
     ----------
     data : tvm.relay.Expr
@@ -566,6 +573,7 @@ def _dequantize_mxnet_min_max_int8(data,
         The minimum to use data elements.
     imax_range : float
         The maximum to use for data elements.
+
     Returns
     -------
     result : tvm.relay.Expr
@@ -588,6 +596,7 @@ def _dequantize_mxnet_min_max_uint8(data,
     but compute the `scale` and `zero_point` to fit our equation.
     Unlike in TFLite where we get the scale and zero_point from the model, Mxnet
     stores the min and max from which we calculate the scale and zero_point.
+
     Parameters
     ----------
     data : tvm.relay.Expr
@@ -596,6 +605,7 @@ def _dequantize_mxnet_min_max_uint8(data,
         The minimum to use data elements.
     imax_range : float
         The maximum to use for data elements.
+
     Returns
     -------
     result : tvm.relay.Expr
@@ -627,6 +637,7 @@ def dequantize_mxnet_min_max(data,
     Users can choose either of the implementation for TVM runtime.
     The main difference between the two implementation is that MKLDNN is centered
     around 0 and the default implementation for uint8 is not.
+
     Parameters
     ----------
     data : tvm.relay.Expr
@@ -640,6 +651,7 @@ def dequantize_mxnet_min_max(data,
     use_mkldnn: bool, optional
         If True then uses MKLDNN quantization implementation otherwise
         will use default implementation.
+
     Returns
     -------
     result : tvm.relay.Expr

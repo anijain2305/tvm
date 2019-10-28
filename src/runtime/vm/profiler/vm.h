@@ -45,7 +45,9 @@ class VirtualMachineDebug : public VirtualMachine {
                          const std::shared_ptr<ModuleNode>& sptr_to_self) final;
 
   void InvokePacked(Index packed_index, const PackedFunc& func, Index arg_count,
-                    Index output_size, const std::vector<Object>& args) final;
+                    Index output_size, const std::vector<ObjectRef>& args) final;
+
+  void LoadExecutable(const Executable* exec);
 
   ~VirtualMachineDebug() {}
 

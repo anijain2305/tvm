@@ -47,23 +47,23 @@ def veval(f, *args, ctx=tvm.cpu(), target="llvm"):
     if isinstance(f, relay.Expr):
         mod = relay.Module()
         mod["main"] = f
-        compiler = relay.vm.VMCompiler()
-        vm = compiler.compile(mod, target)
-        vm.init(tvm.cpu())
+        exe = relay.vm.compile(mod, target)
+        vm = relay.vm.VirtualMachine(exe)
+        vm.init(ctx)
         return vm.invoke("main", *args)
     else:
         assert isinstance(f, relay.Module), "expected expression or module"
         mod = f
-        compiler = relay.vm.VMCompiler()
-        vm = compiler.compile(mod, target)
-        vm.init(tvm.cpu())
+        exe = relay.vm.compile(mod, target)
+        vm = relay.vm.VirtualMachine(exe)
+        vm.init(ctx)
         ret = vm.invoke("main", *args)
         return ret
 
 def vmobj_to_list(o):
-    if isinstance(o, tvm.relay.backend.vmobj.TensorObject):
+    if isinstance(o, tvm.relay.backend.vm.Tensor):
         return [o.asnumpy().tolist()]
-    elif isinstance(o, tvm.relay.backend.vmobj.DatatypeObject):
+    elif isinstance(o, tvm.relay.backend.vm.ADT):
         result = []
         for f in o:
             result.extend(vmobj_to_list(f))
@@ -574,6 +574,7 @@ def test_add_op_broadcast():
     y_data = np.random.rand(1, 5).astype('float32')
     mod["main"] = func
     check_result([x_data, y_data], x_data + y_data, mod=mod)
+
 
 if __name__ == "__main__":
     test_id()

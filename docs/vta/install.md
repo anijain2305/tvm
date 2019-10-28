@@ -202,7 +202,7 @@ Before powering up the device, we need to flash the microSD card image with late
 #### Flash SD Card and Boot Angstrom Linux
 
 To flash SD card and boot Linux on DE10-Nano, it is recommended to navigate to the [Resource](https://www.terasic.com.tw/cgi-bin/page/archive.pl?Language=English&CategoryNo=167&No=1046&PartNo=4) tab of the DE10-Nano product page from Terasic Inc.
-After registeration and login on the webpage, the prebuild Angstrom Linux image would be available for downloading and flashing.
+After registration and login on the webpage, the prebuilt Angstrom Linux image would be available for downloading and flashing.
 Specifically, to flash the downloaded Linux SD card image into your physical SD card:
 
 First, extract the gzipped archive file.
@@ -229,7 +229,7 @@ Now you can connect the power cable and serial port to boot the Angstrom Linux.
 > In this case, you might need to build the `zImage` file of your own from [socfpga-4.9.78-ltsi](https://github.com/altera-opensource/linux-socfpga/tree/socfpga-4.9.78-ltsi) branch of the [linux-socfpga](https://github.com/altera-opensource/linux-socfpga) repository. 
 > For a quick fix, you can also download a prebuilt version of the `zImage` file [here](https://raw.githubusercontent.com/liangfu/de10-nano-supplement/master/zImage).
 
-After connecting he usb cables to the DE10-Nano board, power on the board by connecting the power cable. You may then connect to the serial port of the device by using `minicom` on your host PC:
+After connecting the usb cables to the DE10-Nano board, power on the board by connecting the power cable. You may then connect to the serial port of the device by using `minicom` on your host PC:
 
 ``` bash
 # NOTE: root privilege is typically required to run the following command.

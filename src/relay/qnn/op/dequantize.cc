@@ -43,8 +43,9 @@ bool DequantizeRel(const Array<Type>& types,
   CHECK_EQ(types.size(), 2);
   const auto* data = types[0].as<TensorTypeNode>();
   const auto input_dtype = data->dtype;
-  CHECK(input_dtype == Int(8) || input_dtype == UInt(8))
-    << "Input type should be one of the quantized types [unit8, int8] but was " <<  input_dtype;
+  CHECK(input_dtype == Int(8) || input_dtype == UInt(8) || input_dtype == Int(32))
+    << "Input type should be one of the quantized types [unit8, int8, int32] but was "
+    <<  input_dtype;
   const Array<tvm::Expr> oshape = data->shape;
   // assign output type, output will always be float 32.
   reporter->Assign(types[1], TensorTypeNode::make(oshape, Float(32)));
@@ -88,7 +89,7 @@ RELAY_REGISTER_OP("qnn.dequantize")
 The input is always quantized (int8, uint8) and will be converted to float32 given input scale and zero_point.
 - **data**: Quantized tensor of any shape to dequantize. The input data can be of floating point
 )code" TVM_ADD_FILELINE)
-.set_attrs_type_key("relay.attrs.DequantizeAttrs")
+.set_attrs_type<DequantizeAttrs>()
 .set_num_inputs(1)
 .add_argument("data", "Tensor", "The tensor to dequantize.")
 .set_support_level(11)

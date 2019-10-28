@@ -92,20 +92,42 @@ class VMCompiler : public runtime::ModuleNode {
     return "VMCompiler";
   }
 
-  std::shared_ptr<VirtualMachine> GetVirtualMachine() const {
-    return vm_;
+  void InitVM() {
+    exec_ = std::make_shared<Executable>();
   }
 
-  virtual void InitVM() {
-    vm_ = std::make_shared<VirtualMachine>();
-  }
+  /*!
+   * \brief Set the parameters
+   *
+   * \param name name of parameter
+   * \param data_in input DLTensor
+   */
+  void SetParam(const std::string& name, runtime::NDArray data_in);
 
-  void Compile(const Module& mod_ref,
+  /*!
+   * \brief Compile functions in a Module
+   *
+   * \param mod Relay Module
+   * \param targets For heterogeneous compilation, it is a dictionary indicating context
+                    to target mapping. For homogeneous compilation, it is a build target.
+   * \param target_host Host compilation target, if target is device.
+   */
+  void Compile(Module mod,
                const TargetsMap& targets,
                const tvm::Target& target_host);
 
  protected:
-  Module OptimizeModule(const Module& mod);
+  /*!
+   * \brief Bind params to function by using name
+   * \param func Relay function
+   * \param params params dict
+   * \return relay::Function
+   */
+  relay::Function BindParamsByName(
+      relay::Function func,
+      const std::unordered_map<std::string, runtime::NDArray>& params);
+
+  Module OptimizeModule(const Module& mod, const TargetsMap& targets);
 
   void PopulateGlobalMap();
 
@@ -118,8 +140,10 @@ class VMCompiler : public runtime::ModuleNode {
   tvm::Target target_host_;
   /*! \brief Global shared meta data */
   VMCompilerContext context_;
-  /*! \brief Compiled virtual machine. */
-  std::shared_ptr<VirtualMachine> vm_;
+  /*! \brief Compiled executable. */
+  std::shared_ptr<Executable> exec_;
+  /*! \brief parameters */
+  std::unordered_map<std::string, runtime::NDArray> params_;
 };
 
 }  // namespace vm

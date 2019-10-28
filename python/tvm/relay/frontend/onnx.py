@@ -176,6 +176,15 @@ class BatchNorm(OnnxOpConverter):
         return out[0]
 
 
+class InstanceNorm(OnnxOpConverter):
+    """ Operator converter for BatchNorm.
+    """
+
+    @classmethod
+    def _impl_v1(cls, inputs, attr, params):
+        return AttrCvt(op_name='instance_norm')(inputs, attr, params)
+
+
 class Conv(OnnxOpConverter):
     """ Operator converter for Conv.
     """
@@ -326,15 +335,20 @@ class Pad(OnnxOpConverter):
         for i in range(dims):
             pad_width.append((pads[i], pads[i+dims]))
         attr['pad_width'] = pad_width
+        pad_mode = attr.get('mode', 'constant').decode('utf-8')
+        if pad_mode in ['constant', 'edge', 'reflect']:
+            attr['pad_mode'] = pad_mode
+            attr.pop('mode', None)
+        else:
+            raise tvm.error.OpAttributeInvalid(
+                'Value ' + pad_mode + ' in attribute "mode" is invalid for operator Pad.')
 
         return AttrCvt(
             _op.nn.pad,
             transforms={
                 'value': 'pad_value',
             },
-            ignores=['mode'],
-            custom_check=(lambda attrs: attrs.get('mode', 'constant').decode("utf-8") == 'constant',
-                          'split mode != constant'))(inputs, attr, params)
+            )(inputs, attr, params)
 
     @classmethod
     def _impl_v2(cls, inputs, attr, params):
@@ -344,15 +358,20 @@ class Pad(OnnxOpConverter):
         for i in range(dims):
             pad_width.append((pads[i], pads[i+dims]))
         attr['pad_width'] = pad_width
+        pad_mode = attr.get('mode', 'constant').decode('utf-8')
+        if pad_mode in ['constant', 'edge', 'reflect']:
+            attr['pad_mode'] = pad_mode
+            attr.pop('mode', None)
+        else:
+            raise tvm.error.OpAttributeInvalid(
+                'Value ' + pad_mode + ' in attribute "mode" is invalid for operator Pad.')
 
         return AttrCvt(
             'pad',
             transforms={
                 'value': 'pad_value',
             },
-            ignores=['mode'],
-            custom_check=(lambda attrs: attrs.get('mode', 'constant').decode("utf-8") == 'constant',
-                          'split mode != constant'))(inputs, attr, params)
+            )(inputs, attr, params)
 
 
 class ParametricSoftPlus(OnnxOpConverter):
@@ -562,7 +581,7 @@ class Upsample(OnnxOpConverter):
             assert len(inputs) == 2, "Upsample op take 2 inputs, {} given".format(len(inputs))
             scales = params[inputs[1].name_hint].asnumpy()
             inputs = inputs[:1]
-        assert len(scales) == 4 and scales[0] == 1.0 and scales[1] == 1.0 and scales[2] == scales[3]
+        assert len(scales) == 4 and scales[0] == 1.0 and scales[1] == 1.0
         mode = attr.get('mode')
         if mode == b'nearest':
             method = "nearest_neighbor"
@@ -571,7 +590,8 @@ class Upsample(OnnxOpConverter):
         else:
             raise tvm.error.OpAttributeInvalid(
                 'Value {} in attribute "mode" of operator Upsample is not valid.'.format(mode))
-        attr = {'scale':int(scales[-1]), 'method':method, 'layout':'NCHW', 'align_corners':True}
+        attr = {'scale_h':scales[-2], 'scale_w':scales[-1], 'method':method,
+                'layout':'NCHW', 'align_corners':True}
         return AttrCvt('upsampling')(inputs, attr)
 
 
@@ -903,6 +923,13 @@ class Erf(OnnxOpConverter):
     def _impl_v1(cls, inputs, attr, params):
         return _op.erf(inputs[0])
 
+class Where(OnnxOpConverter):
+    """Operator converter for Where
+    """
+    @classmethod
+    def _impl_v9(cls, inputs, attr, params):
+        return _op.where(inputs[0], inputs[1], inputs[2])
+
 
 # compatible operators that do NOT require any conversion.
 _identity_list = []
@@ -989,7 +1016,7 @@ def _get_convert_map(opset):
         'GlobalAveragePool': Renamer('global_avg_pool2d'),
         'GlobalMaxPool': Renamer('global_max_pool2d'),
         'BatchNormalization': BatchNorm.get_converter(opset),
-        # 'InstanceNormalization'
+        'InstanceNormalization': InstanceNorm.get_converter(opset),
         # 'LpNormalization'
         'Dropout': AttrCvt('dropout', {'ratio': 'rate'}, ignores=['is_test']),
         'Flatten': Flatten.get_converter(opset),
@@ -1023,7 +1050,8 @@ def _get_convert_map(opset):
         'Not': Not.get_converter(opset),
         'And': And.get_converter(opset),
         'Tile': Tile.get_converter(opset),
-        'Erf': Erf.get_converter(opset)
+        'Erf': Erf.get_converter(opset),
+        'Where': Where.get_converter(opset)
     }
 
 

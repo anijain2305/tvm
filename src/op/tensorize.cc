@@ -164,7 +164,7 @@ class TensorIntrinMatcher final : public IRMutator {
     Expr expr = IRMutator::Mutate_(op, e);
     op = expr.as<Call>();
     if (op->call_type == Call::Halide) {
-      Tensor t = Operation(op->func.node_).output(op->value_index);
+      Tensor t = Downcast<Operation>(op->func).output(op->value_index);
       auto it = in_remap_.find(t);
       if (it != in_remap_.end()) {
         const InputEntry& e = it->second;
@@ -522,7 +522,7 @@ TVM_REGISTER_API("test.op.MatchTensorizeBody")
     CHECK(stage->op.as<ComputeOpNode>());
     *ret = MatchTensorizeBody(stage->op.as<ComputeOpNode>(),
                               stage,
-                              {},
+                              {{}},
                               as_unordered_map(out_dom),
                               as_unordered_map(in_region),
                               intrin,

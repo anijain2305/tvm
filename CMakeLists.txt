@@ -7,6 +7,7 @@ include(cmake/util/FindCUDA.cmake)
 include(cmake/util/FindVulkan.cmake)
 include(cmake/util/FindLLVM.cmake)
 include(cmake/util/FindROCM.cmake)
+include(cmake/util/FindANTLR.cmake)
 
 if(EXISTS ${CMAKE_CURRENT_BINARY_DIR}/config.cmake)
   include(${CMAKE_CURRENT_BINARY_DIR}/config.cmake)
@@ -33,6 +34,7 @@ tvm_option(USE_LLVM "Build with LLVM, can be set to specific llvm-config path" O
 tvm_option(USE_STACKVM_RUNTIME "Include stackvm into the runtime" OFF)
 tvm_option(USE_GRAPH_RUNTIME "Build with tiny graph runtime" ON)
 tvm_option(USE_GRAPH_RUNTIME_DEBUG "Build with tiny graph runtime debug mode" OFF)
+tvm_option(USE_OPENMP "Build with OpenMP thread pool implementation" OFF)
 tvm_option(USE_RELAY_DEBUG "Building Relay in debug mode..." OFF)
 tvm_option(USE_SGX "Build with SGX" OFF)
 tvm_option(USE_RTTI "Build with RTTI" ON)
@@ -154,6 +156,7 @@ list(APPEND COMPILER_SRCS ${RELAY_BACKEND_SRCS})
 list(APPEND COMPILER_SRCS ${RELAY_IR_SRCS})
 list(APPEND COMPILER_SRCS ${RELAY_QNN_SRCS})
 
+
 if(USE_VM_PROFILER)
   message(STATUS "Build compiler with Relay VM profiler support...")
   file(GLOB BACKEND_VM_PROFILER_SRCS src/relay/backend/vm/profiler/*.cc)
@@ -233,6 +236,7 @@ include(cmake/modules/VTA.cmake)
 include(cmake/modules/CUDA.cmake)
 include(cmake/modules/OpenCL.cmake)
 include(cmake/modules/OpenGL.cmake)
+include(cmake/modules/OpenMP.cmake)
 include(cmake/modules/Vulkan.cmake)
 include(cmake/modules/Metal.cmake)
 include(cmake/modules/ROCM.cmake)
@@ -264,6 +268,7 @@ add_library(tvm SHARED ${COMPILER_SRCS} ${RUNTIME_SRCS})
 add_library(tvm_topi SHARED ${TOPI_SRCS})
 add_library(tvm_runtime SHARED ${RUNTIME_SRCS})
 
+
 if(USE_RELAY_DEBUG)
   message(STATUS "Building Relay in debug mode...")
   set_target_properties(tvm PROPERTIES COMPILE_DEFINITIONS "USE_RELAY_DEBUG")
@@ -293,6 +298,17 @@ target_link_libraries(tvm ${TVM_LINKER_LIBS} ${TVM_RUNTIME_LINKER_LIBS})
 target_link_libraries(tvm_topi tvm ${TVM_LINKER_LIBS} ${TVM_RUNTIME_LINKER_LIBS})
 target_link_libraries(tvm_runtime ${TVM_RUNTIME_LINKER_LIBS})
 target_link_libraries(nnvm_compiler tvm)
+
+if (HIDE_PRIVATE_SYMBOLS AND NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  set(HIDE_SYMBOLS_LINKER_FLAGS "-Wl,--exclude-libs,ALL")
+  # Note: 'target_link_options' with 'PRIVATE' keyword would be cleaner
+  # but it's not available until CMake 3.13. Switch to 'target_link_options'
+  # once minimum CMake version is bumped up to 3.13 or above.
+  target_link_libraries(tvm ${HIDE_SYMBOLS_LINKER_FLAGS})
+  target_link_libraries(tvm_topi ${HIDE_SYMBOLS_LINKER_FLAGS})
+  target_link_libraries(tvm_runtime ${HIDE_SYMBOLS_LINKER_FLAGS})
+  target_link_libraries(nnvm_compiler ${HIDE_SYMBOLS_LINKER_FLAGS})
+endif()
 
 # Related headers
 target_include_directories(
@@ -358,6 +374,11 @@ if (INSTALL_DEV)
   )
   install(
     DIRECTORY "3rdparty/dlpack/include/." DESTINATION "include"
+    FILES_MATCHING
+    PATTERN "*.h"
+    )
+  install(
+    DIRECTORY "3rdparty/dmlc-core/include/." DESTINATION "include"
     FILES_MATCHING
     PATTERN "*.h"
     )

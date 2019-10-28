@@ -46,41 +46,78 @@ def convert_to_list(x):
         x = [x]
     return x
 
+def vmobj_to_list(o):
+    if isinstance(o, tvm.relay.backend.vmobj.Tensor):
+        return [o.asnumpy().tolist()]
+    elif isinstance(o, tvm.relay.backend.vmobj.ADT):
+        result = []
+        for f in o:
+            result.extend(vmobj_to_list(f))
+        return result
+    elif isinstance(o, tvm.relay.backend.interpreter.TupleValue):
+        result = []
+        for f in o.fields:
+            result.append(vmobj_to_list(f))
+        return result
+    elif isinstance(o, tvm.relay.backend.interpreter.ConstructorValue):
+        if o.constructor.name_hint == 'Cons':
+            tl = vmobj_to_list(o.fields[1])
+            hd = vmobj_to_list(o.fields[0])
+            hd.extend(tl)
+            return hd
+        elif o.constructor.name_hint == 'Nil':
+            return []
+        elif 'tensor_nil' in o.constructor.name_hint:
+            return [0]
+        elif 'tensor' in o.constructor.name_hint:
+            return [o.fields[0].asnumpy()]
+        else:
+            raise RuntimeError("Unknown object type: %s" % o.constructor.name_hint)
+    elif isinstance(o, tvm.relay.backend.interpreter.TensorValue):
+        return [o.data.asnumpy()]
+    else:
+        raise RuntimeError("Unknown object type: %s" % type(o))
+
 def run_tvm_graph(graph_def, input_data, input_node, num_output=1,
-                  target='llvm', out_names=None, opt_level=3):
+                  target='llvm', out_names=None, opt_level=3, mode='graph_runtime'):
     """ Generic function to compile on relay and execute on tvm """
     input_data = convert_to_list(input_data)
     input_node = convert_to_list(input_node)
-
     layout = None
     if target == "cuda":
         layout = "NCHW"
     target_host = None
-
     shape_dict = {e: i.shape for e, i in zip(input_node, input_data)}
-
     mod, params = relay.frontend.from_tensorflow(graph_def,
                                                  layout=layout,
                                                  shape=shape_dict,
                                                  outputs=out_names)
-    with relay.build_config(opt_level=opt_level):
-        graph, lib, params = relay.build(mod, target, target_host, params)
+    if mode in ['debug', 'vm']:
+        ex = relay.create_executor(mode, mod=mod, ctx=tvm.cpu(), target="llvm")
+        inputs = []
+        for param in mod['main'].params:
+            inputs.append(tvm.nd.array(params[param.name_hint]))
+        result = ex.evaluate()(*inputs)
+        return vmobj_to_list(result)
+    else:
+        with relay.build_config(opt_level=opt_level):
+            graph, lib, params = relay.build(mod, target, target_host, params)
 
-    ctx = tvm.context(target, 0)
-    from tvm.contrib import graph_runtime
-    m = graph_runtime.create(graph, lib, ctx)
-    # set inputs
-    for e, i in zip(input_node, input_data):
-        m.set_input(e, tvm.nd.array(i))
+        ctx = tvm.context(target, 0)
+        from tvm.contrib import graph_runtime
+        m = graph_runtime.create(graph, lib, ctx)
+        # set inputs
+        for e, i in zip(input_node, input_data):
+            m.set_input(e, tvm.nd.array(i))
 
-    m.set_input(**params)
-    # execute
-    m.run()
-    # get outputs
-    assert out_names is None or num_output == len(out_names), (
-        "out_names: {} num_output: {}".format(out_names, num_output))
-    tvm_output_list = [m.get_output(i).asnumpy() for i in range(num_output)]
-    return tvm_output_list
+        m.set_input(**params)
+        # execute
+        m.run()
+        # get outputs
+        assert out_names is None or num_output == len(out_names), (
+            "out_names: {} num_output: {}".format(out_names, num_output))
+        tvm_output_list = [m.get_output(i).asnumpy() for i in range(num_output)]
+        return tvm_output_list
 
 def run_tf_graph(sess, input_data, input_node, output_node):
     """ Generic function to execute tensorflow """
@@ -97,7 +134,7 @@ def run_tf_graph(sess, input_data, input_node, output_node):
 
 
 def compare_tf_with_tvm(in_data, in_name, out_name, init_global_variables=False,
-                        no_gpu=False, opt_level=3):
+                        no_gpu=False, opt_level=3, mode='graph_runtime'):
     """Generic function to generate and compare tensorflow and TVM output"""
     def name_without_num(name):
         return name.split(':')[0] if ":" in name else name
@@ -128,7 +165,7 @@ def compare_tf_with_tvm(in_data, in_name, out_name, init_global_variables=False,
 
             tvm_output = run_tvm_graph(final_graph_def, in_data, in_node,
                                        target=device, out_names=out_name,
-                                       num_output=len(out_name), opt_level=opt_level)
+                                       num_output=len(out_name), opt_level=opt_level, mode=mode)
             # since the names from tensorflow and relay runs are not exactly same,
             # first len(tf_output) will be compared
             for i in range(len(tf_output)):
@@ -324,6 +361,22 @@ def test_forward_biasadd():
     _test_biasadd([1, 1, 1, 100], 'NHWC')
     _test_biasadd([4, 17, 17, 19], 'NHWC')
     _test_biasadd([4, 3, 3, 124], 'NHWC')
+
+def _test_forward_where(input_shape):
+    with tf.Graph().as_default():
+        dtype =  tf.float32
+        t = tf.constant(np.random.choice([0, 1, -2, 3, -1, 0.1, -0.2],
+                                         size=input_shape).astype(dtype.name))
+        out = tf.where(t)
+        compare_tf_with_tvm([], [], out.name, mode='debug')
+        compare_tf_with_tvm([], [], out.name, mode='vm')
+
+def test_forward_argwhere():
+    _test_forward_where((5,))
+    _test_forward_where((5, 5))
+    _test_forward_where((5, 5, 5))
+    _test_forward_where((5, 5, 5, 5))
+    _test_forward_where((5, 5, 5, 5, 5))
 
 #######################################################################
 # SpaceToBatchND
@@ -530,6 +583,111 @@ def test_forward_squeeze():
     _test_squeeze(np.arange(6).reshape((1, 2, 1, 3, 1)), [-1])
     _test_squeeze(np.arange(6).reshape((1, 2, 1, 3, 1)), [-3, -5])
     _test_squeeze(np.arange(6).reshape((1, 2, 1, 3, 1)), [-3, -5, -1])
+
+def test_tensor_array_constructor():
+    def run(dtype_str):
+        with tf.Graph().as_default():
+            dtype =  {
+                'float32': tf.float32,
+                'int32'  : tf.int32
+            }[dtype_str]
+            t = tf.constant(np.array([[1.0, 2.0], [3.0, 4.0]]).astype(dtype_str), dtype=dtype)
+            t2 = tf.constant(np.array([[1.0, 2.0], [3.0, 4.0]]).astype(dtype_str), dtype=dtype)
+            ta1 = tf.TensorArray(dtype=dtype, size=2, infer_shape=False, dynamic_size=False)
+            ta2 = ta1.write(0, t)
+            ta3 = ta2.write(1, t2)
+            out = ta3.read(0)
+            g = tf.get_default_graph()
+            compare_tf_with_tvm([], [], 'TensorArrayReadV3:0', mode='debug')
+    run('float32')
+    run('int32')
+
+def test_tensor_array_scatter():
+    def run(dtype_str):
+        with tf.Graph().as_default():
+            dtype =  {
+                'float32': tf.float32,
+                'int32'  : tf.int32
+            }[dtype_str]
+            t = tf.constant(np.array([[1.0], [2.0], [3.0]]).astype(dtype_str), dtype=dtype)
+            indices = tf.constant([2, 1, 0])
+            ta1 = tf.TensorArray(dtype=dtype, size=3, infer_shape=False, dynamic_size=False)
+            ta2 = ta1.scatter(indices, t)
+            out0 = ta2.read(0)
+            out1 = ta2.read(1)
+            out2 = ta2.read(2)
+            g = tf.get_default_graph()
+            compare_tf_with_tvm([], [], ['TensorArrayReadV3:0'], mode='debug')
+            compare_tf_with_tvm([], [], ['TensorArrayReadV3_1:0'], mode='debug')
+            compare_tf_with_tvm([], [], ['TensorArrayReadV3_2:0'], mode='debug')
+    run('float32')
+    run('int32')
+
+# TODO(wweic): Fix gather issue with PartialEvaluate
+# def test_tensor_array_gather():
+#     with tf.Graph().as_default():
+#         dtype = 'float32'
+#         t = tf.constant([[1.0], [2.0], [3.0]])
+#         scatter_indices = tf.constant([2, 1, 0])
+#         gather_indices = tf.constant([1, 2])
+#         ta1 = tf.TensorArray(dtype=tf.float32, size=3, infer_shape=False, dynamic_size=False)
+#         ta2 = ta1.scatter(scatter_indices, t)
+#         t1 = ta2.gather(gather_indices)
+#         g = tf.get_default_graph()
+#         compare_tf_with_tvm([], [], ['TensorArrayGatherV3:0'], mode='debug')
+
+def test_tensor_array_split():
+    def run(dtype_str):
+        with tf.Graph().as_default():
+            dtype =  {
+                'float32': tf.float32,
+                'int32'  : tf.int32
+            }[dtype_str]
+            t = tf.constant(np.array([[1.0], [2.0], [3.0], [4.0], [5.0], [6.0], [7.0], [8.0]]).astype(dtype_str), dtype=dtype)
+            split_length = tf.constant([2, 2, 2, 2], dtype=tf.int32)
+            ta1 = tf.TensorArray(dtype=dtype, size=4, infer_shape=False, dynamic_size=False)
+            ta2 = ta1.split(t, split_length)
+            out0 = ta2.read(0)
+            out1 = ta2.read(1)
+            out2 = ta2.read(2)
+            out3 = ta2.read(3)
+            g = tf.get_default_graph()
+            compare_tf_with_tvm([], [], ['TensorArrayReadV3:0'], mode='debug')
+            compare_tf_with_tvm([], [], ['TensorArrayReadV3_1:0'], mode='debug')
+            compare_tf_with_tvm([], [], ['TensorArrayReadV3_2:0'], mode='debug')
+            compare_tf_with_tvm([], [], ['TensorArrayReadV3_3:0'], mode='debug')
+    run('float32')
+    run('int32')
+
+def test_tensor_array_concat():
+    def run(dtype_str):
+        with tf.Graph().as_default():
+            dtype = {
+                'float32': tf.float32,
+                'int32'  : tf.int32
+            }[dtype_str]
+            t = tf.constant(np.array([[1.0], [2.0], [3.0], [4.0], [5.0], [6.0], [7.0], [8.0]]).astype(dtype_str), dtype=dtype)
+            split_length = tf.constant([2, 2, 2, 2], dtype=tf.int32)
+            ta1 = tf.TensorArray(dtype=dtype, size=4, infer_shape=False, dynamic_size=False)
+            ta2 = ta1.split(t, split_length)
+            t = ta2.concat()
+            compare_tf_with_tvm([], [], ['TensorArrayConcatV3:0'], mode='debug')
+    run('float32')
+    run('int32')
+
+def test_tensor_array_size():
+    def run(dtype_str):
+        with tf.Graph().as_default():
+            dtype =  {
+                'float32': tf.float32,
+                'int32'  : tf.int32
+            }[dtype_str]
+            ta1 = tf.TensorArray(dtype=dtype, size=2, infer_shape=False, dynamic_size=False)
+            out = ta1.size()
+            g = tf.get_default_graph()
+            compare_tf_with_tvm([], [], 'TensorArraySizeV3:0', mode='debug')
+    run('float32')
+    run('int32')
 
 #######################################################################
 # ConcatV2
@@ -2026,15 +2184,18 @@ def test_forward_mean():
 def test_forward_size():
     def check_size(ishape):
         np_input = np.random.uniform(size=ishape).astype(np.float32)
+
+        # if all dimensions are constant, TF will optimize away size operator into constant
+        tf_input_shape = list(np_input.shape)
+        tf_input_shape[0] = None
+
         with tf.Graph().as_default():
-            input = tf.placeholder(shape=np_input.shape, dtype=np_input.dtype, name='input')
+            input = tf.placeholder(shape=tf_input_shape, dtype=np_input.dtype, name='input')
             tf.size(input, name='size')
             compare_tf_with_tvm([np_input], ['input:0'], 'size:0')
 
-    if tf.__version__ < LooseVersion('1.1'):
-        check_size((10, 8, 16, 32))
-        check_size((10,))
-        check_size(())
+    check_size((10, 8, 16, 32))
+    check_size((10,))
 
 #######################################################################
 # All, Max, Min

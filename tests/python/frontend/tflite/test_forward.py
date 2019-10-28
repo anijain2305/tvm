@@ -31,6 +31,7 @@ from tensorflow.python.framework import ops
 from tensorflow.python.ops import math_ops
 from tensorflow.python.ops import nn_ops
 from tensorflow.python.ops import array_ops
+from tensorflow.python.ops import gen_array_ops
 from tensorflow.python.ops import variables
 try:
     from tensorflow import lite as interpreter_wrapper
@@ -228,6 +229,24 @@ def test_forward_transpose():
     _test_forward_transpose((2, 3, 4), (0, 1, 2))
     _test_forward_transpose((2, 3, 4, 5), (3, 0, 1, 2))
     _test_forward_transpose((2, 3, 4, 5), ())
+
+#######################################################################
+# Cast
+# --------
+
+def _test_cast(data, cast_dtype):
+    """ One iteration of CAST """
+    with tf.Graph().as_default():
+        in_data = array_ops.placeholder(shape=data.shape, dtype=data.dtype)
+        out = math_ops.cast(in_data, cast_dtype)
+        compare_tflite_with_tvm(data, 'Placeholder:0', [in_data], [out])
+
+
+def test_forward_cast():
+    """ CAST """
+    _test_cast(np.arange(6.0, dtype=np.float32).reshape((1, 6)), cast_dtype=tf.int32)
+    _test_cast(np.arange(6.0, dtype=np.float32).reshape((1, 6)), cast_dtype=tf.uint8)
+    _test_cast(np.arange(6.0, dtype=np.int32).reshape((1, 6)), cast_dtype=tf.int64)
 
 #######################################################################
 # tile
@@ -633,6 +652,21 @@ def test_all_elemwise():
     _test_forward_elemwise(_test_greater)
 
 #######################################################################
+# Zeros like
+# --------
+
+def _test_zeros_like(data):
+    """ One iteration of ZEROS LIKE """
+    with tf.Graph().as_default():
+        in_data = array_ops.placeholder(shape=data.shape, dtype=data.dtype)
+        out = gen_array_ops.zeros_like(in_data)
+        compare_tflite_with_tvm(data, 'Placeholder:0', [in_data], [out])
+
+def test_forward_zeros_like():
+    """ ZEROS LIKE """
+    _test_zeros_like(np.arange(6.0, dtype=np.float32).reshape((1, 6)))
+
+#######################################################################
 # Reduce
 # ------
 
@@ -680,6 +714,14 @@ def _test_reduce_prod(data, keep_dims=None):
     """ One iteration of reduce_prod """
     return _test_reduce(math_ops.reduce_prod, data, keep_dims)
 
+#######################################################################
+# Reduce_sum
+# -----------
+
+def _test_reduce_sum(data, keep_dims=None):
+    """ One iteration of reduce_sum """
+    return _test_reduce(math_ops.reduce_sum, data, keep_dims)
+
 
 def _test_forward_reduce(testop):
     """ Reduce """
@@ -698,6 +740,7 @@ def test_all_reduce():
     _test_forward_reduce(_test_reduce_max)
     _test_forward_reduce(_test_reduce_mean)
     _test_forward_reduce(_test_reduce_prod)
+    _test_forward_reduce(_test_reduce_sum)
 
 
 #######################################################################
@@ -837,6 +880,21 @@ def test_forward_tanh():
     _test_tanh(np.arange(6.0, dtype=np.float32).reshape((1, 6)))
 
 #######################################################################
+# ReLu
+# --------
+
+def _test_relu(data):
+    """ One iteration of ReLU """
+    with tf.Graph().as_default():
+        in_data = array_ops.placeholder(shape=data.shape, dtype=data.dtype)
+        out = nn_ops.relu(in_data)
+        compare_tflite_with_tvm(data, 'Placeholder:0', [in_data], [out])
+
+def test_forward_relu():
+    """ ReLU """
+    _test_relu(np.arange(6.0, dtype=np.float32).reshape((1, 6)))
+
+#######################################################################
 # Fully Connected
 # -------
 
@@ -948,6 +1006,66 @@ def test_forward_inception_v4_net():
     tvm.testing.assert_allclose(np.squeeze(tvm_output[0]), np.squeeze(tflite_output[0]),
                                 rtol=1e-5, atol=1e-5)
 
+def test_forward_qnn_inception_v1_net():
+    """Test the Quantized TFLite Inception model."""
+    # InceptionV1
+    tflite_model_file = tf_testing.get_workload_official(
+        "https://storage.googleapis.com/download.tensorflow.org/models/inception_v1_224_quant_20181026.tgz",
+        "inception_v1_224_quant.tflite")
+    with open(tflite_model_file, "rb") as f:
+        tflite_model_buf = f.read()
+    # Checking the labels because the requantize implementation is different between TFLite and
+    # Relay. This cause final output numbers to mismatch. So, testing accuracy via labels.
+    np.random.seed(0)
+    data = np.random.random_integers(low=0, high=128, size=(1, 224, 224, 3)).astype('uint8')
+    tflite_output = run_tflite_graph(tflite_model_buf, data)
+    tflite_predictions = np.squeeze(tflite_output)
+    tflite_sorted_labels = tflite_predictions.argsort()[-3:][::-1]
+    tvm_output = run_tvm_graph(tflite_model_buf, data, 'input')
+    tvm_predictions = np.squeeze(tvm_output)
+    tvm_sorted_labels = tvm_predictions.argsort()[-3:][::-1]
+    tvm.testing.assert_allclose(tvm_sorted_labels, tflite_sorted_labels)
+
+def test_forward_qnn_mobilenet_v1_net():
+    """Test the Quantized TFLite Mobilenet V1 model."""
+    # MobilenetV1
+    tflite_model_file = tf_testing.get_workload_official(
+        "https://storage.googleapis.com/download.tensorflow.org/models/mobilenet_v1_2018_08_02/mobilenet_v1_1.0_224_quant.tgz",
+        "mobilenet_v1_1.0_224_quant.tflite")
+    with open(tflite_model_file, "rb") as f:
+        tflite_model_buf = f.read()
+    # Checking the labels because the requantize implementation is different between TFLite and
+    # Relay. This cause final output numbers to mismatch. So, testing accuracy via labels.
+    np.random.seed(0)
+    data = np.random.random_integers(low=0, high=128, size=(1, 224, 224, 3)).astype('uint8')
+    tflite_output = run_tflite_graph(tflite_model_buf, data)
+    tflite_predictions = np.squeeze(tflite_output)
+    tflite_sorted_labels = tflite_predictions.argsort()[-3:][::-1]
+    tvm_output = run_tvm_graph(tflite_model_buf, data, 'input')
+    tvm_predictions = np.squeeze(tvm_output)
+    tvm_sorted_labels = tvm_predictions.argsort()[-3:][::-1]
+    tvm.testing.assert_allclose(tvm_sorted_labels, tflite_sorted_labels)
+
+def test_forward_qnn_mobilenet_v2_net():
+    """Test the Quantized TFLite Mobilenet V2 model."""
+    # MobilenetV2
+    tflite_model_file = tf_testing.get_workload_official(
+        "https://storage.googleapis.com/download.tensorflow.org/models/tflite_11_05_08/mobilenet_v2_1.0_224_quant.tgz",
+        "mobilenet_v2_1.0_224_quant.tflite")
+    with open(tflite_model_file, "rb") as f:
+        tflite_model_buf = f.read()
+    # Checking the labels because the requantize implementation is different between TFLite and
+    # Relay. This cause final output numbers to mismatch. So, testing accuracy via labels.
+    np.random.seed(0)
+    data = np.random.random_integers(low=0, high=128, size=(1, 224, 224, 3)).astype('uint8')
+    tflite_output = run_tflite_graph(tflite_model_buf, data)
+    tflite_predictions = np.squeeze(tflite_output)
+    tflite_sorted_labels = tflite_predictions.argsort()[-3:][::-1]
+    tvm_output = run_tvm_graph(tflite_model_buf, data, 'input')
+    tvm_predictions = np.squeeze(tvm_output)
+    tvm_sorted_labels = tvm_predictions.argsort()[-3:][::-1]
+    tvm.testing.assert_allclose(tvm_sorted_labels, tflite_sorted_labels)
+
 #######################################################################
 # SSD Mobilenet
 # -------------
@@ -982,6 +1100,9 @@ if __name__ == '__main__':
     # Transpose
     test_forward_transpose()
 
+    # Cast
+    test_forward_cast()
+
     # Tile
     test_forward_tile()
 
@@ -999,10 +1120,14 @@ if __name__ == '__main__':
     test_forward_pooling()
     test_forward_softmax()
     test_forward_tanh()
+    test_forward_relu()
     test_forward_fully_connected()
 
     # Elemwise
     test_all_elemwise()
+
+    # Zeros Like
+    test_forward_zeros_like()
 
     # Reduce
     test_all_reduce()
@@ -1013,3 +1138,8 @@ if __name__ == '__main__':
     test_forward_inception_v3_net()
     test_forward_inception_v4_net()
     test_forward_ssd_mobilenet_v1()
+
+    # End to End quantized
+    test_forward_qnn_inception_v1_net()
+    test_forward_qnn_mobilenet_v1_net()
+    test_forward_qnn_mobilenet_v2_net()

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -18,7 +18,6 @@
  */
 
 /*!
- *  Copyright (c) 2018 by Contributors
  * \file relay/backend/compile_engine.cc
  * \brief Internal compialtion engine.
  */
@@ -42,6 +41,11 @@
 
 namespace tvm {
 namespace relay {
+
+TVM_REGISTER_NODE_TYPE(CachedFuncNode);
+TVM_REGISTER_NODE_TYPE(CCacheKeyNode);
+TVM_REGISTER_NODE_TYPE(CCacheValueNode);
+TVM_REGISTER_OBJECT_TYPE(CompileEngineNode);
 
 CCacheKey CCacheKeyNode::make(Function source_func, Target target) {
   auto n = make_node<CCacheKeyNode>();
@@ -78,7 +82,7 @@ Array<IndexExpr> GetShape(const Array<IndexExpr>& shape) {
       CHECK_LE(pval[0], std::numeric_limits<int32_t>::max());
       CHECK_GE(pval[0], std::numeric_limits<int32_t>::min());
       res.push_back(ir::IntImm::make(Int(32), *pval));
-    } else if (val->is_type<ir::Any>()) {
+    } else if (val->IsInstance<ir::Any>()) {
       res.push_back(val.as<ir::Any>()->ToVar());
     } else {
       res.push_back(val);
@@ -219,6 +223,25 @@ class ScheduleGetter :
       CHECK_EQ(call_node->args.size(), 1U)
           << "Only allow function with a single tuple input";
     }
+
+    // Prepare the call_node->checked_type(). For the call node inputs, we ensure that the shape is
+    // Int32. Following code ensures the same for the output as well.
+    // TODO(@icemelon): Support recursive tuple
+    Type call_node_type = call_node->checked_type();
+    if (const auto* tt = call_node->checked_type().as<TensorTypeNode>()) {
+      call_node_type = TensorTypeNode::make(GetShape(tt->shape), tt->dtype);
+    } else if (const auto* tuple_t = call_node->checked_type().as<TupleTypeNode>()) {
+      std::vector<Type> new_fields;
+      for (auto field : tuple_t->fields) {
+        if (const auto* tt = field.as<TensorTypeNode>()) {
+          new_fields.push_back(TensorTypeNode::make(GetShape(tt->shape), tt->dtype));
+        } else {
+          new_fields.push_back(field);
+        }
+      }
+      call_node_type = TupleTypeNode::make(new_fields);
+    }
+
     CHECK(call_node->op.as<OpNode>())
         << "Primitive function only allows call into primitive ops";
     Op op = Downcast<Op>(call_node->op);
@@ -232,7 +255,7 @@ class ScheduleGetter :
                                          Operation(), 0));
     } else {
       outputs = fcompute[op](call_node->attrs, inputs,
-                             call_node->checked_type(), target_);
+                             call_node_type, target_);
     }
 
     int op_pattern = fpattern[op];

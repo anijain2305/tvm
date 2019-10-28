@@ -24,6 +24,7 @@ from .. import analysis
 from .. import expr as _expr
 from .. import module as _module
 from .. import op as _op
+from .. import qnn as _qnn
 from ... import nd as _nd
 from .common import ExprTable
 from .common import infer_shape as _infer_shape
@@ -32,10 +33,11 @@ __all__ = ['from_tflite']
 
 class TensorWrapper(object):
     """Tensor wrapper for TFLite Tensor"""
-    def __init__(self, tensor_idx, tensor, buffer):
+    def __init__(self, tensor_idx, tensor, buffer, qnn_params=None):
         self.tensor_idx = tensor_idx
         self.tensor = tensor
         self.buffer = buffer
+        self.qnn_params = qnn_params
 
 class OperatorConverter(object):
     """Operator Converted for converting TFLite ops to Relay ops"""
@@ -75,17 +77,21 @@ class OperatorConverter(object):
             'MAXIMUM': self.convert_maximum,
             'MINIMUM': self.convert_minimum,
             'GREATER': self.convert_greater,
+            'ZEROS_LIKE': self.convert_zeros_like,
             'REDUCE_MIN': self._convert_reduce_min,
             'REDUCE_MAX': self._convert_reduce_max,
             'MEAN': self._convert_reduce_mean,
             'REDUCE_PROD': self._convert_reduce_prod,
+            'SUM': self._convert_reduce_sum,
             'FULLY_CONNECTED': self.convert_fully_connected,
             'PAD': self.convert_pad,
             'PACK': self.convert_pack,
             'LOGISTIC': self.convert_logistic,
             'TANH':self.convert_tanh,
+            'RELU':self.convert_relu,
             'SPLIT': self.convert_split,
             'TRANSPOSE': self.convert_transpose,
+            'CAST': self.convert_cast,
             'TILE': self.convert_tile,
             'BATCH_TO_SPACE_ND': self.convert_batch_to_space_nd,
             'SPACE_TO_BATCH_ND': self.convert_space_to_batch_nd
@@ -158,7 +164,19 @@ class OperatorConverter(object):
             tensor = self.subgraph.Tensors(tensor_idx)
             buffer_idx = tensor.Buffer()
             buffer = self.model.Buffers(buffer_idx)
-            return_list.append(TensorWrapper(tensor_idx, tensor, buffer))
+
+            # Check if the tensors are quantized. Parse if yes.
+            qnn_params = None
+            tflite_qnn_params = tensor.Quantization()
+            if tflite_qnn_params is not None:
+                scale = float(tflite_qnn_params.ScaleAsNumpy())
+                zero_point = int(tflite_qnn_params.ZeroPointAsNumpy())
+                # Check that the scale and zero points are valid.
+                if scale != 0 or zero_point != 0:
+                    qnn_params = dict()
+                    qnn_params['scale'] = scale
+                    qnn_params['zero_point'] = zero_point
+            return_list.append(TensorWrapper(tensor_idx, tensor, buffer, qnn_params))
         return return_list
 
     def get_tensor_value(self, tensor_wrapper):
@@ -179,6 +197,9 @@ class OperatorConverter(object):
         if tensor_wrapper.tensor.Type() == TensorType.INT32:
             return np.frombuffer(tensor_wrapper.buffer.DataAsNumpy(), dtype=np.int32).reshape(
                 tensor_wrapper.tensor.ShapeAsNumpy())
+        if tensor_wrapper.tensor.Type() == TensorType.INT64:
+            return np.frombuffer(tensor_wrapper.buffer.DataAsNumpy(), dtype=np.int64).reshape(
+                tensor_wrapper.tensor.ShapeAsNumpy())
         raise NotImplementedError("Tensor type {} is currently not supported"
                                   .format(str(tensor_wrapper.tensor.Type())))
 
@@ -195,8 +216,26 @@ class OperatorConverter(object):
             return "float32"
         if tensor_type == TensorType.INT32:
             return "int32"
+        if tensor_type == TensorType.INT64:
+            return "int64"
         raise NotImplementedError("Tensor type {} is currently not supported"
                                   .format(str(tensor_type)))
+
+    def has_same_qnn_params(self, lhs_tensor, rhs_tensor):
+        return lhs_tensor.qnn_params['scale'] == rhs_tensor.qnn_params['scale'] and \
+                lhs_tensor.qnn_params['zero_point'] == rhs_tensor.qnn_params['zero_point']
+
+    def is_quantized(self, op):
+        """Check if an input tensor is quantized."""
+        try:
+            from tflite.Operator import Operator
+        except ImportError:
+            raise ImportError("The tflite package must be installed")
+
+        assert isinstance(op, Operator)
+        input_tensors = self.get_input_tensors(op)
+        first_tensor = input_tensors[0]
+        return first_tensor.qnn_params is not None
 
     def convert_conv2d(self, op):
         """Convert TFLite conv2d"""
@@ -236,8 +275,15 @@ class OperatorConverter(object):
         target_shape = reshape_options.NewShapeAsNumpy()
 
         in_expr = self.get_expr(input_tensor_idx)
-        out = _op.reshape(in_expr, newshape=tuple(target_shape))
 
+        # If the tensors are quantized, ensure that input/output qnn params are same.
+        if input_tensor.qnn_params:
+            output_tensors = self.get_output_tensors(op)
+            assert len(output_tensors) == 1, "There should be only 1 output tensor"
+            output_tensor = output_tensors[0]
+            assert self.has_same_qnn_params(input_tensor, output_tensor), \
+                    "TFLite reshape requires input and output scale and zero points to be equal"
+        out = _op.reshape(in_expr, newshape=tuple(target_shape))
         return out
 
     def _convert_resize(self, method, op):
@@ -322,9 +368,32 @@ class OperatorConverter(object):
 
         input_tensor = input_tensors[0]
         input_tensor_idx = input_tensor.tensor_idx
+
+        output_tensors = self.get_output_tensors(op)
+        assert len(output_tensors) == 1, "output tensors length should be 1"
+        output_tensor = output_tensors[0]
+        output_tensor_type = output_tensor.tensor.Type()
+        output_tensor_type_str = self.get_tensor_type_str(output_tensor_type)
+
         params = {'axis': 1}  # 1 is channel
         in_expr = self.get_expr(input_tensor_idx)
+
+        # TODO - Naive softmax int8 implementation leads to bad accuracy. Currently, we can
+        # dequantize to FP32 and perform softmax on FP32. We can investigate an integer only softmax
+        # implementation in future.
+        if input_tensor.qnn_params:
+            in_expr = _qnn.op.dequantize(data=in_expr,
+                                         input_scale=input_tensor.qnn_params['scale'],
+                                         input_zero_point=input_tensor.qnn_params['zero_point'])
+
         out = _op.nn.softmax(in_expr, **params)
+
+        # Go back to integer dataype if the original operator was quantized.
+        if output_tensor.qnn_params:
+            out = _qnn.op.quantize(data=out,
+                                   output_scale=output_tensor.qnn_params['scale'],
+                                   output_zero_point=output_tensor.qnn_params['zero_point'],
+                                   out_dtype=output_tensor_type_str)
 
         return out
 
@@ -345,6 +414,23 @@ class OperatorConverter(object):
 
         return out
 
+    def convert_relu(self, op):
+        """Convert TFLite ReLU"""
+        try:
+            from tflite.Operator import Operator
+        except ImportError:
+            raise ImportError("The tflite package must be installed")
+
+        assert isinstance(op, Operator)
+        input_tensors = self.get_input_tensors(op)
+        assert len(input_tensors) == 1, "input tensors length should be 1"
+
+        input_tensor = input_tensors[0]
+        in_expr = self.get_expr(input_tensor.tensor_idx)
+        out = _op.nn.relu(in_expr)
+
+        return out
+
     def convert_concatenation(self, op):
         """Convert TFLite concatenation"""
         try:
@@ -361,7 +447,8 @@ class OperatorConverter(object):
         in_exprs = [self.get_expr(input_tensor.tensor_idx) for input_tensor in input_tensors]
 
         output_tensors = self.get_output_tensors(op)
-        assert len(output_tensors) == 1, "output tensors should be 1"
+        assert len(output_tensors) == 1, "output tensors length should be 1"
+        output_tensor = output_tensors[0]
 
         assert op.BuiltinOptionsType() == BuiltinOptions.ConcatenationOptions
         op_options = op.BuiltinOptions()
@@ -370,12 +457,27 @@ class OperatorConverter(object):
         concatenation_axis = concatenation_options.Axis()
         fused_activation_fn = concatenation_options.FusedActivationFunction()
 
-        # with axis in N H W C
-        out = _op.concatenate(in_exprs, axis=concatenation_axis)
+        if not input_tensors[0].qnn_params:
+            out = _op.concatenate(in_exprs, axis=concatenation_axis)
+        else:
+            input_scales = [input_tensor.qnn_params['scale'] for input_tensor in input_tensors]
+            input_zero_points = \
+                    [input_tensor.qnn_params['zero_point'] for input_tensor in input_tensors]
+            out = _qnn.op.concatenate(in_exprs,
+                                      input_scales=input_scales,
+                                      input_zero_points=input_zero_points,
+                                      output_scale=output_tensor.qnn_params['scale'],
+                                      output_zero_point=output_tensor.qnn_params['zero_point'],
+                                      axis=concatenation_axis)
 
         # if we have activation fn
         if fused_activation_fn != ActivationFunctionType.NONE:
-            out = self.convert_fused_activation_function(out, fused_activation_fn)
+            if not output_tensor.qnn_params:
+                out = self.convert_fused_activation_function(out, fused_activation_fn)
+            else:
+                raise tvm.error.OpNotImplemented(
+                    'Operator {} with fused activation is not supported yet.'
+                    .format('qnn.op.concatenate'))
         return out
 
     def _convert_elemwise(self, relay_op, op):
@@ -409,7 +511,25 @@ class OperatorConverter(object):
             rhs_type_str = self.get_tensor_type_str(rhs_tensor.tensor.Type())
             rhs_expr = self.exp_tab.new_const(self.get_tensor_value(rhs_tensor),
                                               dtype=rhs_type_str)
-        out = relay_op(lhs_expr, rhs_expr)
+
+        output_tensors = self.get_output_tensors(op)
+        assert len(output_tensors) == 1, "output tensors length should be 1"
+        output_tensor = output_tensors[0]
+
+        # If quantized, extracts qnn params and call QNN add operator.
+        if lhs_tensor.qnn_params:
+            assert rhs_tensor.qnn_params, "Both tensors should be quantized."
+            assert output_tensor.qnn_params, "Output tensor should be quantized."
+            out = relay_op(lhs=lhs_expr,
+                           rhs=rhs_expr,
+                           lhs_scale=lhs_tensor.qnn_params['scale'],
+                           lhs_zero_point=lhs_tensor.qnn_params['zero_point'],
+                           rhs_scale=rhs_tensor.qnn_params['scale'],
+                           rhs_zero_point=rhs_tensor.qnn_params['zero_point'],
+                           output_scale=output_tensor.qnn_params['scale'],
+                           output_zero_point=output_tensor.qnn_params['zero_point'])
+        else:
+            out = relay_op(lhs_expr, rhs_expr)
 
         # Options (fused_activation_function)
         options = None
@@ -428,37 +548,88 @@ class OperatorConverter(object):
             fused_activation_fn = options.FusedActivationFunction()
             # if we have activation fn
             if fused_activation_fn != ActivationFunctionType.NONE:
+                if output_tensor.qnn_params:
+                    raise tvm.error.OpNotImplemented(
+                        'Elemwise operators with fused activation are not supported yet.')
                 out = self.convert_fused_activation_function(out, fused_activation_fn)
 
         return out
 
     def convert_add(self, op):
         """Convert TFLite ADD"""
+        # Check if the input tensor is quantized, call QNN op
+        if self.is_quantized(op):
+            return self._convert_elemwise(_qnn.op.add, op)
         return self._convert_elemwise(_op.add, op)
 
     def convert_sub(self, op):
         """Convert TFLite SUB"""
+        # Check if the input tensor is quantized, call QNN op
+        if self.is_quantized(op):
+            raise tvm.error.OpNotImplemented(
+                'TFlite quantized sub operator is not supported yet.')
         return self._convert_elemwise(_op.subtract, op)
 
     def convert_mul(self, op):
         """Convert TFLite MUL"""
+        # Check if the input tensor is quantized, call QNN op
+        if self.is_quantized(op):
+            raise tvm.error.OpNotImplemented(
+                'TFlite quantized mul operator is not supported yet.')
         return self._convert_elemwise(_op.multiply, op)
 
     def convert_div(self, op):
         """Convert TFLite DIV"""
+        # Check if the input tensor is quantized, call QNN op
+        if self.is_quantized(op):
+            raise tvm.error.OpNotImplemented(
+                'TFlite quantized div operator is not supported yet.')
         return self._convert_elemwise(_op.divide, op)
 
     def convert_pow(self, op):
+        # Check if the input tensor is quantized, call QNN op
+        if self.is_quantized(op):
+            raise tvm.error.OpNotImplemented(
+                'TFlite quantized pow operator is not supported yet.')
         return self._convert_elemwise(_op.power, op)
 
     def convert_maximum(self, op):
+        # Check if the input tensor is quantized, call QNN op
+        if self.is_quantized(op):
+            raise tvm.error.OpNotImplemented(
+                'TFlite quantized maximum operator is not supported yet.')
         return self._convert_elemwise(_op.maximum, op)
 
     def convert_minimum(self, op):
+        # Check if the input tensor is quantized, call QNN op
+        if self.is_quantized(op):
+            raise tvm.error.OpNotImplemented(
+                'TFlite quantized minimum operator is not supported yet.')
         return self._convert_elemwise(_op.minimum, op)
 
     def convert_greater(self, op):
+        # Check if the input tensor is quantized, call QNN op
+        if self.is_quantized(op):
+            raise tvm.error.OpNotImplemented(
+                'TFlite quantized greater operator is not supported yet.')
         return self._convert_elemwise(_op.greater, op)
+
+    def convert_zeros_like(self, op):
+        """Convert TFLite ZEROS LIKE"""
+        try:
+            from tflite.Operator import Operator
+        except ImportError:
+            raise ImportError("The tflite package must be installed")
+
+        assert isinstance(op, Operator)
+        input_tensors = self.get_input_tensors(op)
+        assert len(input_tensors) == 1, "input tensors length should be 1"
+
+        input_tensor = input_tensors[0]
+        in_expr = self.get_expr(input_tensor.tensor_idx)
+        out = _op.zeros_like(in_expr)
+
+        return out
 
     def _convert_reduce(self, relay_op, op):
         """Generic method to Convert TFLite MEAN operators"""
@@ -502,6 +673,9 @@ class OperatorConverter(object):
     def _convert_reduce_prod(self, op):
         return self._convert_reduce(_op.reduce.prod, op)
 
+    def _convert_reduce_sum(self, op):
+        return self._convert_reduce(_op.reduce.sum, op)
+
     def convert_fully_connected(self, op):
         """Convert TFLite fully connected"""
         try:
@@ -520,6 +694,12 @@ class OperatorConverter(object):
         input_tensor = input_tensors[0]
         input_tensor_idx = input_tensor.tensor_idx
         weight_tensor = input_tensors[1]
+
+        output_tensors = self.get_output_tensors(op)
+        assert len(output_tensors) == 1, "output tensors length should be 1"
+        output_tensor = output_tensors[0]
+        output_tensor_type = output_tensor.tensor.Type()
+        output_tensor_type_str = self.get_tensor_type_str(output_tensor_type)
 
         input_tensor_shape = input_tensor.tensor.ShapeAsNumpy()
         weight_tensor_shape = weight_tensor.tensor.ShapeAsNumpy()
@@ -548,7 +728,13 @@ class OperatorConverter(object):
         weight_value = self.get_tensor_value(weight_tensor)
         weight_expr = self.exp_tab.new_const(weight_value, dtype=weight_tensor_type_str)
 
-        out = _op.nn.dense(in_expr, weight_expr)
+        if input_tensor.qnn_params:
+            out = _qnn.op.dense(in_expr, weight_expr,
+                                input_zero_point=input_tensor.qnn_params['zero_point'],
+                                kernel_zero_point=weight_tensor.qnn_params['zero_point'],
+                                out_dtype='int32')
+        else:
+            out = _op.nn.dense(in_expr, weight_expr)
 
         # if we have bias
         if len(input_tensors) == 3:
@@ -563,7 +749,23 @@ class OperatorConverter(object):
 
         # If we have fused activations
         if fused_activation_fn != ActivationFunctionType.NONE:
-            out = self.convert_fused_activation_function(out, fused_activation_fn)
+            if not output_tensor.qnn_params:
+                out = self.convert_fused_activation_function(out, fused_activation_fn)
+            else:
+                raise tvm.error.OpNotImplemented(
+                    'Operator {} with fused activation is not supported yet.'
+                    .format('qnn.op.dense'))
+
+        # Finally if the dense is quantized. Add a requantize at the end.
+        if output_tensor.qnn_params:
+            input_scale = input_tensor.qnn_params['scale'] * weight_tensor.qnn_params['scale']
+            input_zero_point = 0
+            out = _qnn.op.requantize(out,
+                                     input_scale=input_scale,
+                                     input_zero_point=input_zero_point,
+                                     output_scale=output_tensor.qnn_params['scale'],
+                                     output_zero_point=output_tensor.qnn_params['zero_point'],
+                                     out_dtype=output_tensor_type_str)
 
         return out
 
@@ -634,6 +836,12 @@ class OperatorConverter(object):
         input_tensor = input_tensors[0]
         input_tensor_idx = input_tensor.tensor_idx
         weight_tensor = input_tensors[1]
+
+        output_tensors = self.get_output_tensors(op)
+        assert len(output_tensors) == 1, "output tensors length should be 1"
+        output_tensor = output_tensors[0]
+        output_tensor_type = output_tensor.tensor.Type()
+        output_tensor_type_str = self.get_tensor_type_str(output_tensor_type)
 
         is_depthwise_conv = False
         if conv_type == 'conv2d':
@@ -712,15 +920,24 @@ class OperatorConverter(object):
         elif padding == Padding.SAME:
             pad_top, pad_bottom = get_pad_value(input_h, dilated_kernel_h, stride_h)
             pad_left, pad_right = get_pad_value(input_w, dilated_kernel_w, stride_w)
-            in_expr = _op.nn.pad(data=in_expr, pad_width=((0, 0),
-                                                          (pad_top, pad_bottom),
-                                                          (pad_left, pad_right),
-                                                          (0, 0)))
+            do_pad = not (pad_top == 0 and pad_bottom == 0 and pad_left == 0 and pad_right == 0)
+            if do_pad:
+                in_expr = _op.nn.pad(data=in_expr, pad_width=((0, 0),
+                                                              (pad_top, pad_bottom),
+                                                              (pad_left, pad_right),
+                                                              (0, 0)))
         else:
             raise tvm.error.OpAttributeUnImplemented(
                 'Padding format {} is not supported for operator Conv.'.format(padding))
 
-        out = _op.nn.conv2d(data=in_expr, weight=weight_expr, **params)
+        if input_tensor.qnn_params:
+            qnn_conv2d_params = dict(params)
+            qnn_conv2d_params['input_zero_point'] = input_tensor.qnn_params['zero_point']
+            qnn_conv2d_params['kernel_zero_point'] = weight_tensor.qnn_params['zero_point']
+            qnn_conv2d_params['out_dtype'] = 'int32'
+            out = _qnn.op.conv2d(in_expr, weight_expr, **qnn_conv2d_params)
+        else:
+            out = _op.nn.conv2d(in_expr, weight_expr, **params)
 
         # if we have bias
         if len(input_tensors) == 3:
@@ -736,7 +953,23 @@ class OperatorConverter(object):
 
         # If we have fused activations
         if fused_activation_fn != ActivationFunctionType.NONE:
-            out = self.convert_fused_activation_function(out, fused_activation_fn)
+            if not output_tensor.qnn_params:
+                out = self.convert_fused_activation_function(out, fused_activation_fn)
+            else:
+                raise tvm.error.OpNotImplemented(
+                    'Operator {} with fused activation is not supported yet.'
+                    .format('qnn.op.conv2d'))
+
+        # Finally if the conv is quantized. Add a requantize at the end.
+        if output_tensor.qnn_params:
+            input_scale = input_tensor.qnn_params['scale'] * weight_tensor.qnn_params['scale']
+            input_zero_point = 0
+            out = _qnn.op.requantize(out,
+                                     input_scale=input_scale,
+                                     input_zero_point=input_zero_point,
+                                     output_scale=output_tensor.qnn_params['scale'],
+                                     output_zero_point=output_tensor.qnn_params['zero_point'],
+                                     out_dtype=output_tensor_type_str)
 
         return out
 
@@ -802,6 +1035,31 @@ class OperatorConverter(object):
 
         return out
 
+    def convert_cast(self, op):
+        """Convert TFLite CAST"""
+        try:
+            from tflite.Operator import Operator
+            from tflite.BuiltinOptions import BuiltinOptions
+            from tflite.CastOptions import CastOptions
+        except ImportError:
+            raise ImportError("The tflite package must be installed")
+
+        assert isinstance(op, Operator)
+        input_tensors = self.get_input_tensors(op)
+        assert len(input_tensors) == 1, "input tensors length should be 1"
+        input_tensor = input_tensors[0]
+        in_expr = self.get_expr(input_tensor.tensor_idx)
+
+        assert op.BuiltinOptionsType() == BuiltinOptions.CastOptions
+        op_options = op.BuiltinOptions()
+        cast_options = CastOptions()
+        cast_options.Init(op_options.Bytes, op_options.Pos)
+        cast_dtype = cast_options.OutDataType()
+
+        out = _op.cast(in_expr, self.get_tensor_type_str(cast_dtype))
+
+        return out
+
     def convert_tile(self, op):
         """tile implementation."""
         try:
@@ -841,6 +1099,12 @@ class OperatorConverter(object):
         input_tensor = input_tensors[0]
         input_tensor_idx = input_tensor.tensor_idx
 
+        output_tensors = self.get_output_tensors(op)
+        assert len(output_tensors) == 1, "output tensors should be 1"
+        output_tensor = output_tensors[0]
+        output_tensor_type = output_tensor.tensor.Type()
+        output_tensor_type_str = self.get_tensor_type_str(output_tensor_type)
+
         assert op.BuiltinOptionsType() == BuiltinOptions.Pool2DOptions
         op_options = op.BuiltinOptions()
         pool2d_options = Pool2DOptions()
@@ -871,8 +1135,19 @@ class OperatorConverter(object):
                 'Padding format {} for operator Pool2D is not supported.'.format(padding))
 
         if pool_type == "average":
-            out = _op.nn.avg_pool2d(in_expr, **params)
+            if input_tensor.qnn_params:
+                assert self.has_same_qnn_params(input_tensor, output_tensor), \
+                        'TFLite avg_pool2dreshape requires input and output scale' \
+                        'and zero points to be equal'
+                out = _op.cast(in_expr, dtype="int32")
+                out = _op.nn.avg_pool2d(out, **params)
+                out = _op.cast(out, dtype=output_tensor_type_str)
+            else:
+                out = _op.nn.avg_pool2d(in_expr, **params)
         elif pool_type == "max":
+            if input_tensor.qnn_params:
+                assert self.has_same_qnn_params(input_tensor, output_tensor), \
+                        "qnn.op.max_pool2d requires input and output qnn params to be same"
             out = _op.nn.max_pool2d(in_expr, **params)
         else:
             raise tvm.error.OpNotImplemented(
@@ -880,8 +1155,12 @@ class OperatorConverter(object):
 
         # If we have fused activations
         if fused_activation_fn != ActivationFunctionType.NONE:
-            out = self.convert_fused_activation_function(out, fused_activation_fn)
-
+            if input_tensor.qnn_params:
+                raise tvm.error.OpNotImplemented(
+                    'Operator {} with fused activation is not supported yet.'
+                    .format('qnn.op.pool2d'))
+            else:
+                out = self.convert_fused_activation_function(out, fused_activation_fn)
         return out
 
     def convert_pad(self, op):
@@ -924,7 +1203,7 @@ class OperatorConverter(object):
         in_exprs = [self.get_expr(input_tensor.tensor_idx) for input_tensor in input_tensors]
 
         output_tensors = self.get_output_tensors(op)
-        assert len(output_tensors) == 1, "output tensors should be 1"
+        assert len(output_tensors) == 1, "output tensors length should be 1"
 
         assert op.BuiltinOptionsType() == BuiltinOptions.PackOptions
         op_options = op.BuiltinOptions()
@@ -1172,4 +1451,5 @@ def from_tflite(model, shape_dict, dtype_dict):
     outputs = [exp_tab.get_expr(get_tensor_name(subgraph, i)) for i in model_outputs]
     outputs = outputs[0] if len(outputs) == 1 else _expr.Tuple(outputs)
     func = _expr.Function(analysis.free_vars(outputs), outputs)
-    return _module.Module.from_expr(func), params
+    mod = _module.Module.from_expr(func)
+    return mod, params
