@@ -193,10 +193,24 @@ def test_fifo_buffer():
                   .format(buffer_shape, data_shape, axis))
             verify_fifo_buffer(buffer_shape, data_shape, axis)
 
+
+def test_fifo_buffer_for_quantized_integers():
+    for dtype in ['int8', 'uint8']:
+        for ndim in [1, 2, 3, 4, 5, 6]:
+            for axis in range(ndim):
+                buffer_shape = tuple(7 for _ in range(ndim))
+                data_shape = tuple((2 if i == axis else 7) for i in range(ndim))
+                print('Testing FIFO buffer op: buffer_shape = {}, data_shape = {}, axis = {}'
+                      .format(buffer_shape, data_shape, axis))
+                verify_fifo_buffer(buffer_shape, data_shape, axis, dtype=dtype)
+
+
 def test_conv1d_integration():
     print('Testing FIFO buffer with 1D convolution')
     verify_conv1d_integration()
 
+
 if __name__ == '__main__':
     test_fifo_buffer()
+    test_fifo_buffer_for_quantized_integers()
     test_conv1d_integration()

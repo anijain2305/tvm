@@ -939,15 +939,25 @@ def _mx_contrib_quantize(inputs, attrs):
         out_dtype = out_type
     if out_dtype not in {'int8', 'uint8'}:
         raise ValueError('Unsupported out_dtype: %s' % out_dtype)
-    min_calib_range = attrs.get_float('min_calib_range')
-    max_calib_range = attrs.get_float('max_calib_range')
+    min_calib_range = attrs.get_float('min_calib_range', 0.0)
+    max_calib_range = attrs.get_float('max_calib_range', 0.0)
     quantized_output, scale, zero_point = quantize_mxnet_min_max(inputs[0],
                                                                  min_range=min_calib_range,
                                                                  max_range=max_calib_range,
                                                                  out_dtype=out_dtype,
                                                                  use_mkldnn=True)
     return quantized_output, min_calib_range, max_calib_range
-    # return [(quantized_output, out_dtype, scale, zero_point), min_calib_range, max_calib_range]
+
+
+def _contrib_quantized_ring_buffer(inputs, attrs):
+    data = inputs[0]
+    buffer = inputs[1]
+    min_calib_range = inputs[2]
+    max_calib_range = inputs[3]
+    new_attrs = {}
+    new_attrs['axis'] = attrs.get_int('axis')
+    res = _op.nn.fifo_buffer(data=data, buffer=buffer, **new_attrs)
+    return res, min_calib_range, max_calib_range
 
 
 def _mx__sg_mkldnn_fully_connected(inputs, attrs, subgraphs, params):
@@ -1367,6 +1377,7 @@ _convert_map = {
     "_contrib_quantized_act" : _contrib_quantized_act,
     "_contrib_quantized_pooling" : _contrib_quantized_pooling,
     "_sg_mkldnn_fully_connected": _mx__sg_mkldnn_fully_connected,
+    "_contrib_quantized_ring_buffer": _contrib_quantized_ring_buffer,
 
     # Depricated:
     "Crop"              : _mx_crop_like,
