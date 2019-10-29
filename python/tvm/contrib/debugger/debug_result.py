@@ -207,12 +207,18 @@ class DebugResult(object):
     def display_debug_result(self):
         """Displays the debugger result"
         """
-        header = ["Node Name", "Ops", "Time(us)", "Time(%)", "Shape", "Inputs", "Outputs"]
-        lines = ["---------", "---", "--------", "-------", "-----", "------", "-------"]
+        header = ["Node Name", "Ops", "Time(us)", "Time(%)", "CDF", "Inputs", "Outputs"]
+        lines = ["---------", "---", "--------", "-------", "---", "------", "-------"]
         eid = 0
         data = []
         total_time = sum(time[0] for time in self._time_list)
-        for node, time in zip(self._nodes_list, self._time_list):
+
+
+        time_sorted_structure = sorted(zip(self._nodes_list, self._time_list), key=lambda x : x[1],
+                reverse=True)
+        cdf = 0
+        # for node, time in zip(self._nodes_list, self._time_list):
+        for node, time in time_sorted_structure:
             num_outputs = self.get_graph_node_output_num(node)
             for j in range(num_outputs):
                 op = node['op']
@@ -220,12 +226,13 @@ class DebugResult(object):
                     eid += 1
                     continue
                 name = node['name']
-                shape = str(self._output_tensor_list[eid].shape)
+                # shape = str(self._output_tensor_list[eid].shape)
                 time_us = round(time[0] * 1000000, 3)
                 time_percent = round(((time[0] / total_time) * 100), 3)
+                cdf += time_percent
                 inputs = str(node['attrs']['num_inputs'])
                 outputs = str(node['attrs']['num_outputs'])
-                node_data = [name, op, time_us, time_percent, shape, inputs, outputs]
+                node_data = [name, op, time_us, time_percent, cdf, inputs, outputs]
                 data.append(node_data)
                 eid += 1
         fmt = ""
@@ -240,6 +247,7 @@ class DebugResult(object):
         print(fmt.format(*lines))
         for row in data:
             print(fmt.format(*row))
+        print("Total Time = ", total_time*1000, "ms")
 
 def save_tensors(params):
     """Save parameter dictionary to binary bytes.

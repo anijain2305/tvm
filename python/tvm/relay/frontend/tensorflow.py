@@ -298,6 +298,8 @@ def _conv(opname):
 
             attr['padding'] = [0, 0]
 
+        elif attr['padding'] == 'EXPLICIT':
+            raise tvm.error.OpAttributeUnImplemented('Attribute explicit padding is not supported in Conv2D.')
         else:
             msg = 'Value {} in attribute "padding" of operator Conv is not ' \
                   'valid.'
@@ -626,6 +628,14 @@ def _reshape():
         pop_node = inputs.pop(1)
         try:
             shape_arg = _get_tuple_param(params, pop_node)
+            new_shape_arg = []
+            # FIXME - VERY BAD HACK - Quickly support Alexa model.
+            for i, s in enumerate(shape_arg):
+                if s == -1:
+                    new_shape_arg.append(76)
+                else:
+                    new_shape_arg.append(s)
+            shape_arg = tuple(new_shape_arg)
         except AttributeError:
             # Shape operator is already pruned, hence
             # try to infer shape by precompute prune if possible.
@@ -1962,7 +1972,7 @@ class GraphProto(object):
         self._loops = {}
         self._branches = {}
         self._mod = _module.Module({})
-        self._prelude = Prelude(self._mod)
+        # self._prelude = Prelude(self._mod)
 
     def from_tensorflow(self, graph, layout="NHWC", shape=None, outputs=None):
         """Construct relay nodes from tensorflow graph definition - GraphDef.
@@ -2481,6 +2491,7 @@ def from_tensorflow(graph, layout="NHWC", shape=None, outputs=None):
     params : dict of str to tvm.ndarray
         Dict of converted parameters stored in tvm.ndarray format
     """
+    print(shape)
     g = GraphProto()
     mod, params = g.from_tensorflow(graph, layout, shape, outputs)
     return mod, params

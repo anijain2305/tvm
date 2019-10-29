@@ -367,6 +367,7 @@ class AttrCvt(object):
         self._ignores.append('_node_name')
         self._ignores.append('is_training')
         self._ignores.append('_target_layout')
+        self._ignores.append('explicit_paddings')
 
         # apply custom check
         if self._custom_check:

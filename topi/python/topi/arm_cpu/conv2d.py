@@ -508,9 +508,21 @@ def _alter_conv2d_layout_arm(attrs, inputs, tinfos, F):
     groups = attrs.get_int('groups')
     data_layout_key = "data_layout" if "data_layout" in new_attrs else "layout"
     layout = attrs[data_layout_key]
+    kernel_layout = attrs['kernel_layout']
     out_dtype = attrs["out_dtype"]
     if out_dtype in ("same", ""):
         out_dtype = tinfos[0].dtype
+
+    # Fallback to NCHW if NHWC is used.
+    if layout == 'NHWC' and kernel_layout == 'HWIO':
+        data, kernel = tinfos[0:2]
+        N, H, W, CI = get_const_tuple(data.shape)
+        KH, KW, _, CO = get_const_tuple(kernel.shape)
+
+        # Set new layouts and call conv2d
+        new_attrs['kernel_layout'] = 'OIHW'
+        new_attrs['data_layout'] = 'NCHW'
+        return F.nn.conv2d(*copy_inputs, **new_attrs)
 
     if layout != 'NCHW':
         return None
@@ -644,48 +656,3 @@ def _alter_conv2d_layout_arm(attrs, inputs, tinfos, F):
             # currently we only have contrib_spatial_pack and direct template
             # add more schedule templates.
             return None
-
-@conv2d_legalize.register("arm_cpu")
-def _conv2d_legalize(attrs, inputs, arg_types):
-    """Legalizes Conv2D op.
-
-    Parameters
-    ----------
-    attrs : tvm.attrs.Attrs
-        Attributes of current convolution
-    inputs : list of tvm.relay.Expr
-        The args of the Relay expr to be legalized
-    types : list of types
-        List of input and output types
-
-    Returns
-    -------
-    result : tvm.relay.Expr
-        The legalized expr
-    """
-
-    if attrs['data_layout'] == 'NHWC':
-        data, kernel = inputs
-        if attrs['kernel_layout'] == 'HWIO':
-            # Handle HWIO layout. This is common in TF graph.
-            kernel = relay.transpose(kernel, axes=(3, 2, 0, 1))
-        elif attrs['kernel_layout'] == 'HWOI':
-            # Handle HWOI layout. This is common in TF depthwise conv2d graph.
-            kernel = relay.transpose(kernel, axes=(2, 3, 0, 1))
-        elif attrs['kernel_layout'] != 'OIHW':
-            return None
-
-        logger.warning("Legalize arm_cpu - NHWC schedule absent. Inserting layout transforms to "
-                       + "fallback to NCHW. This can result in performance degradation.")
-        # Set new attrs for the tranposed conv.
-        new_attrs = {k: attrs[k] for k in attrs.keys()}
-        new_attrs['data_layout'] = 'NCHW'
-        new_attrs['kernel_layout'] = 'OIHW'
-
-        # Convert from NHWC to NCHW.
-        data = relay.transpose(data, axes=(0, 3, 1, 2))
-        conv = relay.nn.conv2d(data, kernel, **new_attrs)
-        # Convert back to original NHWC layout.
-        out = relay.transpose(conv, axes=(0, 2, 3, 1))
-        return out
-    return None
