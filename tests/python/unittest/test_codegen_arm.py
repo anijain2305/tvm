@@ -59,6 +59,7 @@ def test_vmlal_s16():
 
         # Verify we see the correct number of vmlal.s16 instructions
         assembly = f.get_source('asm')
+        print(assembly)
         matches = re.findall("vmlal.s16", assembly)
         assert (len(matches) == N // 4)
     check_correct_assembly(8)

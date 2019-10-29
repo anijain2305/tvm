@@ -345,6 +345,8 @@ class RelayBuildModule : public runtime::ModuleNode {
     } else {
       relay_module = seq(relay_module);
     }
+    func = relay_module->Lookup("main");
+    LOG(INFO) << "Final = " << AsText(func, false);
 
     // Handle heterogeneous compilation.
     transform::PassContext pass_ctx = PassContext::Current();
