@@ -951,7 +951,11 @@ def _mx_contrib_quantize(inputs, attrs):
 
 
 def _mx__sg_mkldnn_fully_connected(inputs, attrs, subgraphs, params):
-    assert subgraphs[0].op.name == 'nn.dense' or subgraphs[0].op.name == "nn.bias_add"
+    if attrs.get_bool('with_relu', False):
+        assert subgraphs[0].op.name == 'nn.relu'
+    else:
+        assert subgraphs[0].op.name == 'nn.dense' or subgraphs[0].op.name == "nn.bias_add"
+    with_relu = attrs.get_bool('with_relu', False)
     data = inputs[0]
     data_dtype = _infer_type(data).checked_type.dtype
     assert data_dtype in {'int8', 'uint8'}
@@ -978,15 +982,21 @@ def _mx__sg_mkldnn_fully_connected(inputs, attrs, subgraphs, params):
     kernel_dtype = _infer_type(kernel).checked_type.dtype
     kernel_scale = get_mkldnn_uint8_scale(kernel_min, kernel_max) if kernel_dtype == 'uint8' \
         else get_mkldnn_int8_scale(kernel_min, kernel_max)
-    if has_bias:
+    if with_relu:
+        relu_input = subgraphs[0].args[0]
+        if has_bias:
+            dense_attrs = relu_input.args[0].attrs
+        else:
+            dense_attrs = relu_input.attrs
+    elif has_bias:
         dense_attrs = _infer_type(subgraphs[0].args[0]).attrs
     else:
         dense_attrs = subgraphs[0].attrs
-    res = relay.qnn.op.quantized_dense(data,
-                                       kernel,
-                                       0,
-                                       0,
-                                       dense_attrs['units'])
+    res = relay.qnn.op.dense(data,
+                             kernel,
+                             0,
+                             0,
+                             dense_attrs['units'])
     if has_bias:
         bias_data = inputs[2]
         bias_min_name = _get_name(inputs[7])
@@ -1001,10 +1011,13 @@ def _mx__sg_mkldnn_fully_connected(inputs, attrs, subgraphs, params):
         bias_requantize_scale = _expr.const(bias_requantize_scale, dtype="float32")
         requantized_bias = _op.cast(_op.multiply(_op.cast(bias_data, 'float32'),
                                                  bias_requantize_scale), 'int32')
-        bias_attrs = subgraphs[0].attrs
+        if with_relu:
+            bias_attrs = subgraphs[0].args[0].attrs
+        else:
+            bias_attrs = subgraphs[0].attrs
         res = _op.nn.bias_add(res, requantized_bias, axis=bias_attrs['axis'])
     enable_float_output = attrs.get_bool('enable_float_output', False)
-    out_dtype = 'unit8' if attrs.get_bool('with_relu', False) else 'int8'
+    out_dtype = 'uint8' if attrs.get_bool('with_relu', False) else 'int8'
     input_scale = np.float32(data_scale * kernel_scale)
     if not enable_float_output:
         min_output_range = attrs.get_float('min_calib_range')
@@ -1016,28 +1029,41 @@ def _mx__sg_mkldnn_fully_connected(inputs, attrs, subgraphs, params):
                                                             out_dtype)
     else:
         output_scale = np.float32(data_scale * kernel_scale)
-    res = relay.qnn.op.requantize(
-        res,
-        input_scale=input_scale,
-        input_zero_point=0,
-        output_scale=output_scale,
-        output_zero_point=0,
-        out_dtype=out_dtype)
-    if enable_float_output:
-        res = relay.qnn.op.dequantize(res, output_scale, input_zero_point=0)
-    if enable_float_output:
-        return res
-    else:
+    if not enable_float_output:
+        res = relay.qnn.op.requantize(
+            res,
+            input_scale=input_scale,
+            input_zero_point=0,
+            output_scale=output_scale,
+            output_zero_point=0,
+            out_dtype=out_dtype)
         return res, min_output_range, max_output_range
+    else:
+        res = relay.qnn.op.dequantize(res, output_scale, input_zero_point=0)
+        return res
 
 
 def _mx_mkldnn_conv(inputs, attrs, subgraphs, params):
+    if attrs.get_bool('with_bn', False):
+        raise ValueError('Fused batch normalization with convolution is not et supported.')
+    if attrs.get_bool('with_sum', False):
+        raise ValueError('Fused post sum in convolution is not supported.')
     if not attrs.get_bool('quantized', False):
-        has_bias = subgraphs[0].op.name == 'nn.bias_add'
-        if not has_bias:
-            conv_attrs = subgraphs[0].attrs
+        has_fused_relu = False
+        if attrs.get_bool('with_act', False):
+            if subgraphs[0].op.name != 'nn.relu':
+                raise ValueError('Only relu fusion as activation is supported')
+            has_fused_relu = True
+        if has_fused_relu:
+            subgraph = subgraphs[0].args[0]
         else:
-            conv_attrs = subgraphs[0].args[0].attrs
+            subgraph = subgraphs[0]
+
+        has_bias = subgraph.op.name == 'nn.bias_add'
+        if not has_bias:
+            conv_attrs = subgraph.attrs
+        else:
+            conv_attrs = subgraph.args[0].attrs
         new_attrs = {}
         new_attrs["channels"] = conv_attrs["channels"]
         new_attrs["kernel_size"] = conv_attrs["kernel_size"]
@@ -1050,23 +1076,31 @@ def _mx_mkldnn_conv(inputs, attrs, subgraphs, params):
         res = _op.nn.conv2d(inputs[0], inputs[1], **new_attrs)
         if has_bias:
             assert len(inputs) == 3
-            bias_attrs = subgraphs[0].attrs
+            bias_attrs = subgraph.attrs
             res = _op.nn.bias_add(res, inputs[2], axis=bias_attrs['axis'])
-
+        if has_fused_relu:
+            res = _op.nn.relu(res)
         return res
-    assert len(subgraphs) == 1
 
-    subgraph = subgraphs[0]
+    assert len(subgraphs) == 1
+    has_fused_relu = False
+    if attrs.get_bool('with_act', False):
+        if subgraphs[0].op.name != 'nn.relu':
+            raise ValueError('Only relu fusion as activation is supported')
+        has_fused_relu = True
+    if has_fused_relu:
+        subgraph = subgraphs[0].args[0]
+    else:
+        subgraph = subgraphs[0]
     if len(inputs) == 4:
         assert subgraph.op.name == "nn.conv2d"
     elif len(inputs) == 5:
         assert subgraph.op.name == "nn.bias_add"
     else:
-        raise ValueError("Number of inputs can be 2 or 3 but was %d" % len(inputs))
+        raise ValueError("Number of inputs can be 4 or 5 but was %d" % len(inputs))
     has_bias = len(inputs) == 5
     # input data
     data = inputs[0]
-
     if has_bias:
         data_min = inputs[3]
         data_max = inputs[4]
@@ -1075,6 +1109,9 @@ def _mx_mkldnn_conv(inputs, attrs, subgraphs, params):
         data_max = inputs[3]
     if not isinstance(data, tvm.relay.expr.Call):
         data_dtype = _infer_type(data).checked_type.dtype
+        assert data_dtype in {'int8', 'uint8'}
+        if data_min < 0.0:
+            assert data_dtype == 'int8', "Expect int8 when data_min < 0.0, consider quantize model with int8."
     else:
         data_dtype = get_dtype_from_min_max(data_min, data_max)
     data_scale = get_mkldnn_uint8_scale(data_min, data_max) if data_dtype == 'uint8' \
@@ -1125,6 +1162,8 @@ def _mx_mkldnn_conv(inputs, attrs, subgraphs, params):
         output_scale=output_scale,
         output_zero_point=0,
         out_dtype=out_dtype)
+    if has_fused_relu:
+        res = _op.nn.relu(res)
     return res, min_output_range, max_output_range
 
 

@@ -343,7 +343,7 @@ def get_conv_mkldnn_requantized_scale_outDtype(min_output_range,
                                                max_output_range,
                                                data_scale,
                                                kernel_scale):
-    out_dtype = 'int8' # later add support for uint8
+    out_dtype = 'uint8' if min_output_range >= 0.0 else 'int8'
     requantize_scale = get_mkldnn_requantize_scale_outDtype(min_output_range,
                                                             max_output_range,
                                                             data_scale,
