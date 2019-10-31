@@ -42,6 +42,7 @@ tvm_option(USE_MSVC_MT "Build with MT" OFF)
 tvm_option(USE_MICRO "Build with Micro" OFF)
 tvm_option(INSTALL_DEV "Install compiler infrastructure" OFF)
 tvm_option(HIDE_PRIVATE_SYMBOLS "Compile with -fvisibility=hidden." OFF)
+tvm_option(USE_CYCLE_ARM_CORTEX "Compile with arm cortex cpu cycle dependency." OFF)
 
 # 3rdparty libraries
 tvm_option(DLPACK_PATH "Path to DLPACK" "3rdparty/dlpack/include")
@@ -212,6 +213,10 @@ else()
 endif(USE_STACKVM_RUNTIME)
 
 if(USE_GRAPH_RUNTIME)
+  if(USE_CYCLE_ARM_CORTEX)
+    message(STATUS "Build CYCLE_ARM_CORTEX for cycle profiling on Arm cortex cpu.")
+    add_definitions(-DCYCLE_ARM_CORTEX=1)
+  endif(USE_CYCLE_ARM_CORTEX)
   message(STATUS "Build with Graph runtime support...")
   file(GLOB RUNTIME_GRAPH_SRCS src/runtime/graph/*.cc)
   list(APPEND RUNTIME_SRCS ${RUNTIME_GRAPH_SRCS})

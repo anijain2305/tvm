@@ -91,7 +91,7 @@ class GraphRuntime : public ModuleNode {
   const char* type_key() const final {
     return "GraphRuntime";
   }
-  void Run();
+  void Run(const std::string& prof_name);
 
   /*!
    * \brief Initialize the graph executor with graph and context.
@@ -420,6 +420,8 @@ class GraphRuntime : public ModuleNode {
   std::vector<size_t> data_alignment_;
   /*! \brief Operator on each node. */
   std::vector<std::function<void()> > op_execs_;
+
+  bool cyc_prof_init {false};
 };
 
 std::vector<TVMContext> GetAllContext(const TVMArgs& args);

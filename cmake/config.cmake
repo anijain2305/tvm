@@ -88,6 +88,9 @@ set(USE_GRAPH_RUNTIME ON)
 # Whether enable additional graph debug functions
 set(USE_GRAPH_RUNTIME_DEBUG OFF)
 
+# Whether to enable cpu cycle profiling for ARM cortex cpu. Default is x86.
+set(USE_CYCLE_ARM_CORTEX OFF)
+
 # Whether enable additional vm profiler functions
 set(USE_VM_PROFILER OFF)
 

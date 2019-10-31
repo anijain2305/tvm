@@ -123,6 +123,10 @@ class GraphModule(object):
 
     def __init__(self, module):
         self.module = module
+        self._cyc_prof_init = module["cyc_prof_init"]
+        self._cyc_prof_dump = module["cyc_prof_dump"]
+        self._cyc_prof_start = module["cyc_prof_start"]
+        self._cyc_prof_stop = module["cyc_prof_stop"]
         self._set_input = module["set_input"]
         self._run = module["run"]
         self._get_output = module["get_output"]
@@ -130,6 +134,18 @@ class GraphModule(object):
         self._get_num_outputs = module["get_num_outputs"]
         self._load_params = module["load_params"]
         self._share_params = module["share_params"]
+
+    def cyc_prof_init(self):
+        self._cyc_prof_init()
+
+    def cyc_prof_dump(self, filename):
+        self._cyc_prof_dump(filename)
+
+    def cyc_prof_start(self, prof_name):
+        self._cyc_prof_start(prof_name)
+
+    def cyc_prof_stop(self, prof_name):
+        self._cyc_prof_stop(prof_name)
 
     def set_input(self, key=None, value=None, **params):
         """Set inputs to the module via kwargs
@@ -155,7 +171,7 @@ class GraphModule(object):
             for k in keys:
                 self._get_input(k).copyfrom(params[k])
 
-    def run(self, **input_dict):
+    def run(self, prof_name="graph_runtime_run", **input_dict):
         """Run forward execution of the graph
 
         Parameters
@@ -165,7 +181,7 @@ class GraphModule(object):
         """
         if input_dict:
             self.set_input(**input_dict)
-        self._run()
+        self._run(prof_name)
 
     def get_num_outputs(self):
         """Get the number of outputs from the graph

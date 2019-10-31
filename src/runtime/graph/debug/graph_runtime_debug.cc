@@ -56,7 +56,7 @@ class GraphRuntimeDebug : public GraphRuntime {
    */
   std::string RunIndividual(int number, int repeat, int min_repeat_ms) {
     // warmup run
-    GraphRuntime::Run();
+    GraphRuntime::Run("debug_runtime:warmup-run");
     std::ostringstream os;
     std::vector<double> time_per_op(op_execs_.size(), 0);
     for (int i = 0; i < repeat; ++i) {

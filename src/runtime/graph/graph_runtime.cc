@@ -22,6 +22,7 @@
  * \file graph_runtime.cc
  */
 #include "graph_runtime.h"
+#include "cycle_count_tracker.h"
 
 #include <tvm/runtime/device_api.h>
 #include <tvm/runtime/ndarray.h>
@@ -51,11 +52,14 @@ inline size_t GetDataAlignment(const DLTensor& arr) {
 /*!
  * \brief Run all the operations one by one.
  */
-void GraphRuntime::Run() {
+void GraphRuntime::Run(const std::string& prof_name) {
+  std::string *copy = new std::string(prof_name);
+  CYC_PROF_START(copy->c_str());
   // setup the array and requirements.
   for (size_t i = 0; i < op_execs_.size(); ++i) {
     if (op_execs_[i]) op_execs_[i]();
   }
+  CYC_PROF_STOP(copy->c_str());
 }
 /*!
  * \brief Initialize the graph executor with graph and context.
@@ -413,7 +417,29 @@ PackedFunc GraphRuntime::GetFunction(
     const std::string& name,
     const std::shared_ptr<ModuleNode>& sptr_to_self) {
   // Return member functions during query.
-  if (name == "set_input") {
+  if(name == "cyc_prof_init") {
+    return PackedFunc([sptr_to_self, this](TVMArgs args, TVMRetValue* rv) {
+      CYC_PROF_INIT();
+    });
+  } else if(name == "cyc_prof_dump") {
+    return PackedFunc([sptr_to_self, this](TVMArgs args, TVMRetValue* rv) {
+      std::string filename = args[0];
+      CYC_PROF_DUMP(std::move(filename.c_str()));
+    });
+
+  } else if(name == "cyc_prof_start") {
+    return PackedFunc([sptr_to_self, this](TVMArgs args, TVMRetValue* rv) {
+      std::string prof_name = args[0];
+      std::string *copy = new std::string(prof_name);
+      CYC_PROF_START(std::move(copy->c_str()));
+    });
+  } else if(name == "cyc_prof_stop") {
+    return PackedFunc([sptr_to_self, this](TVMArgs args, TVMRetValue* rv) {
+      std::string prof_name = args[0];
+      std::string *copy = new std::string(prof_name);
+      CYC_PROF_STOP(std::move(copy->c_str()));
+    });
+  } else if (name == "set_input") {
     return PackedFunc([sptr_to_self, this](TVMArgs args, TVMRetValue* rv) {
         if (args[0].type_code() == kStr) {
           int in_idx = this->GetInputIndex(args[0]);
@@ -456,7 +482,8 @@ PackedFunc GraphRuntime::GetFunction(
       });
   } else if (name == "run") {
     return PackedFunc([sptr_to_self, this](TVMArgs args, TVMRetValue* rv) {
-        this->Run();
+        std::string prof_name = args[0];
+        this->Run(prof_name);
       });
   } else if (name == "load_params") {
     return PackedFunc([sptr_to_self, this](TVMArgs args, TVMRetValue* rv) {
