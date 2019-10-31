@@ -459,10 +459,18 @@ PackedFunc GraphRuntime::GetFunction(
     });
   } else if (name == "get_output") {
     return PackedFunc([sptr_to_self, this](TVMArgs args, TVMRetValue* rv) {
-      if (args.num_args == 2) {
+      if (args.num_args == 3) {
+        std::string prof_name = args[2];
+        std::string *copy = new std::string(prof_name);
+        CYC_PROF_START(std::move(copy->c_str()));
         this->CopyOutputTo(args[0], args[1]);
+        CYC_PROF_STOP(std::move(copy->c_str()));
       } else {
+        std::string prof_name = args[1];
+        std::string *copy = new std::string(prof_name);
+        CYC_PROF_START(std::move(copy->c_str()));
         *rv = this->GetOutput(args[0]);
+        CYC_PROF_STOP(std::move(copy->c_str()));
       }
     });
   } else if (name == "get_input") {

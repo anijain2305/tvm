@@ -171,7 +171,7 @@ class GraphModule(object):
             for k in keys:
                 self._get_input(k).copyfrom(params[k])
 
-    def run(self, prof_name="graph_runtime_run", **input_dict):
+    def run(self, prof_name="graph_runtime:run", **input_dict):
         """Run forward execution of the graph
 
         Parameters
@@ -210,7 +210,7 @@ class GraphModule(object):
 
         return self._get_input(index)
 
-    def get_output(self, index, out=None):
+    def get_output(self, index, out=None, prof_name="graph_runtime:get_output"):
         """Get index-th output to out
 
         Parameters
@@ -222,10 +222,10 @@ class GraphModule(object):
             The output array container
         """
         if out:
-            self._get_output(index, out)
+            self._get_output(index, out, prof_name)
             return out
 
-        return self._get_output(index)
+        return self._get_output(index, prof_name)
 
     def debug_get_output(self, node, out):
         """Run graph upto node and get the output to out
