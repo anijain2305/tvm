@@ -974,3 +974,38 @@ class ChangeBatch:
                 else:
                     return var
         return ChangeBatchMutator().visit(func)
+
+# FIXME - Make it a pass
+def ConvertLayout(mod, src_layout, dst_layout):
+    from tvm.relay.op import register_alter_op_layout
+    def run_opt_pass(mod, passes):
+       passes = passes if isinstance(passes, list) else [passes]
+       seq = Sequential(passes)
+       with PassContext(opt_level=3):
+           mod = seq(mod)
+       return mod
+
+ 
+    @register_alter_op_layout("nn.conv2d", level=114)
+    def alter_conv2d(attrs, inputs, tinfos):
+        data_layout = attrs['data_layout']
+        kernel_layout = attrs['kernel_layout']
+        data, weight = inputs
+        if data_layout == 'NHWC' and kernel_layout == 'HWIO':
+            new_attrs = dict(attrs)
+            new_attrs['data_layout'] = 'NCHW'
+            new_attrs['kernel_layout'] = 'OIHW'
+            return relay.nn.conv2d(data, weight, **new_attrs)
+        return None
+
+    assert src_layout == "NHWC" and dst_layout == "NCHW", \
+            "Supports only NHWC to NCHW layout transformation"
+
+    b_mod = run_opt_pass(mod, CanonicalizeOps())
+    b_mod = run_opt_pass(b_mod, AlterOpLayout())
+    b_mod = run_opt_pass(b_mod, FoldConstant())
+    print("######## Before ###########")
+    print(mod)
+    print("######## After ###########")
+    print(b_mod)
+    return b_mod
