@@ -335,6 +335,7 @@ class RelayBuildModule : public runtime::ModuleNode {
       pass_seqs.push_back(transform::AlterOpLayout());
     }
     pass_seqs.push_back(transform::FoldConstant());
+    pass_seqs.push_back(transform::PrintIR(false));
 
     // Create a sequential pass and perform optimizations.
     transform::Pass seq = transform::Sequential(pass_seqs);

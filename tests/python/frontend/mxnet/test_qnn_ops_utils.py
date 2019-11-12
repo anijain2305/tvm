@@ -21,18 +21,16 @@ from tvm import relay
 from tvm.contrib import graph_runtime
 
 
-def test_mxnet_dequantize_op():
-
-    def quantize_test_driver(in_dtype, quant_args, in_data, verify_output_data):
+def test_mxnet_quantization():
+    def quantize_test_driver(in_dtype, quant_args, out_dtype, in_data, verify_output_data):
         shape = in_data.shape
         input_data = relay.var("input_data", shape=shape, dtype=in_dtype)
         min_range = quant_args['min_range']
         max_range = quant_args['max_range']
-        quantized_output = \
-            relay.frontend.dequantize_mxnet_min_max(input_data,
-                                                    min_range=min_range,
-                                                    max_range=max_range,
-                                                    in_dtype=in_dtype)
+        quantized_output, _, _ = relay.frontend.quantize_mxnet_min_max(input_data,
+                                                                       min_range=min_range,
+                                                                       max_range=max_range,
+                                                                       out_dtype=out_dtype)
         mod = relay.Function(relay.analysis.free_vars(quantized_output), quantized_output)
         mod = relay.Module.from_expr(mod)
         mod = relay.qnn.transform.CanonicalizeOps()(mod)
@@ -43,53 +41,46 @@ def test_mxnet_dequantize_op():
             rt_mod.set_input(**params)
             rt_mod.run()
             res = rt_mod.get_output(0).asnumpy()
-            assert np.allclose(res, verify_output_data, )
-            assert res.dtype == np.float32
+            np.testing.assert_equal(res, verify_output_data)
+            assert res.dtype == out_dtype
 
-    def test_uint8_to_float32():
-        data = np.array([0, 1, 2, 3, 4, 251, 252, 253, 254, 255]) \
+    def test_float32_to_uint8():
+        data = np.array([-63.5, -63, -62.5, -62, -61.5, 62, 62.5, 63, 63.5, 64]) \
+            .astype('float32') \
+            .reshape((2, 5))
+        output = np.array([0, 1, 2, 3, 4, 251, 252, 253, 254, 255]) \
             .astype('uint8') \
             .reshape((2, 5))
-        output = np.array([-63.5, -63, -62.5, -62, -61.5, 62, 62.5, 63, 63.5, 64]) \
+        quant_args = {"min_range": -63.5, "max_range": 64}
+        quantize_test_driver(in_dtype='float32', quant_args=quant_args, out_dtype='uint8',
+                             in_data=data, verify_output_data=output)
+
+    def test_float32_to_int8():
+        data = np.array([-63.5, -63, -62.5, -62, -61.5, 62, 62.5, 63, 63.5, 64]) \
             .astype('float32') \
             .reshape((2, 5))
-        quant_args = {"min_range": -63.5, "max_range": 64}
-        quantize_test_driver(in_dtype='uint8',
-                             quant_args=quant_args,
-                             in_data=data,
-                             verify_output_data=output)
-
-    def test_int8_to_float32():
-        data = np.array([-126, -125, -124, -123, -122, 123, 124, 125, 126, 127]) \
+        output = np.array([-126, -125, -124, -123, -122, 123, 124, 125, 126, 127]) \
             .astype('int8') \
             .reshape((2, 5))
-        output = np.array([-63.496063, -62.992126, -62.48819, -61.984253, -61.480316,
-                           61.984253, 62.48819, 62.992126, 63.496063, 64.]) \
-            .astype('float32') \
-            .reshape((2, 5))
         quant_args = {"min_range": -63.5, "max_range": 64}
-        quantize_test_driver(in_dtype='int8',
-                             quant_args=quant_args,
-                             in_data=data,
-                             verify_output_data=output)
+        quantize_test_driver(in_dtype='float32', quant_args=quant_args, out_dtype='int8',
+                             in_data=data, verify_output_data=output)
 
-    test_uint8_to_float32()
-    test_int8_to_float32()
+    test_float32_to_uint8()
+    test_float32_to_int8()
 
 
-def test_mkldnn_dequantize_op():
-
-    def quantize_test_driver(in_dtype, quant_args, in_data, verify_output_data):
+def test_mxnet_mkldnn_quantization():
+    def quantize_test_driver(in_dtype, quant_args, out_dtype, in_data, verify_output_data):
         shape = in_data.shape
         input_data = relay.var("input_data", shape=shape, dtype=in_dtype)
         min_range = quant_args['min_range']
         max_range = quant_args['max_range']
-        quantized_output = \
-            relay.frontend.dequantize_mxnet_min_max(input_data,
-                                                    min_range=min_range,
-                                                    max_range=max_range,
-                                                    in_dtype=in_dtype,
-                                                    use_mkldnn=True)
+        quantized_output, _, _ = relay.frontend.quantize_mxnet_min_max(input_data,
+                                                                       min_range=min_range,
+                                                                       max_range=max_range,
+                                                                       out_dtype=out_dtype,
+                                                                       use_mkldnn=True)
         mod = relay.Function(relay.analysis.free_vars(quantized_output), quantized_output)
         mod = relay.Module.from_expr(mod)
         mod = relay.qnn.transform.CanonicalizeOps()(mod)
@@ -100,43 +91,132 @@ def test_mkldnn_dequantize_op():
             rt_mod.set_input(**params)
             rt_mod.run()
             res = rt_mod.get_output(0).asnumpy()
-            # print(res)
-            # np.testing.assert_equal(res, verify_output_data)
-            assert np.allclose(res, verify_output_data, )
-            assert res.dtype == np.float32
+            np.testing.assert_equal(res, verify_output_data)
+            assert res.dtype == out_dtype
 
-    def test_uint8_to_float32():
-        data = np.array([0, 1, 2, 3, 4, 251, 252, 253, 254, 255]) \
+    def test_float32_to_uint8():
+        data = np.array([-63.5, -63, -62.5, -62, -61.5, 62, 62.5, 63, 63.5, 64]) \
+            .astype('float32') \
+            .reshape((2, 5))
+        output = np.array([0, 0, 0, 0, 0, 247, 249, 251, 253, 255]) \
             .astype('uint8') \
             .reshape((2, 5))
-        output = np.array([0., 0.2509804, 0.5019608, 0.75294125, 1.0039216,
-                           62.996082, 63.247063, 63.498043, 63.749023, 64.]) \
+        quant_args = {"min_range": -63.5, "max_range": 64}
+        quantize_test_driver(in_dtype='float32', quant_args=quant_args, out_dtype='uint8',
+                             in_data=data, verify_output_data=output)
+
+    def test_float32_to_int8():
+        data = np.array([-63.5, -63, -62.5, -62, -61.5, 62, 62.5, 63, 63.5, 64]) \
             .astype('float32') \
             .reshape((2, 5))
-        quant_args = {"min_range": -63.5, "max_range": 64}
-        quantize_test_driver(in_dtype='uint8',
-                             quant_args=quant_args,
-                             in_data=data,
-                             verify_output_data=output)
-
-    def test_int8_to_float32():
-        data = np.array([-126, -125, -124, -123, -122, 123, 124, 125, 126, 127]) \
+        output = np.array([-126, -125, -124, -123, -122, 123, 124, 125, 126, 127]) \
             .astype('int8') \
             .reshape((2, 5))
-        output = np.array([-63.496063, -62.992126, -62.48819, -61.984253, -61.480316,
-                           61.984253, 62.48819, 62.992126, 63.496063, 64.]) \
-            .astype('float32') \
-            .reshape((2, 5))
         quant_args = {"min_range": -63.5, "max_range": 64}
-        quantize_test_driver(in_dtype='int8',
-                             quant_args=quant_args,
-                             in_data=data,
-                             verify_output_data=output)
+        quantize_test_driver(in_dtype='float32', quant_args=quant_args, out_dtype='int8',
+                             in_data=data, verify_output_data=output)
 
-    test_uint8_to_float32()
-    test_int8_to_float32()
+    test_float32_to_uint8()
+    test_float32_to_int8()
+
+
+def test_mxnet_conv_weight_quantization_mkldnn():
+    def quantize_test_driver(out_dtype, in_data, verify_output_data):
+        quantized_output, _, _ = relay.frontend.quantize_conv_weights_mkldnn(in_data,
+                                                                             "input_data")
+        mod = relay.Function(relay.analysis.free_vars(quantized_output), quantized_output)
+        mod = relay.Module.from_expr(mod)
+        mod = relay.qnn.transform.CanonicalizeOps()(mod)
+        with relay.build_config(opt_level=3):
+            graph, lib, params = relay.build(mod, "llvm", params=None)
+            rt_mod = graph_runtime.create(graph, lib, ctx=tvm.cpu(0))
+            rt_mod.set_input(input_data=in_data)
+            rt_mod.set_input(**params)
+            rt_mod.run()
+            res = rt_mod.get_output(0).asnumpy()
+            np.testing.assert_equal(res, verify_output_data)
+            assert res.dtype == out_dtype
+
+    def test_float32_to_int8():
+        data = np.array([0.0441604, 0.03017418, 0.03101145, 0.03285711, 0.0184189, 0.0333233,
+                         0.02895038, 0.01649691, 0.01324425, 0.01096264, 0.01516934, 0.00323179,
+                         -0.01969179, -0.02577864, -0.02674193, -0.02682905, -0.05210099, -0.05635381,
+                         -0.04693264, -0.04124459]) \
+            .astype('float32') \
+            .reshape((5, 1, 2, 2))
+        output = np.array([100, 68, 70, 74,  42, 75, 65, 37, 30, 25, 34, 7, -44, -58,
+                           -60, -60, -117, -127, -106, -93]) \
+            .astype('int8') \
+            .reshape((5, 1, 2, 2))
+        quantize_test_driver(out_dtype='int8',
+                             in_data=data, verify_output_data=output)
+
+    test_float32_to_int8()
+
+
+def test_mxnet_conv_bias_quantization_mkldnn():
+    def quantize_test_driver(in_data, bias_scale, verify_output_data):
+        quantized_output = relay.frontend.quantize_conv_bias_mkldnn(in_data,
+                                                                          bias_scale,
+                                                                          "input_data")
+        mod = relay.Function(relay.analysis.free_vars(quantized_output), quantized_output)
+        mod = relay.Module.from_expr(mod)
+        mod = relay.qnn.transform.CanonicalizeOps()(mod)
+        with relay.build_config(opt_level=3):
+            graph, lib, params = relay.build(mod, "llvm", params=None)
+            rt_mod = graph_runtime.create(graph, lib, ctx=tvm.cpu(0))
+            rt_mod.set_input(input_data=in_data)
+            rt_mod.set_input(**params)
+            rt_mod.run()
+            res = rt_mod.get_output(0).asnumpy()
+            np.testing.assert_equal(res, verify_output_data)
+            assert res.dtype == 'int32'
+
+    def test_fp32_to_int32():
+        data_scale = 255.078
+        weight_scale = 2364.12
+        bias_scale = np.divide(1, data_scale*weight_scale).astype('float32')
+        bias_data = np.array([0.05864264, 0.03235293, 0.04161578, -0.0402531, -0.09235826])\
+            .astype('float32')\
+            .reshape((5,))
+        expected_output = np.array([35364, 19510, 25096, -24274, -55695])
+        quantize_test_driver(bias_data, bias_scale, expected_output)
+
+    test_fp32_to_int32()
+
+def test_get_conv_mkldnn_requantized_scale_outDtype():
+    data_scale = np.float32(1/255.078)
+    weight_scale = np.float32(1/2364.12)
+    expected_output = np.float32(0.000834749)
+    requantize_scale, out_dtype = \
+        relay.frontend.get_conv_mkldnn_requantized_scale_outDtype(-0.252293,
+                                                                  0.174720,
+                                                                  data_scale,
+                                                                  weight_scale)
+    assert out_dtype == 'int8'
+    np.testing.assert_allclose(expected_output, requantize_scale, rtol=1e-5)
+
+
+def test_get_scale():
+
+    def test_uint8_scale():
+        scale = relay.frontend.get_mkldnn_uint8_scale(0.000407, 0.999356)
+        expected_scale = 0.00391904
+        assert np.allclose(expected_scale, scale)
+
+    def test_int8_scale():
+        scale = relay.frontend.get_mkldnn_int8_scale(-56.573826, 56.573826)
+        expected_scale = 0.007868945
+        assert np.allclose(expected_scale, scale)
+
+    test_uint8_scale()
+    test_int8_scale()
 
 
 if __name__ == "__main__":
-    test_mxnet_dequantize_op()
-    test_mkldnn_dequantize_op()
+    test_mxnet_quantization()
+    test_mxnet_mkldnn_quantization()
+    test_mxnet_conv_weight_quantization_mkldnn()
+    test_get_scale()
+    test_mxnet_conv_bias_quantization_mkldnn()
+    test_get_conv_mkldnn_requantized_scale_outDtype()
