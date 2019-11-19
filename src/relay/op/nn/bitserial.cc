@@ -27,7 +27,7 @@
 #include <tvm/relay/attrs/bitserial.h>
 #include <tvm/relay/op.h>
 
-#include "../../pass/alter_op_layout.h"
+#include "../../pass/infer_layout_util.h"
 
 namespace tvm {
 namespace relay {

@@ -18,7 +18,7 @@
  */
 
 /*!
- * \file alter_op_layout.cc
+ * \file convert_op_layout.cc
  * \brief Alternate the layouts of operators or replace primitive operators with
           other expressions. This pass can be used for computing convolution in
           custom layouts or other general weight pre-transformation.
@@ -42,30 +42,40 @@
 namespace tvm {
 namespace relay {
 
-namespace alter_op_layout {
+namespace convert_op_layout {
 
-class AlterNode : public TransformMemorizerNode {
+/*!
+ * \brief Container for the transformations for ConvertLayout. Will be passed via context to the
+ * FForwardRewrite.
+ */
+class ConvertNode : public TransformMemorizerNode {
  public:
   /*!
-   * \brief Defines the call transformation for AlterOpLayout pass. The new layouts are defined by
-   * used for different targets using a packed func.
+   * \brief Initializes the desired_layout.
+   * \param desired_layout The desired layout.
+   */
+  explicit ConvertNode(const std::string& desired_layout) : desired_layout_(desired_layout) {}
+
+  /*!
+   * \brief Defines the call transformation for ConvertLayout pass. The new layouts should be the
+   * desired layout as specified by the user.
    * \param ref_call The original call.
    * \param new_args The traversed/recursed args to the call.
    * \return The new Call after calling the packed func.
    */
   Call GetCallWithNewLayouts(const Call& ref_call, const std::vector<Expr>& new_args) const {
-    static auto falter_layout = Op::GetAttr<FTVMAlterOpLayout>("FTVMAlterOpLayout");
+    static auto fconvert_layout = Op::GetAttr<FTVMConvertOpLayout>("FTVMConvertOpLayout");
     Op op = Downcast<Op>(ref_call->op);
 
     Expr new_e;
     bool modified = false;
-    if (falter_layout.count(op)) {
+    if (fconvert_layout.count(op)) {
       tvm::Array<tvm::Tensor> tinfos;
       for (auto expr : ref_call->args) {
         auto ttype = expr->type_as<TensorTypeNode>();
         tinfos.push_back(tvm::placeholder(ttype->shape, ttype->dtype));
       }
-      Expr altered_value = falter_layout[op](ref_call->attrs, new_args, tinfos);
+      Expr altered_value = fconvert_layout[op](ref_call->attrs, new_args, tinfos, desired_layout_);
       if (altered_value.defined()) {
         new_e = altered_value;
         modified = true;
@@ -80,7 +90,9 @@ class AlterNode : public TransformMemorizerNode {
     return GetRef<Call>(new_call);
   }
 
-  static constexpr const char* _type_key = "relay.alter_op_layout.AlterNode";
+ private:
+  /*! \brief The desired layout for the Convert Layout pass */
+  std::string desired_layout_;
 };
 
 /*!
@@ -88,28 +100,28 @@ class AlterNode : public TransformMemorizerNode {
  * 1. The altered op should have the same number of arguments as the previous one.
  * 2. Do not support nested tuple arguments.
  */
-Expr AlterOpLayout(const Expr& expr) {
-  TransformMemorizer alterMemorizer(make_node<AlterNode>());
-  auto fcontext = [&](const Call& call) -> NodeRef { return alterMemorizer; };
+Expr ConvertLayout(const Expr& expr, const std::string& desired_layout) {
+  TransformMemorizer transformMemorizer(make_node<ConvertNode>(desired_layout));
+  auto fcontext = [&](const Call& call) -> NodeRef { return transformMemorizer; };
 
-  return ForwardRewrite(expr, LayoutRewriter<AlterNode>, fcontext);
+  return ForwardRewrite(expr, LayoutRewriter<ConvertNode>, fcontext);
 }
 
-}  // namespace alter_op_layout
+}  // namespace convert_op_layout
 
 namespace transform {
 
-Pass AlterOpLayout() {
+Pass ConvertLayout(const std::string& desired_layout) {
   runtime::TypedPackedFunc<Function(Function, Module, PassContext)> pass_func =
-    [=](Function f, Module m, PassContext pc) {
-      return Downcast<Function>(relay::alter_op_layout::AlterOpLayout(f));
-  };
-  return CreateFunctionPass(pass_func, 3, "AlterOpLayout",
-                            {ir::StringImm::make("InferType")});
+      [=](Function f, Module m, PassContext pc) {
+        return Downcast<Function>(relay::convert_op_layout::ConvertLayout(f, desired_layout));
+      };
+  return CreateFunctionPass(
+      pass_func, 3, "ConvertLayout",
+      {ir::StringImm::make("InferType"), ir::StringImm::make("CanonicalizeOps")});
 }
 
-TVM_REGISTER_API("relay._transform.AlterOpLayout")
-.set_body_typed(AlterOpLayout);
+TVM_REGISTER_API("relay._transform.ConvertLayout").set_body_typed(ConvertLayout);
 
 }  // namespace transform
 
