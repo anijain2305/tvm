@@ -18,7 +18,6 @@
  */
 
 /*!
- * Copyright (c) 2019 by Contributors
  *
  * \file src/tvm/relay/pass/fuse_ops.cc
  *
@@ -862,6 +861,13 @@ class FuseMutator : private ExprMutator {
   Expr VisitExpr_(const CallNode* call) {
     static const Op& stop_fusion = Op::Get("annotation.stop_fusion");
     if (call->op.as<OpNode>()) {
+      static auto fnoncomputational =
+        Op::GetAttr<TNonComputational>("TNonComputational");
+
+      if (fnoncomputational.get(Downcast<Op>(call->op), false)) {
+        return ExprMutator::VisitExpr_(call);
+      }
+
       // If it is a primitive op call
       // then we must have a group assignment for it already.
       CHECK(gmap_.count(call));

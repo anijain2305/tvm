@@ -18,7 +18,6 @@
  */
 
 /*!
- *  Copyright (c) 2019 by Contributors
  * \file tvm/arithmetic/const_int_bound.cc
  */
 #include <tvm/arithmetic.h>
@@ -53,7 +52,8 @@ inline void PrintBoundValue(std::ostream& os, int64_t val) {
 }
 
 TVM_STATIC_IR_FUNCTOR(IRPrinter, vtable)
-.set_dispatch<ConstIntBoundNode>([](const ConstIntBoundNode* op, IRPrinter* p) {
+.set_dispatch<ConstIntBoundNode>([](const ObjectRef& node, IRPrinter* p) {
+    auto* op = static_cast<const ConstIntBoundNode*>(node.get());
     p->stream << "ConstIntBound[";
     PrintBoundValue(p->stream, op->min_value);
     p->stream << ',';

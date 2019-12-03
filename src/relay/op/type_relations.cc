@@ -18,7 +18,6 @@
  */
 
 /*!
- *  Copyright (c) 2018 by Contributors
  * \file type_relations.cc
  * \brief A set of utilities and common functionality
  * for type relations.
@@ -142,6 +141,14 @@ bool BroadcastCompRel(const Array<Type>& types,
     }
   }
   return false;
+}
+
+Array<IndexExpr> RankShape(const Array<IndexExpr>& shape) {
+  if (shape.size() == 0) {
+    return {};
+  } else {
+    return { tvm::Integer(shape.size()) };
+  }
 }
 
 }  // namespace relay

@@ -18,7 +18,6 @@
  */
 
 /*!
- *  Copyright (c) 2017 by Contributors
  *  Exposre of pass functions.
  * \file api_pass.cc
  */
@@ -92,6 +91,12 @@ TVM_REGISTER_API("ir_pass.StorageFlatten")
     } else {
       *ret = StorageFlatten(args[0], args[1], args[2], args[3]);
     }
+  });
+
+TVM_REGISTER_API("ir_pass.RewriteForTensorCore")
+.set_body_typed<Stmt(const Stmt&, const Schedule&, const Map<Tensor, Buffer>&)>
+  ([](const Stmt& stmt, const Schedule& schedule, const Map<Tensor, Buffer>& extern_buffer) {
+      return RewriteForTensorCore(stmt, schedule, extern_buffer);
   });
 
 TVM_REGISTER_API("ir_pass.AttrsEqual")

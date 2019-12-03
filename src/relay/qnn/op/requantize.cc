@@ -18,7 +18,6 @@
  */
 
 /*!
- *  Copyright (c) 2019 by Contributors
  * \file src/relay/qnn/op/requantize.cc
  * \brief QNN requantize operator.
  */
@@ -36,8 +35,6 @@ namespace qnn {
 TVM_REGISTER_NODE_TYPE(RequantizeAttrs);
 
 // Lowering of qnn.requantize op
-
-
 
 /*
  * \brief Lower requantize to a sequence of ops.
@@ -73,8 +70,8 @@ Expr RequantizeLower(const Expr& input_tensor, const RequantizeAttrs* param,
   // 2) If the input and output scales are same, we can skip the fixed point multiplication.
   auto scaled_int64_t = tensor;
   if (param->input_scale != param->output_scale) {
-    scaled_int64_t = FixedPointMuliply(scaled_int64_t, double_multiplier, input_shape,
-                                       param->rounding);
+    scaled_int64_t =
+        FixedPointMultiply(scaled_int64_t, double_multiplier, input_shape, param->rounding);
   }
 
   // 3) Add the output zero point.

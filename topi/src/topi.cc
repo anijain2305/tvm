@@ -18,7 +18,6 @@
  */
 
 /*!
-*  Copyright (c) 2017 by Contributors
 * \brief Registration of TVM operators and schedules
 * \file topi.cc
 */
@@ -122,7 +121,9 @@ TOPI_REGISTER_BCAST_OP("topi.add", topi::add);
 TOPI_REGISTER_BCAST_OP("topi.subtract", topi::subtract);
 TOPI_REGISTER_BCAST_OP("topi.multiply", topi::multiply);
 TOPI_REGISTER_BCAST_OP("topi.divide", topi::divide);
+TOPI_REGISTER_BCAST_OP("topi.floor_divide", topi::floor_divide);
 TOPI_REGISTER_BCAST_OP("topi.mod", topi::mod);
+TOPI_REGISTER_BCAST_OP("topi.floor_mod", topi::floor_mod);
 TOPI_REGISTER_BCAST_OP("topi.maximum", topi::maximum);
 TOPI_REGISTER_BCAST_OP("topi.minimum", topi::minimum);
 TOPI_REGISTER_BCAST_OP("topi.power", topi::power);
@@ -298,6 +299,11 @@ TVM_REGISTER_GLOBAL("topi.prod")
 TVM_REGISTER_GLOBAL("topi.all")
 .set_body([](TVMArgs args, TVMRetValue *rv) {
   *rv = topi::all(args[0], ArrayOrInt(args[1]), args[2]);
+  });
+
+TVM_REGISTER_GLOBAL("topi.any")
+.set_body([](TVMArgs args, TVMRetValue *rv) {
+  *rv = topi::any(args[0], ArrayOrInt(args[1]), args[2]);
   });
 
 /* Ops from transform.h */

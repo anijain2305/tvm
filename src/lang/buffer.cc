@@ -18,7 +18,6 @@
  */
 
 /*!
- *  Copyright (c) 2016 by Contributors
  * \file buffer.cc
  */
 #include <tvm/buffer.h>
@@ -452,7 +451,8 @@ Buffer BufferNode::make(Var data,
 }
 
 TVM_STATIC_IR_FUNCTOR(IRPrinter, vtable)
-.set_dispatch<BufferNode>([](const BufferNode *op, IRPrinter *p) {
+.set_dispatch<BufferNode>([](const ObjectRef& node, IRPrinter *p) {
+    auto* op = static_cast<const BufferNode*>(node.get());
     p->stream << "buffer(" << op->name << ", " << op << ")";
 });
 

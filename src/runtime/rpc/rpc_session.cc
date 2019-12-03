@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -18,10 +18,10 @@
  */
 
 /*!
- *  Copyright (c) 2017 by Contributors
  * \file rpc_session.cc
  * \brief RPC session for remote function call.
  */
+#include <tvm/runtime/c_runtime_api.h>
 #include <tvm/runtime/packed_func.h>
 #include <tvm/runtime/device_api.h>
 #include <tvm/runtime/registry.h>
@@ -35,11 +35,13 @@
 #include <cmath>
 #include <algorithm>
 #include "rpc_session.h"
+#include "../object_internal.h"
 #include "../../common/ring_buffer.h"
 #include "../../common/socket.h"
 
 namespace tvm {
 namespace runtime {
+
 // Temp buffer for data array
 struct RPCByteArrayBuffer {
   TVMByteArray arr;
@@ -1119,25 +1121,29 @@ void RPCModuleLoad(TVMArgs args, TVMRetValue *rv) {
   }
   std::string file_name = args[0];
   TVMRetValue ret = (*fsys_load_)(file_name);
-  Module m = ret;
-  *rv = static_cast<void*>(new Module(m));
+  // pass via void*
+  TVMValue value;
+  int rcode;
+  ret.MoveToCHost(&value, &rcode);
+  CHECK_EQ(rcode, kModuleHandle);
+  *rv = static_cast<void*>(value.v_handle);
 }
 
 void RPCModuleImport(TVMArgs args, TVMRetValue *rv) {
   void* pmod = args[0];
   void* cmod = args[1];
-  static_cast<Module*>(pmod)->Import(
-      *static_cast<Module*>(cmod));
+  ObjectInternal::GetModuleNode(pmod)->Import(
+      GetRef<Module>(ObjectInternal::GetModuleNode(cmod)));
 }
 
 void RPCModuleFree(TVMArgs args, TVMRetValue *rv) {
   void* mhandle = args[0];
-  delete static_cast<Module*>(mhandle);
+  ObjectInternal::ObjectFree(mhandle);
 }
 
 void RPCModuleGetFunc(TVMArgs args, TVMRetValue *rv) {
   void* mhandle = args[0];
-  PackedFunc pf = static_cast<Module*>(mhandle)->GetFunction(
+  PackedFunc pf = ObjectInternal::GetModuleNode(mhandle)->GetFunction(
       args[1], false);
   if (pf != nullptr) {
     *rv = static_cast<void*>(new PackedFunc(pf));
@@ -1149,7 +1155,7 @@ void RPCModuleGetFunc(TVMArgs args, TVMRetValue *rv) {
 void RPCModuleGetSource(TVMArgs args, TVMRetValue *rv) {
   void* mhandle = args[0];
   std::string fmt = args[1];
-  *rv = (*static_cast<Module*>(mhandle))->GetSource(fmt);
+  *rv = ObjectInternal::GetModuleNode(mhandle)->GetSource(fmt);
 }
 
 void RPCNDArrayFree(TVMArgs args, TVMRetValue *rv) {
@@ -1211,11 +1217,45 @@ void RPCSession::EventHandler::HandlePackedCall() {
   CHECK_EQ(state_, kRecvCode);
 }
 
+PackedFunc MicroTimeEvaluator(
+    PackedFunc pf,
+    TVMContext ctx,
+    int number,
+    int repeat) {
+  auto ftimer = [pf, ctx, number, repeat](TVMArgs args, TVMRetValue *rv) mutable {
+    TVMRetValue temp;
+    std::ostringstream os;
+    // skip first time call, to activate lazy compilation components.
+    pf.CallPacked(args, &temp);
+    DeviceAPI::Get(ctx)->StreamSync(ctx, nullptr);
+    for (int i = 0; i < repeat; ++i) {
+      double speed = 0.0;
+      for (int j = 0; j < number; ++j) {
+        pf.CallPacked(args, &temp);
+        DeviceAPI::Get(ctx)->StreamSync(ctx, nullptr);
+        speed += (temp.operator double()) / number;
+      }
+      os.write(reinterpret_cast<char*>(&speed), sizeof(speed));
+    }
+    std::string blob = os.str();
+    TVMByteArray arr;
+    arr.size = blob.length();
+    arr.data = blob.data();
+    // return the time.
+    *rv = arr;
+  };
+  return PackedFunc(ftimer);
+}
+
 PackedFunc WrapTimeEvaluator(PackedFunc pf,
                              TVMContext ctx,
                              int number,
                              int repeat,
                              int min_repeat_ms) {
+  if (static_cast<int>(ctx.device_type) == static_cast<int>(kDLMicroDev)) {
+    return MicroTimeEvaluator(pf, ctx, number, repeat);
+  }
+
   auto ftimer = [pf, ctx, number, repeat, min_repeat_ms](TVMArgs args, TVMRetValue *rv) mutable {
     TVMRetValue temp;
     std::ostringstream os;

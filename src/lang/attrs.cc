@@ -18,7 +18,6 @@
  */
 
 /*!
- *  Copyright (c) 2018 by Contributors
  * \file attrs.cc
  */
 #include <tvm/attrs.h>
@@ -61,7 +60,8 @@ Attrs DictAttrsNode::make(Map<std::string, NodeRef> dict) {
 }
 
 TVM_STATIC_IR_FUNCTOR(IRPrinter, vtable)
-.set_dispatch<DictAttrsNode>([](const DictAttrsNode *op, IRPrinter *p) {
+.set_dispatch<DictAttrsNode>([](const ObjectRef& node, IRPrinter *p) {
+    auto* op = static_cast<const DictAttrsNode*>(node.get());
     p->stream << op->dict;
 });
 
