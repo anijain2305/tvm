@@ -1,0 +1,575 @@
+INFO:logger:batch size = 1 for inference
+INFO:logger:rgb_mean = 0,0,0
+INFO:logger:rgb_std = 1,1,1
+INFO:logger:label_name = softmax_label
+INFO:logger:Input data shape = (3, 224, 224)
+INFO:logger:Dataset for inference: ./data/val_256_q90.rec
+[20:01:34] /home/ubuntu/mxnet/incubator-mxnet/src/io/iter_image_recordio_2.cc:831: Create ImageRecordIter2 optimized for CPU backend.Use omp threads instead of preprocess_threads.
+[20:01:34] /home/ubuntu/mxnet/incubator-mxnet/src/io/iter_image_recordio_2.cc:178: ImageRecordIOParser2: ./data/val_256_q90.rec, use 24 threads for decoding..
+INFO:logger:Loading symbol from file /home/ubuntu/mxnet/incubator-mxnet/example/quantization/./model/resnet18_v1-quantized-5batches-naive-symbol.json
+INFO:logger:Loading params from file /home/ubuntu/mxnet/incubator-mxnet/example/quantization/./model/resnet18_v1-quantized-0000.params
+INFO:logger:Skipping the first 0 batches
+INFO:logger:Running model ./model/resnet18_v1-quantized-5batches-naive-symbol.json for inference
+[20:01:35] /home/ubuntu/mxnet/incubator-mxnet/src/executor/graph_executor.cc:1982: Subgraph backend MKLDNN is activated.
+[20:01:35] /home/ubuntu/mxnet/incubator-mxnet/src/operator/subgraph/mkldnn/mkldnn_fc.cc:179: Bias scale = 2933.36
+[20:01:35] /home/ubuntu/mxnet/incubator-mxnet/src/operator/subgraph/mkldnn/mkldnn_fc.cc:180: Bias int32 scale = 0.288602
+[20:01:35] /home/ubuntu/mxnet/incubator-mxnet/src/operator/subgraph/mkldnn/mkldnn_fc.cc:187: Data scale = 5.36748
+[20:01:35] /home/ubuntu/mxnet/incubator-mxnet/src/operator/subgraph/mkldnn/mkldnn_fc.cc:188: Weight scale = 157.723
+Perf	Mxnet	resnet18_v1-quantized-5batches-naive-symbol	1.056683	1.019716	0.00012
+INFO:logger:batch size = 1 for inference
+INFO:logger:rgb_mean = 0,0,0
+INFO:logger:rgb_std = 1,1,1
+INFO:logger:label_name = softmax_label
+INFO:logger:Input data shape = (3, 224, 224)
+INFO:logger:Running model ./model/resnet18_v1-quantized-5batches-naive-symbol.json for inference
+Perf	Tvm	resnet18_v1-quantized-5batches-naive-symbol	1.00313	0.97084	1.8e-05
+INFO:logger:batch size = 1 for inference
+INFO:logger:rgb_mean = 0,0,0
+INFO:logger:rgb_std = 1,1,1
+INFO:logger:label_name = softmax_label
+INFO:logger:Input data shape = (3, 224, 224)
+INFO:logger:Dataset for inference: ./data/val_256_q90.rec
+[20:01:41] /home/ubuntu/mxnet/incubator-mxnet/src/io/iter_image_recordio_2.cc:831: Create ImageRecordIter2 optimized for CPU backend.Use omp threads instead of preprocess_threads.
+[20:01:41] /home/ubuntu/mxnet/incubator-mxnet/src/io/iter_image_recordio_2.cc:178: ImageRecordIOParser2: ./data/val_256_q90.rec, use 24 threads for decoding..
+INFO:logger:Loading symbol from file /home/ubuntu/mxnet/incubator-mxnet/example/quantization/./model/resnet18_v1-quantized-5batches-naive-symbol.json
+INFO:logger:Loading params from file /home/ubuntu/mxnet/incubator-mxnet/example/quantization/./model/resnet18_v1-quantized-0000.params
+INFO:logger:Skipping the first 0 batches
+INFO:logger:Running model ./model/resnet18_v1-quantized-5batches-naive-symbol.json for inference
+[20:01:41] /home/ubuntu/mxnet/incubator-mxnet/src/executor/graph_executor.cc:1982: Subgraph backend MKLDNN is activated.
+[20:01:42] /home/ubuntu/mxnet/incubator-mxnet/src/operator/subgraph/mkldnn/mkldnn_fc.cc:179: Bias scale = 2933.36
+[20:01:42] /home/ubuntu/mxnet/incubator-mxnet/src/operator/subgraph/mkldnn/mkldnn_fc.cc:180: Bias int32 scale = 0.288602
+[20:01:42] /home/ubuntu/mxnet/incubator-mxnet/src/operator/subgraph/mkldnn/mkldnn_fc.cc:187: Data scale = 5.36748
+[20:01:42] /home/ubuntu/mxnet/incubator-mxnet/src/operator/subgraph/mkldnn/mkldnn_fc.cc:188: Weight scale = 157.723
+Perf	Mxnet	resnet18_v1-quantized-5batches-naive-symbol	1.059763	1.018524	0.0002
+INFO:logger:batch size = 1 for inference
+INFO:logger:rgb_mean = 0,0,0
+INFO:logger:rgb_std = 1,1,1
+INFO:logger:label_name = softmax_label
+INFO:logger:Input data shape = (3, 224, 224)
+INFO:logger:Running model ./model/resnet18_v1-quantized-5batches-naive-symbol.json for inference
+Perf	Tvm	resnet18_v1-quantized-5batches-naive-symbol	1.001734	0.975847	1.1e-05
+INFO:logger:batch size = 1 for inference
+INFO:logger:rgb_mean = 0,0,0
+INFO:logger:rgb_std = 1,1,1
+INFO:logger:label_name = softmax_label
+INFO:logger:Input data shape = (3, 224, 224)
+INFO:logger:Dataset for inference: ./data/val_256_q90.rec
+[20:01:48] /home/ubuntu/mxnet/incubator-mxnet/src/io/iter_image_recordio_2.cc:831: Create ImageRecordIter2 optimized for CPU backend.Use omp threads instead of preprocess_threads.
+[20:01:48] /home/ubuntu/mxnet/incubator-mxnet/src/io/iter_image_recordio_2.cc:178: ImageRecordIOParser2: ./data/val_256_q90.rec, use 24 threads for decoding..
+INFO:logger:Loading symbol from file /home/ubuntu/mxnet/incubator-mxnet/example/quantization/./model/resnet18_v1-quantized-5batches-naive-symbol.json
+INFO:logger:Loading params from file /home/ubuntu/mxnet/incubator-mxnet/example/quantization/./model/resnet18_v1-quantized-0000.params
+INFO:logger:Skipping the first 0 batches
+INFO:logger:Running model ./model/resnet18_v1-quantized-5batches-naive-symbol.json for inference
+[20:01:48] /home/ubuntu/mxnet/incubator-mxnet/src/executor/graph_executor.cc:1982: Subgraph backend MKLDNN is activated.
+[20:01:48] /home/ubuntu/mxnet/incubator-mxnet/src/operator/subgraph/mkldnn/mkldnn_fc.cc:179: Bias scale = 2933.36
+[20:01:48] /home/ubuntu/mxnet/incubator-mxnet/src/operator/subgraph/mkldnn/mkldnn_fc.cc:180: Bias int32 scale = 0.288602
+[20:01:48] /home/ubuntu/mxnet/incubator-mxnet/src/operator/subgraph/mkldnn/mkldnn_fc.cc:187: Data scale = 5.36748
+[20:01:48] /home/ubuntu/mxnet/incubator-mxnet/src/operator/subgraph/mkldnn/mkldnn_fc.cc:188: Weight scale = 157.723
+Perf	Mxnet	resnet18_v1-quantized-5batches-naive-symbol	1.05635	1.026154	9.9e-05
+INFO:logger:batch size = 1 for inference
+INFO:logger:rgb_mean = 0,0,0
+INFO:logger:rgb_std = 1,1,1
+INFO:logger:label_name = softmax_label
+INFO:logger:Input data shape = (3, 224, 224)
+INFO:logger:Running model ./model/resnet18_v1-quantized-5batches-naive-symbol.json for inference
+Perf	Tvm	resnet18_v1-quantized-5batches-naive-symbol	1.012627	0.973225	1.7e-05
+INFO:logger:batch size = 1 for inference
+INFO:logger:rgb_mean = 0,0,0
+INFO:logger:rgb_std = 1,1,1
+INFO:logger:label_name = softmax_label
+INFO:logger:Input data shape = (3, 224, 224)
+INFO:logger:Dataset for inference: ./data/val_256_q90.rec
+[20:01:55] /home/ubuntu/mxnet/incubator-mxnet/src/io/iter_image_recordio_2.cc:831: Create ImageRecordIter2 optimized for CPU backend.Use omp threads instead of preprocess_threads.
+[20:01:55] /home/ubuntu/mxnet/incubator-mxnet/src/io/iter_image_recordio_2.cc:178: ImageRecordIOParser2: ./data/val_256_q90.rec, use 24 threads for decoding..
+INFO:logger:Loading symbol from file /home/ubuntu/mxnet/incubator-mxnet/example/quantization/./model/resnet18_v1-quantized-5batches-naive-symbol.json
+INFO:logger:Loading params from file /home/ubuntu/mxnet/incubator-mxnet/example/quantization/./model/resnet18_v1-quantized-0000.params
+INFO:logger:Skipping the first 0 batches
+INFO:logger:Running model ./model/resnet18_v1-quantized-5batches-naive-symbol.json for inference
+[20:01:55] /home/ubuntu/mxnet/incubator-mxnet/src/executor/graph_executor.cc:1982: Subgraph backend MKLDNN is activated.
+[20:01:55] /home/ubuntu/mxnet/incubator-mxnet/src/operator/subgraph/mkldnn/mkldnn_fc.cc:179: Bias scale = 2933.36
+[20:01:55] /home/ubuntu/mxnet/incubator-mxnet/src/operator/subgraph/mkldnn/mkldnn_fc.cc:180: Bias int32 scale = 0.288602
+[20:01:55] /home/ubuntu/mxnet/incubator-mxnet/src/operator/subgraph/mkldnn/mkldnn_fc.cc:187: Data scale = 5.36748
+[20:01:55] /home/ubuntu/mxnet/incubator-mxnet/src/operator/subgraph/mkldnn/mkldnn_fc.cc:188: Weight scale = 157.723
+Perf	Mxnet	resnet18_v1-quantized-5batches-naive-symbol	1.056368	1.027107	5.5e-05
+INFO:logger:batch size = 1 for inference
+INFO:logger:rgb_mean = 0,0,0
+INFO:logger:rgb_std = 1,1,1
+INFO:logger:label_name = softmax_label
+INFO:logger:Input data shape = (3, 224, 224)
+INFO:logger:Running model ./model/resnet18_v1-quantized-5batches-naive-symbol.json for inference
+Perf	Tvm	resnet18_v1-quantized-5batches-naive-symbol	0.997466	0.970602	1.3e-05
+INFO:logger:batch size = 1 for inference
+INFO:logger:rgb_mean = 0,0,0
+INFO:logger:rgb_std = 1,1,1
+INFO:logger:label_name = softmax_label
+INFO:logger:Input data shape = (3, 224, 224)
+INFO:logger:Dataset for inference: ./data/val_256_q90.rec
+[20:02:02] /home/ubuntu/mxnet/incubator-mxnet/src/io/iter_image_recordio_2.cc:831: Create ImageRecordIter2 optimized for CPU backend.Use omp threads instead of preprocess_threads.
+[20:02:02] /home/ubuntu/mxnet/incubator-mxnet/src/io/iter_image_recordio_2.cc:178: ImageRecordIOParser2: ./data/val_256_q90.rec, use 24 threads for decoding..
+INFO:logger:Loading symbol from file /home/ubuntu/mxnet/incubator-mxnet/example/quantization/./model/resnet18_v1-quantized-5batches-naive-symbol.json
+INFO:logger:Loading params from file /home/ubuntu/mxnet/incubator-mxnet/example/quantization/./model/resnet18_v1-quantized-0000.params
+INFO:logger:Skipping the first 0 batches
+INFO:logger:Running model ./model/resnet18_v1-quantized-5batches-naive-symbol.json for inference
+[20:02:02] /home/ubuntu/mxnet/incubator-mxnet/src/executor/graph_executor.cc:1982: Subgraph backend MKLDNN is activated.
+[20:02:02] /home/ubuntu/mxnet/incubator-mxnet/src/operator/subgraph/mkldnn/mkldnn_fc.cc:179: Bias scale = 2933.36
+[20:02:02] /home/ubuntu/mxnet/incubator-mxnet/src/operator/subgraph/mkldnn/mkldnn_fc.cc:180: Bias int32 scale = 0.288602
+[20:02:02] /home/ubuntu/mxnet/incubator-mxnet/src/operator/subgraph/mkldnn/mkldnn_fc.cc:187: Data scale = 5.36748
+[20:02:02] /home/ubuntu/mxnet/incubator-mxnet/src/operator/subgraph/mkldnn/mkldnn_fc.cc:188: Weight scale = 157.723
+Perf	Mxnet	resnet18_v1-quantized-5batches-naive-symbol	1.059807	1.026154	0.000117
+INFO:logger:batch size = 1 for inference
+INFO:logger:rgb_mean = 0,0,0
+INFO:logger:rgb_std = 1,1,1
+INFO:logger:label_name = softmax_label
+INFO:logger:Input data shape = (3, 224, 224)
+INFO:logger:Running model ./model/resnet18_v1-quantized-5batches-naive-symbol.json for inference
+Perf	Tvm	resnet18_v1-quantized-5batches-naive-symbol	0.996341	0.967264	1.2e-05
+INFO:logger:batch size = 1 for inference
+INFO:logger:rgb_mean = 0,0,0
+INFO:logger:rgb_std = 1,1,1
+INFO:logger:label_name = softmax_label
+INFO:logger:Input data shape = (3, 224, 224)
+INFO:logger:Dataset for inference: ./data/val_256_q90.rec
+[20:02:09] /home/ubuntu/mxnet/incubator-mxnet/src/io/iter_image_recordio_2.cc:831: Create ImageRecordIter2 optimized for CPU backend.Use omp threads instead of preprocess_threads.
+[20:02:09] /home/ubuntu/mxnet/incubator-mxnet/src/io/iter_image_recordio_2.cc:178: ImageRecordIOParser2: ./data/val_256_q90.rec, use 24 threads for decoding..
+INFO:logger:Loading symbol from file /home/ubuntu/mxnet/incubator-mxnet/example/quantization/./model/resnet50_v1-quantized-5batches-naive-symbol.json
+INFO:logger:Loading params from file /home/ubuntu/mxnet/incubator-mxnet/example/quantization/./model/resnet50_v1-quantized-0000.params
+INFO:logger:Skipping the first 0 batches
+INFO:logger:Running model ./model/resnet50_v1-quantized-5batches-naive-symbol.json for inference
+[20:02:09] /home/ubuntu/mxnet/incubator-mxnet/src/executor/graph_executor.cc:1982: Subgraph backend MKLDNN is activated.
+[20:02:10] /home/ubuntu/mxnet/incubator-mxnet/src/operator/subgraph/mkldnn/mkldnn_fc.cc:179: Bias scale = 147.692
+[20:02:10] /home/ubuntu/mxnet/incubator-mxnet/src/operator/subgraph/mkldnn/mkldnn_fc.cc:180: Bias int32 scale = 3.50916
+[20:02:10] /home/ubuntu/mxnet/incubator-mxnet/src/operator/subgraph/mkldnn/mkldnn_fc.cc:187: Data scale = 2.64973
+[20:02:10] /home/ubuntu/mxnet/incubator-mxnet/src/operator/subgraph/mkldnn/mkldnn_fc.cc:188: Weight scale = 195.596
+Perf	Mxnet	resnet50_v1-quantized-5batches-naive-symbol	2.050172	1.977444	5.6e-05
+INFO:logger:batch size = 1 for inference
+INFO:logger:rgb_mean = 0,0,0
+INFO:logger:rgb_std = 1,1,1
+INFO:logger:label_name = softmax_label
+INFO:logger:Input data shape = (3, 224, 224)
+INFO:logger:Running model ./model/resnet50_v1-quantized-5batches-naive-symbol.json for inference
+Perf	Tvm	resnet50_v1-quantized-5batches-naive-symbol	2.369618	2.233744	5.2e-05
+INFO:logger:batch size = 1 for inference
+INFO:logger:rgb_mean = 0,0,0
+INFO:logger:rgb_std = 1,1,1
+INFO:logger:label_name = softmax_label
+INFO:logger:Input data shape = (3, 224, 224)
+INFO:logger:Dataset for inference: ./data/val_256_q90.rec
+[20:02:21] /home/ubuntu/mxnet/incubator-mxnet/src/io/iter_image_recordio_2.cc:831: Create ImageRecordIter2 optimized for CPU backend.Use omp threads instead of preprocess_threads.
+[20:02:21] /home/ubuntu/mxnet/incubator-mxnet/src/io/iter_image_recordio_2.cc:178: ImageRecordIOParser2: ./data/val_256_q90.rec, use 24 threads for decoding..
+INFO:logger:Loading symbol from file /home/ubuntu/mxnet/incubator-mxnet/example/quantization/./model/resnet50_v1-quantized-5batches-naive-symbol.json
+INFO:logger:Loading params from file /home/ubuntu/mxnet/incubator-mxnet/example/quantization/./model/resnet50_v1-quantized-0000.params
+INFO:logger:Skipping the first 0 batches
+INFO:logger:Running model ./model/resnet50_v1-quantized-5batches-naive-symbol.json for inference
+[20:02:21] /home/ubuntu/mxnet/incubator-mxnet/src/executor/graph_executor.cc:1982: Subgraph backend MKLDNN is activated.
+[20:02:22] /home/ubuntu/mxnet/incubator-mxnet/src/operator/subgraph/mkldnn/mkldnn_fc.cc:179: Bias scale = 147.692
+[20:02:22] /home/ubuntu/mxnet/incubator-mxnet/src/operator/subgraph/mkldnn/mkldnn_fc.cc:180: Bias int32 scale = 3.50916
+[20:02:22] /home/ubuntu/mxnet/incubator-mxnet/src/operator/subgraph/mkldnn/mkldnn_fc.cc:187: Data scale = 2.64973
+[20:02:22] /home/ubuntu/mxnet/incubator-mxnet/src/operator/subgraph/mkldnn/mkldnn_fc.cc:188: Weight scale = 195.596
+Perf	Mxnet	resnet50_v1-quantized-5batches-naive-symbol	2.040755	1.964331	0.00012
+INFO:logger:batch size = 1 for inference
+INFO:logger:rgb_mean = 0,0,0
+INFO:logger:rgb_std = 1,1,1
+INFO:logger:label_name = softmax_label
+INFO:logger:Input data shape = (3, 224, 224)
+INFO:logger:Running model ./model/resnet50_v1-quantized-5batches-naive-symbol.json for inference
+Perf	Tvm	resnet50_v1-quantized-5batches-naive-symbol	2.425897	2.245665	6.4e-05
+INFO:logger:batch size = 1 for inference
+INFO:logger:rgb_mean = 0,0,0
+INFO:logger:rgb_std = 1,1,1
+INFO:logger:label_name = softmax_label
+INFO:logger:Input data shape = (3, 224, 224)
+INFO:logger:Dataset for inference: ./data/val_256_q90.rec
+[20:02:33] /home/ubuntu/mxnet/incubator-mxnet/src/io/iter_image_recordio_2.cc:831: Create ImageRecordIter2 optimized for CPU backend.Use omp threads instead of preprocess_threads.
+[20:02:33] /home/ubuntu/mxnet/incubator-mxnet/src/io/iter_image_recordio_2.cc:178: ImageRecordIOParser2: ./data/val_256_q90.rec, use 24 threads for decoding..
+INFO:logger:Loading symbol from file /home/ubuntu/mxnet/incubator-mxnet/example/quantization/./model/resnet50_v1-quantized-5batches-naive-symbol.json
+INFO:logger:Loading params from file /home/ubuntu/mxnet/incubator-mxnet/example/quantization/./model/resnet50_v1-quantized-0000.params
+INFO:logger:Skipping the first 0 batches
+INFO:logger:Running model ./model/resnet50_v1-quantized-5batches-naive-symbol.json for inference
+[20:02:34] /home/ubuntu/mxnet/incubator-mxnet/src/executor/graph_executor.cc:1982: Subgraph backend MKLDNN is activated.
+[20:02:34] /home/ubuntu/mxnet/incubator-mxnet/src/operator/subgraph/mkldnn/mkldnn_fc.cc:179: Bias scale = 147.692
+[20:02:34] /home/ubuntu/mxnet/incubator-mxnet/src/operator/subgraph/mkldnn/mkldnn_fc.cc:180: Bias int32 scale = 3.50916
+[20:02:34] /home/ubuntu/mxnet/incubator-mxnet/src/operator/subgraph/mkldnn/mkldnn_fc.cc:187: Data scale = 2.64973
+[20:02:34] /home/ubuntu/mxnet/incubator-mxnet/src/operator/subgraph/mkldnn/mkldnn_fc.cc:188: Weight scale = 195.596
+Perf	Mxnet	resnet50_v1-quantized-5batches-naive-symbol	2.064964	1.992226	5.5e-05
+INFO:logger:batch size = 1 for inference
+INFO:logger:rgb_mean = 0,0,0
+INFO:logger:rgb_std = 1,1,1
+INFO:logger:label_name = softmax_label
+INFO:logger:Input data shape = (3, 224, 224)
+INFO:logger:Running model ./model/resnet50_v1-quantized-5batches-naive-symbol.json for inference
+Perf	Tvm	resnet50_v1-quantized-5batches-naive-symbol	2.4341	2.242088	6.1e-05
+INFO:logger:batch size = 1 for inference
+INFO:logger:rgb_mean = 0,0,0
+INFO:logger:rgb_std = 1,1,1
+INFO:logger:label_name = softmax_label
+INFO:logger:Input data shape = (3, 224, 224)
+INFO:logger:Dataset for inference: ./data/val_256_q90.rec
+[20:02:45] /home/ubuntu/mxnet/incubator-mxnet/src/io/iter_image_recordio_2.cc:831: Create ImageRecordIter2 optimized for CPU backend.Use omp threads instead of preprocess_threads.
+[20:02:45] /home/ubuntu/mxnet/incubator-mxnet/src/io/iter_image_recordio_2.cc:178: ImageRecordIOParser2: ./data/val_256_q90.rec, use 24 threads for decoding..
+INFO:logger:Loading symbol from file /home/ubuntu/mxnet/incubator-mxnet/example/quantization/./model/resnet50_v1-quantized-5batches-naive-symbol.json
+INFO:logger:Loading params from file /home/ubuntu/mxnet/incubator-mxnet/example/quantization/./model/resnet50_v1-quantized-0000.params
+INFO:logger:Skipping the first 0 batches
+INFO:logger:Running model ./model/resnet50_v1-quantized-5batches-naive-symbol.json for inference
+[20:02:46] /home/ubuntu/mxnet/incubator-mxnet/src/executor/graph_executor.cc:1982: Subgraph backend MKLDNN is activated.
+[20:02:46] /home/ubuntu/mxnet/incubator-mxnet/src/operator/subgraph/mkldnn/mkldnn_fc.cc:179: Bias scale = 147.692
+[20:02:46] /home/ubuntu/mxnet/incubator-mxnet/src/operator/subgraph/mkldnn/mkldnn_fc.cc:180: Bias int32 scale = 3.50916
+[20:02:46] /home/ubuntu/mxnet/incubator-mxnet/src/operator/subgraph/mkldnn/mkldnn_fc.cc:187: Data scale = 2.64973
+[20:02:46] /home/ubuntu/mxnet/incubator-mxnet/src/operator/subgraph/mkldnn/mkldnn_fc.cc:188: Weight scale = 195.596
+Perf	Mxnet	resnet50_v1-quantized-5batches-naive-symbol	2.048767	1.979589	5.5e-05
+INFO:logger:batch size = 1 for inference
+INFO:logger:rgb_mean = 0,0,0
+INFO:logger:rgb_std = 1,1,1
+INFO:logger:label_name = softmax_label
+INFO:logger:Input data shape = (3, 224, 224)
+INFO:logger:Running model ./model/resnet50_v1-quantized-5batches-naive-symbol.json for inference
+Perf	Tvm	resnet50_v1-quantized-5batches-naive-symbol	2.435526	2.25234	5.2e-05
+INFO:logger:batch size = 1 for inference
+INFO:logger:rgb_mean = 0,0,0
+INFO:logger:rgb_std = 1,1,1
+INFO:logger:label_name = softmax_label
+INFO:logger:Input data shape = (3, 224, 224)
+INFO:logger:Dataset for inference: ./data/val_256_q90.rec
+[20:02:58] /home/ubuntu/mxnet/incubator-mxnet/src/io/iter_image_recordio_2.cc:831: Create ImageRecordIter2 optimized for CPU backend.Use omp threads instead of preprocess_threads.
+[20:02:58] /home/ubuntu/mxnet/incubator-mxnet/src/io/iter_image_recordio_2.cc:178: ImageRecordIOParser2: ./data/val_256_q90.rec, use 24 threads for decoding..
+INFO:logger:Loading symbol from file /home/ubuntu/mxnet/incubator-mxnet/example/quantization/./model/resnet50_v1-quantized-5batches-naive-symbol.json
+INFO:logger:Loading params from file /home/ubuntu/mxnet/incubator-mxnet/example/quantization/./model/resnet50_v1-quantized-0000.params
+INFO:logger:Skipping the first 0 batches
+INFO:logger:Running model ./model/resnet50_v1-quantized-5batches-naive-symbol.json for inference
+[20:02:58] /home/ubuntu/mxnet/incubator-mxnet/src/executor/graph_executor.cc:1982: Subgraph backend MKLDNN is activated.
+[20:02:58] /home/ubuntu/mxnet/incubator-mxnet/src/operator/subgraph/mkldnn/mkldnn_fc.cc:179: Bias scale = 147.692
+[20:02:58] /home/ubuntu/mxnet/incubator-mxnet/src/operator/subgraph/mkldnn/mkldnn_fc.cc:180: Bias int32 scale = 3.50916
+[20:02:58] /home/ubuntu/mxnet/incubator-mxnet/src/operator/subgraph/mkldnn/mkldnn_fc.cc:187: Data scale = 2.64973
+[20:02:58] /home/ubuntu/mxnet/incubator-mxnet/src/operator/subgraph/mkldnn/mkldnn_fc.cc:188: Weight scale = 195.596
+Perf	Mxnet	resnet50_v1-quantized-5batches-naive-symbol	2.067684	1.987457	5.6e-05
+INFO:logger:batch size = 1 for inference
+INFO:logger:rgb_mean = 0,0,0
+INFO:logger:rgb_std = 1,1,1
+INFO:logger:label_name = softmax_label
+INFO:logger:Input data shape = (3, 224, 224)
+INFO:logger:Running model ./model/resnet50_v1-quantized-5batches-naive-symbol.json for inference
+Perf	Tvm	resnet50_v1-quantized-5batches-naive-symbol	2.505555	2.253056	0.000119
+INFO:logger:batch size = 1 for inference
+INFO:logger:rgb_mean = 0,0,0
+INFO:logger:rgb_std = 1,1,1
+INFO:logger:label_name = softmax_label
+INFO:logger:Input data shape = (3, 224, 224)
+INFO:logger:Dataset for inference: ./data/val_256_q90.rec
+[20:03:10] /home/ubuntu/mxnet/incubator-mxnet/src/io/iter_image_recordio_2.cc:831: Create ImageRecordIter2 optimized for CPU backend.Use omp threads instead of preprocess_threads.
+[20:03:10] /home/ubuntu/mxnet/incubator-mxnet/src/io/iter_image_recordio_2.cc:178: ImageRecordIOParser2: ./data/val_256_q90.rec, use 24 threads for decoding..
+INFO:logger:Loading symbol from file /home/ubuntu/mxnet/incubator-mxnet/example/quantization/./model/resnet50_v1b-quantized-5batches-naive-symbol.json
+INFO:logger:Loading params from file /home/ubuntu/mxnet/incubator-mxnet/example/quantization/./model/resnet50_v1b-quantized-0000.params
+INFO:logger:Skipping the first 0 batches
+INFO:logger:Running model ./model/resnet50_v1b-quantized-5batches-naive-symbol.json for inference
+[20:03:10] /home/ubuntu/mxnet/incubator-mxnet/src/executor/graph_executor.cc:1982: Subgraph backend MKLDNN is activated.
+[20:03:11] /home/ubuntu/mxnet/incubator-mxnet/src/operator/subgraph/mkldnn/mkldnn_fc.cc:179: Bias scale = 144.906
+[20:03:11] /home/ubuntu/mxnet/incubator-mxnet/src/operator/subgraph/mkldnn/mkldnn_fc.cc:180: Bias int32 scale = 4.08592
+[20:03:11] /home/ubuntu/mxnet/incubator-mxnet/src/operator/subgraph/mkldnn/mkldnn_fc.cc:187: Data scale = 3.1472
+[20:03:11] /home/ubuntu/mxnet/incubator-mxnet/src/operator/subgraph/mkldnn/mkldnn_fc.cc:188: Weight scale = 188.127
+Perf	Mxnet	resnet50_v1b-quantized-5batches-naive-symbol	1.896789	1.829863	7.3e-05
+INFO:logger:batch size = 1 for inference
+INFO:logger:rgb_mean = 0,0,0
+INFO:logger:rgb_std = 1,1,1
+INFO:logger:label_name = softmax_label
+INFO:logger:Input data shape = (3, 224, 224)
+INFO:logger:Running model ./model/resnet50_v1b-quantized-5batches-naive-symbol.json for inference
+Perf	Tvm	resnet50_v1b-quantized-5batches-naive-symbol	2.293724	2.202034	3.1e-05
+INFO:logger:batch size = 1 for inference
+INFO:logger:rgb_mean = 0,0,0
+INFO:logger:rgb_std = 1,1,1
+INFO:logger:label_name = softmax_label
+INFO:logger:Input data shape = (3, 224, 224)
+INFO:logger:Dataset for inference: ./data/val_256_q90.rec
+[20:03:22] /home/ubuntu/mxnet/incubator-mxnet/src/io/iter_image_recordio_2.cc:831: Create ImageRecordIter2 optimized for CPU backend.Use omp threads instead of preprocess_threads.
+[20:03:22] /home/ubuntu/mxnet/incubator-mxnet/src/io/iter_image_recordio_2.cc:178: ImageRecordIOParser2: ./data/val_256_q90.rec, use 24 threads for decoding..
+INFO:logger:Loading symbol from file /home/ubuntu/mxnet/incubator-mxnet/example/quantization/./model/resnet50_v1b-quantized-5batches-naive-symbol.json
+INFO:logger:Loading params from file /home/ubuntu/mxnet/incubator-mxnet/example/quantization/./model/resnet50_v1b-quantized-0000.params
+INFO:logger:Skipping the first 0 batches
+INFO:logger:Running model ./model/resnet50_v1b-quantized-5batches-naive-symbol.json for inference
+[20:03:22] /home/ubuntu/mxnet/incubator-mxnet/src/executor/graph_executor.cc:1982: Subgraph backend MKLDNN is activated.
+[20:03:22] /home/ubuntu/mxnet/incubator-mxnet/src/operator/subgraph/mkldnn/mkldnn_fc.cc:179: Bias scale = 144.906
+[20:03:22] /home/ubuntu/mxnet/incubator-mxnet/src/operator/subgraph/mkldnn/mkldnn_fc.cc:180: Bias int32 scale = 4.08592
+[20:03:22] /home/ubuntu/mxnet/incubator-mxnet/src/operator/subgraph/mkldnn/mkldnn_fc.cc:187: Data scale = 3.1472
+[20:03:22] /home/ubuntu/mxnet/incubator-mxnet/src/operator/subgraph/mkldnn/mkldnn_fc.cc:188: Weight scale = 188.127
+Perf	Mxnet	resnet50_v1b-quantized-5batches-naive-symbol	1.88758	1.820087	0.000117
+INFO:logger:batch size = 1 for inference
+INFO:logger:rgb_mean = 0,0,0
+INFO:logger:rgb_std = 1,1,1
+INFO:logger:label_name = softmax_label
+INFO:logger:Input data shape = (3, 224, 224)
+INFO:logger:Running model ./model/resnet50_v1b-quantized-5batches-naive-symbol.json for inference
+Perf	Tvm	resnet50_v1b-quantized-5batches-naive-symbol	2.304711	2.221346	1.9e-05
+INFO:logger:batch size = 1 for inference
+INFO:logger:rgb_mean = 0,0,0
+INFO:logger:rgb_std = 1,1,1
+INFO:logger:label_name = softmax_label
+INFO:logger:Input data shape = (3, 224, 224)
+INFO:logger:Dataset for inference: ./data/val_256_q90.rec
+[20:03:33] /home/ubuntu/mxnet/incubator-mxnet/src/io/iter_image_recordio_2.cc:831: Create ImageRecordIter2 optimized for CPU backend.Use omp threads instead of preprocess_threads.
+[20:03:33] /home/ubuntu/mxnet/incubator-mxnet/src/io/iter_image_recordio_2.cc:178: ImageRecordIOParser2: ./data/val_256_q90.rec, use 24 threads for decoding..
+INFO:logger:Loading symbol from file /home/ubuntu/mxnet/incubator-mxnet/example/quantization/./model/resnet50_v1b-quantized-5batches-naive-symbol.json
+INFO:logger:Loading params from file /home/ubuntu/mxnet/incubator-mxnet/example/quantization/./model/resnet50_v1b-quantized-0000.params
+INFO:logger:Skipping the first 0 batches
+INFO:logger:Running model ./model/resnet50_v1b-quantized-5batches-naive-symbol.json for inference
+[20:03:34] /home/ubuntu/mxnet/incubator-mxnet/src/executor/graph_executor.cc:1982: Subgraph backend MKLDNN is activated.
+[20:03:34] /home/ubuntu/mxnet/incubator-mxnet/src/operator/subgraph/mkldnn/mkldnn_fc.cc:179: Bias scale = 144.906
+[20:03:34] /home/ubuntu/mxnet/incubator-mxnet/src/operator/subgraph/mkldnn/mkldnn_fc.cc:180: Bias int32 scale = 4.08592
+[20:03:34] /home/ubuntu/mxnet/incubator-mxnet/src/operator/subgraph/mkldnn/mkldnn_fc.cc:187: Data scale = 3.1472
+[20:03:34] /home/ubuntu/mxnet/incubator-mxnet/src/operator/subgraph/mkldnn/mkldnn_fc.cc:188: Weight scale = 188.127
+Perf	Mxnet	resnet50_v1b-quantized-5batches-naive-symbol	1.913717	1.842737	0.000322
+INFO:logger:batch size = 1 for inference
+INFO:logger:rgb_mean = 0,0,0
+INFO:logger:rgb_std = 1,1,1
+INFO:logger:label_name = softmax_label
+INFO:logger:Input data shape = (3, 224, 224)
+INFO:logger:Running model ./model/resnet50_v1b-quantized-5batches-naive-symbol.json for inference
+Perf	Tvm	resnet50_v1b-quantized-5batches-naive-symbol	2.298708	2.199173	5e-05
+INFO:logger:batch size = 1 for inference
+INFO:logger:rgb_mean = 0,0,0
+INFO:logger:rgb_std = 1,1,1
+INFO:logger:label_name = softmax_label
+INFO:logger:Input data shape = (3, 224, 224)
+INFO:logger:Dataset for inference: ./data/val_256_q90.rec
+[20:03:45] /home/ubuntu/mxnet/incubator-mxnet/src/io/iter_image_recordio_2.cc:831: Create ImageRecordIter2 optimized for CPU backend.Use omp threads instead of preprocess_threads.
+[20:03:45] /home/ubuntu/mxnet/incubator-mxnet/src/io/iter_image_recordio_2.cc:178: ImageRecordIOParser2: ./data/val_256_q90.rec, use 24 threads for decoding..
+INFO:logger:Loading symbol from file /home/ubuntu/mxnet/incubator-mxnet/example/quantization/./model/resnet50_v1b-quantized-5batches-naive-symbol.json
+INFO:logger:Loading params from file /home/ubuntu/mxnet/incubator-mxnet/example/quantization/./model/resnet50_v1b-quantized-0000.params
+INFO:logger:Skipping the first 0 batches
+INFO:logger:Running model ./model/resnet50_v1b-quantized-5batches-naive-symbol.json for inference
+[20:03:45] /home/ubuntu/mxnet/incubator-mxnet/src/executor/graph_executor.cc:1982: Subgraph backend MKLDNN is activated.
+[20:03:45] /home/ubuntu/mxnet/incubator-mxnet/src/operator/subgraph/mkldnn/mkldnn_fc.cc:179: Bias scale = 144.906
+[20:03:45] /home/ubuntu/mxnet/incubator-mxnet/src/operator/subgraph/mkldnn/mkldnn_fc.cc:180: Bias int32 scale = 4.08592
+[20:03:45] /home/ubuntu/mxnet/incubator-mxnet/src/operator/subgraph/mkldnn/mkldnn_fc.cc:187: Data scale = 3.1472
+[20:03:45] /home/ubuntu/mxnet/incubator-mxnet/src/operator/subgraph/mkldnn/mkldnn_fc.cc:188: Weight scale = 188.127
+Perf	Mxnet	resnet50_v1b-quantized-5batches-naive-symbol	1.924409	1.860857	5.8e-05
+INFO:logger:batch size = 1 for inference
+INFO:logger:rgb_mean = 0,0,0
+INFO:logger:rgb_std = 1,1,1
+INFO:logger:label_name = softmax_label
+INFO:logger:Input data shape = (3, 224, 224)
+INFO:logger:Running model ./model/resnet50_v1b-quantized-5batches-naive-symbol.json for inference
+Perf	Tvm	resnet50_v1b-quantized-5batches-naive-symbol	2.296781	2.201319	2.6e-05
+INFO:logger:batch size = 1 for inference
+INFO:logger:rgb_mean = 0,0,0
+INFO:logger:rgb_std = 1,1,1
+INFO:logger:label_name = softmax_label
+INFO:logger:Input data shape = (3, 224, 224)
+INFO:logger:Dataset for inference: ./data/val_256_q90.rec
+[20:03:56] /home/ubuntu/mxnet/incubator-mxnet/src/io/iter_image_recordio_2.cc:831: Create ImageRecordIter2 optimized for CPU backend.Use omp threads instead of preprocess_threads.
+[20:03:56] /home/ubuntu/mxnet/incubator-mxnet/src/io/iter_image_recordio_2.cc:178: ImageRecordIOParser2: ./data/val_256_q90.rec, use 24 threads for decoding..
+INFO:logger:Loading symbol from file /home/ubuntu/mxnet/incubator-mxnet/example/quantization/./model/resnet50_v1b-quantized-5batches-naive-symbol.json
+INFO:logger:Loading params from file /home/ubuntu/mxnet/incubator-mxnet/example/quantization/./model/resnet50_v1b-quantized-0000.params
+INFO:logger:Skipping the first 0 batches
+INFO:logger:Running model ./model/resnet50_v1b-quantized-5batches-naive-symbol.json for inference
+[20:03:57] /home/ubuntu/mxnet/incubator-mxnet/src/executor/graph_executor.cc:1982: Subgraph backend MKLDNN is activated.
+[20:03:57] /home/ubuntu/mxnet/incubator-mxnet/src/operator/subgraph/mkldnn/mkldnn_fc.cc:179: Bias scale = 144.906
+[20:03:57] /home/ubuntu/mxnet/incubator-mxnet/src/operator/subgraph/mkldnn/mkldnn_fc.cc:180: Bias int32 scale = 4.08592
+[20:03:57] /home/ubuntu/mxnet/incubator-mxnet/src/operator/subgraph/mkldnn/mkldnn_fc.cc:187: Data scale = 3.1472
+[20:03:57] /home/ubuntu/mxnet/incubator-mxnet/src/operator/subgraph/mkldnn/mkldnn_fc.cc:188: Weight scale = 188.127
+Perf	Mxnet	resnet50_v1b-quantized-5batches-naive-symbol	1.913018	1.849651	5.9e-05
+INFO:logger:batch size = 1 for inference
+INFO:logger:rgb_mean = 0,0,0
+INFO:logger:rgb_std = 1,1,1
+INFO:logger:label_name = softmax_label
+INFO:logger:Input data shape = (3, 224, 224)
+INFO:logger:Running model ./model/resnet50_v1b-quantized-5batches-naive-symbol.json for inference
+Perf	Tvm	resnet50_v1b-quantized-5batches-naive-symbol	2.320482	2.214909	4e-05
+INFO:logger:batch size = 1 for inference
+INFO:logger:rgb_mean = 0,0,0
+INFO:logger:rgb_std = 1,1,1
+INFO:logger:label_name = softmax_label
+INFO:logger:Input data shape = (3, 224, 224)
+INFO:logger:Dataset for inference: None
+[20:04:08] /home/ubuntu/mxnet/incubator-mxnet/src/io/iter_image_recordio_2.cc:831: Create ImageRecordIter2 optimized for CPU backend.Use omp threads instead of preprocess_threads.
+[20:04:08] /home/ubuntu/mxnet/incubator-mxnet/src/io/iter_image_recordio_2.cc:178: ImageRecordIOParser2: None, use 24 threads for decoding..
+Traceback (most recent call last):
+
+  File "profile_mxnet.py", line 238, in <module>
+    **combine_mean_std)
+
+  File "/home/ubuntu/mxnet/incubator-mxnet/python/mxnet/io/io.py", line 960, in creator
+    ctypes.byref(iter_handle)))
+
+  File "/home/ubuntu/mxnet/incubator-mxnet/python/mxnet/base.py", line 278, in check_call
+    raise MXNetError(py_str(_LIB.MXGetLastError()))
+
+mxnet.base.MXNetError: [20:04:08] /home/ubuntu/mxnet/incubator-mxnet/3rdparty/dmlc-core/src/io/local_filesys.cc:86: LocalFileSystem.GetPathInfo: None error: No such file or directory
+Stack trace:
+  [bt] (0) /home/ubuntu/mxnet/incubator-mxnet/python/mxnet/../../build/libmxnet.so(dmlc::io::LocalFileSystem::GetPathInfo(dmlc::io::URI const&)+0x5df) [0x7f68d7935c9f]
+  [bt] (1) /home/ubuntu/mxnet/incubator-mxnet/python/mxnet/../../build/libmxnet.so(dmlc::io::InputSplitBase::InitInputFileInfo(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, bool)+0x167) [0x7f68d7924847]
+  [bt] (2) /home/ubuntu/mxnet/incubator-mxnet/python/mxnet/../../build/libmxnet.so(dmlc::io::InputSplitBase::Init(dmlc::io::FileSystem*, char const*, unsigned long, bool)+0x70) [0x7f68d7924ef0]
+  [bt] (3) /home/ubuntu/mxnet/incubator-mxnet/python/mxnet/../../build/libmxnet.so(dmlc::InputSplit::Create(char const*, char const*, unsigned int, unsigned int, char const*, bool, int, unsigned long, bool)+0x888) [0x7f68d7908218]
+  [bt] (4) /home/ubuntu/mxnet/incubator-mxnet/python/mxnet/../../build/libmxnet.so(dmlc::InputSplit::Create(char const*, unsigned int, unsigned int, char const*)+0x1e) [0x7f68d7908abe]
+  [bt] (5) /home/ubuntu/mxnet/incubator-mxnet/python/mxnet/../../build/libmxnet.so(mxnet::io::ImageRecordIOParser2<float>::Init(std::vector<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > > > const&)+0x8bb) [0x7f68d698c7db]
+  [bt] (6) /home/ubuntu/mxnet/incubator-mxnet/python/mxnet/../../build/libmxnet.so(mxnet::io::ImageRecordIter2Wrapper::Init(std::vector<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > > > const&)+0x42d) [0x7f68d6979b9d]
+  [bt] (7) /home/ubuntu/mxnet/incubator-mxnet/python/mxnet/../../build/libmxnet.so(MXDataIterCreateIter+0x3b0) [0x7f68d6aae5f0]
+  [bt] (8) /usr/lib/x86_64-linux-gnu/libffi.so.6(ffi_call_unix64+0x4c) [0x7f68e0299e40]
+
+
+
+INFO:logger:batch size = 1 for inference
+INFO:logger:rgb_mean = 0,0,0
+INFO:logger:rgb_std = 1,1,1
+INFO:logger:label_name = softmax_label
+INFO:logger:Input data shape = (3, 224, 224)
+INFO:logger:Running model ./model/mobilenet1.0-quantized-5batches-naive-symbol.json for inference
+Perf	Tvm	mobilenet1.0-quantized-5batches-naive-symbol	0.744798	0.703335	6.3e-05
+INFO:logger:batch size = 1 for inference
+INFO:logger:rgb_mean = 0,0,0
+INFO:logger:rgb_std = 1,1,1
+INFO:logger:label_name = softmax_label
+INFO:logger:Input data shape = (3, 224, 224)
+INFO:logger:Dataset for inference: None
+[20:04:11] /home/ubuntu/mxnet/incubator-mxnet/src/io/iter_image_recordio_2.cc:831: Create ImageRecordIter2 optimized for CPU backend.Use omp threads instead of preprocess_threads.
+[20:04:11] /home/ubuntu/mxnet/incubator-mxnet/src/io/iter_image_recordio_2.cc:178: ImageRecordIOParser2: None, use 24 threads for decoding..
+Traceback (most recent call last):
+
+  File "profile_mxnet.py", line 238, in <module>
+    **combine_mean_std)
+
+  File "/home/ubuntu/mxnet/incubator-mxnet/python/mxnet/io/io.py", line 960, in creator
+    ctypes.byref(iter_handle)))
+
+  File "/home/ubuntu/mxnet/incubator-mxnet/python/mxnet/base.py", line 278, in check_call
+    raise MXNetError(py_str(_LIB.MXGetLastError()))
+
+mxnet.base.MXNetError: [20:04:11] /home/ubuntu/mxnet/incubator-mxnet/3rdparty/dmlc-core/src/io/local_filesys.cc:86: LocalFileSystem.GetPathInfo: None error: No such file or directory
+Stack trace:
+  [bt] (0) /home/ubuntu/mxnet/incubator-mxnet/python/mxnet/../../build/libmxnet.so(dmlc::io::LocalFileSystem::GetPathInfo(dmlc::io::URI const&)+0x5df) [0x7fc84a079c9f]
+  [bt] (1) /home/ubuntu/mxnet/incubator-mxnet/python/mxnet/../../build/libmxnet.so(dmlc::io::InputSplitBase::InitInputFileInfo(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, bool)+0x167) [0x7fc84a068847]
+  [bt] (2) /home/ubuntu/mxnet/incubator-mxnet/python/mxnet/../../build/libmxnet.so(dmlc::io::InputSplitBase::Init(dmlc::io::FileSystem*, char const*, unsigned long, bool)+0x70) [0x7fc84a068ef0]
+  [bt] (3) /home/ubuntu/mxnet/incubator-mxnet/python/mxnet/../../build/libmxnet.so(dmlc::InputSplit::Create(char const*, char const*, unsigned int, unsigned int, char const*, bool, int, unsigned long, bool)+0x888) [0x7fc84a04c218]
+  [bt] (4) /home/ubuntu/mxnet/incubator-mxnet/python/mxnet/../../build/libmxnet.so(dmlc::InputSplit::Create(char const*, unsigned int, unsigned int, char const*)+0x1e) [0x7fc84a04cabe]
+  [bt] (5) /home/ubuntu/mxnet/incubator-mxnet/python/mxnet/../../build/libmxnet.so(mxnet::io::ImageRecordIOParser2<float>::Init(std::vector<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > > > const&)+0x8bb) [0x7fc8490d07db]
+  [bt] (6) /home/ubuntu/mxnet/incubator-mxnet/python/mxnet/../../build/libmxnet.so(mxnet::io::ImageRecordIter2Wrapper::Init(std::vector<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > > > const&)+0x42d) [0x7fc8490bdb9d]
+  [bt] (7) /home/ubuntu/mxnet/incubator-mxnet/python/mxnet/../../build/libmxnet.so(MXDataIterCreateIter+0x3b0) [0x7fc8491f25f0]
+  [bt] (8) /usr/lib/x86_64-linux-gnu/libffi.so.6(ffi_call_unix64+0x4c) [0x7fc8529dde40]
+
+
+
+INFO:logger:batch size = 1 for inference
+INFO:logger:rgb_mean = 0,0,0
+INFO:logger:rgb_std = 1,1,1
+INFO:logger:label_name = softmax_label
+INFO:logger:Input data shape = (3, 224, 224)
+INFO:logger:Running model ./model/mobilenet1.0-quantized-5batches-naive-symbol.json for inference
+Perf	Tvm	mobilenet1.0-quantized-5batches-naive-symbol	0.732922	0.707626	1.3e-05
+INFO:logger:batch size = 1 for inference
+INFO:logger:rgb_mean = 0,0,0
+INFO:logger:rgb_std = 1,1,1
+INFO:logger:label_name = softmax_label
+INFO:logger:Input data shape = (3, 224, 224)
+INFO:logger:Dataset for inference: None
+[20:04:14] /home/ubuntu/mxnet/incubator-mxnet/src/io/iter_image_recordio_2.cc:831: Create ImageRecordIter2 optimized for CPU backend.Use omp threads instead of preprocess_threads.
+[20:04:14] /home/ubuntu/mxnet/incubator-mxnet/src/io/iter_image_recordio_2.cc:178: ImageRecordIOParser2: None, use 24 threads for decoding..
+Traceback (most recent call last):
+
+  File "profile_mxnet.py", line 238, in <module>
+    **combine_mean_std)
+
+  File "/home/ubuntu/mxnet/incubator-mxnet/python/mxnet/io/io.py", line 960, in creator
+    ctypes.byref(iter_handle)))
+
+  File "/home/ubuntu/mxnet/incubator-mxnet/python/mxnet/base.py", line 278, in check_call
+    raise MXNetError(py_str(_LIB.MXGetLastError()))
+
+mxnet.base.MXNetError: [20:04:14] /home/ubuntu/mxnet/incubator-mxnet/3rdparty/dmlc-core/src/io/local_filesys.cc:86: LocalFileSystem.GetPathInfo: None error: No such file or directory
+Stack trace:
+  [bt] (0) /home/ubuntu/mxnet/incubator-mxnet/python/mxnet/../../build/libmxnet.so(dmlc::io::LocalFileSystem::GetPathInfo(dmlc::io::URI const&)+0x5df) [0x7f96074f9c9f]
+  [bt] (1) /home/ubuntu/mxnet/incubator-mxnet/python/mxnet/../../build/libmxnet.so(dmlc::io::InputSplitBase::InitInputFileInfo(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, bool)+0x167) [0x7f96074e8847]
+  [bt] (2) /home/ubuntu/mxnet/incubator-mxnet/python/mxnet/../../build/libmxnet.so(dmlc::io::InputSplitBase::Init(dmlc::io::FileSystem*, char const*, unsigned long, bool)+0x70) [0x7f96074e8ef0]
+  [bt] (3) /home/ubuntu/mxnet/incubator-mxnet/python/mxnet/../../build/libmxnet.so(dmlc::InputSplit::Create(char const*, char const*, unsigned int, unsigned int, char const*, bool, int, unsigned long, bool)+0x888) [0x7f96074cc218]
+  [bt] (4) /home/ubuntu/mxnet/incubator-mxnet/python/mxnet/../../build/libmxnet.so(dmlc::InputSplit::Create(char const*, unsigned int, unsigned int, char const*)+0x1e) [0x7f96074ccabe]
+  [bt] (5) /home/ubuntu/mxnet/incubator-mxnet/python/mxnet/../../build/libmxnet.so(mxnet::io::ImageRecordIOParser2<float>::Init(std::vector<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > > > const&)+0x8bb) [0x7f96065507db]
+  [bt] (6) /home/ubuntu/mxnet/incubator-mxnet/python/mxnet/../../build/libmxnet.so(mxnet::io::ImageRecordIter2Wrapper::Init(std::vector<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > > > const&)+0x42d) [0x7f960653db9d]
+  [bt] (7) /home/ubuntu/mxnet/incubator-mxnet/python/mxnet/../../build/libmxnet.so(MXDataIterCreateIter+0x3b0) [0x7f96066725f0]
+  [bt] (8) /usr/lib/x86_64-linux-gnu/libffi.so.6(ffi_call_unix64+0x4c) [0x7f960fe5de40]
+
+
+
+INFO:logger:batch size = 1 for inference
+INFO:logger:rgb_mean = 0,0,0
+INFO:logger:rgb_std = 1,1,1
+INFO:logger:label_name = softmax_label
+INFO:logger:Input data shape = (3, 224, 224)
+INFO:logger:Running model ./model/mobilenet1.0-quantized-5batches-naive-symbol.json for inference
+Perf	Tvm	mobilenet1.0-quantized-5batches-naive-symbol	0.732829	0.707388	1.1e-05
+INFO:logger:batch size = 1 for inference
+INFO:logger:rgb_mean = 0,0,0
+INFO:logger:rgb_std = 1,1,1
+INFO:logger:label_name = softmax_label
+INFO:logger:Input data shape = (3, 224, 224)
+INFO:logger:Dataset for inference: None
+[20:04:18] /home/ubuntu/mxnet/incubator-mxnet/src/io/iter_image_recordio_2.cc:831: Create ImageRecordIter2 optimized for CPU backend.Use omp threads instead of preprocess_threads.
+[20:04:18] /home/ubuntu/mxnet/incubator-mxnet/src/io/iter_image_recordio_2.cc:178: ImageRecordIOParser2: None, use 24 threads for decoding..
+Traceback (most recent call last):
+
+  File "profile_mxnet.py", line 238, in <module>
+    **combine_mean_std)
+
+  File "/home/ubuntu/mxnet/incubator-mxnet/python/mxnet/io/io.py", line 960, in creator
+    ctypes.byref(iter_handle)))
+
+  File "/home/ubuntu/mxnet/incubator-mxnet/python/mxnet/base.py", line 278, in check_call
+    raise MXNetError(py_str(_LIB.MXGetLastError()))
+
+mxnet.base.MXNetError: [20:04:18] /home/ubuntu/mxnet/incubator-mxnet/3rdparty/dmlc-core/src/io/local_filesys.cc:86: LocalFileSystem.GetPathInfo: None error: No such file or directory
+Stack trace:
+  [bt] (0) /home/ubuntu/mxnet/incubator-mxnet/python/mxnet/../../build/libmxnet.so(dmlc::io::LocalFileSystem::GetPathInfo(dmlc::io::URI const&)+0x5df) [0x7f5e14500c9f]
+  [bt] (1) /home/ubuntu/mxnet/incubator-mxnet/python/mxnet/../../build/libmxnet.so(dmlc::io::InputSplitBase::InitInputFileInfo(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, bool)+0x167) [0x7f5e144ef847]
+  [bt] (2) /home/ubuntu/mxnet/incubator-mxnet/python/mxnet/../../build/libmxnet.so(dmlc::io::InputSplitBase::Init(dmlc::io::FileSystem*, char const*, unsigned long, bool)+0x70) [0x7f5e144efef0]
+  [bt] (3) /home/ubuntu/mxnet/incubator-mxnet/python/mxnet/../../build/libmxnet.so(dmlc::InputSplit::Create(char const*, char const*, unsigned int, unsigned int, char const*, bool, int, unsigned long, bool)+0x888) [0x7f5e144d3218]
+  [bt] (4) /home/ubuntu/mxnet/incubator-mxnet/python/mxnet/../../build/libmxnet.so(dmlc::InputSplit::Create(char const*, unsigned int, unsigned int, char const*)+0x1e) [0x7f5e144d3abe]
+  [bt] (5) /home/ubuntu/mxnet/incubator-mxnet/python/mxnet/../../build/libmxnet.so(mxnet::io::ImageRecordIOParser2<float>::Init(std::vector<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > > > const&)+0x8bb) [0x7f5e135577db]
+  [bt] (6) /home/ubuntu/mxnet/incubator-mxnet/python/mxnet/../../build/libmxnet.so(mxnet::io::ImageRecordIter2Wrapper::Init(std::vector<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > > > const&)+0x42d) [0x7f5e13544b9d]
+  [bt] (7) /home/ubuntu/mxnet/incubator-mxnet/python/mxnet/../../build/libmxnet.so(MXDataIterCreateIter+0x3b0) [0x7f5e136795f0]
+  [bt] (8) /usr/lib/x86_64-linux-gnu/libffi.so.6(ffi_call_unix64+0x4c) [0x7f5e1ce64e40]
+
+
+
+INFO:logger:batch size = 1 for inference
+INFO:logger:rgb_mean = 0,0,0
+INFO:logger:rgb_std = 1,1,1
+INFO:logger:label_name = softmax_label
+INFO:logger:Input data shape = (3, 224, 224)
+INFO:logger:Running model ./model/mobilenet1.0-quantized-5batches-naive-symbol.json for inference
+Perf	Tvm	mobilenet1.0-quantized-5batches-naive-symbol	0.72953	0.709295	1e-05
+INFO:logger:batch size = 1 for inference
+INFO:logger:rgb_mean = 0,0,0
+INFO:logger:rgb_std = 1,1,1
+INFO:logger:label_name = softmax_label
+INFO:logger:Input data shape = (3, 224, 224)
+INFO:logger:Dataset for inference: None
+[20:04:21] /home/ubuntu/mxnet/incubator-mxnet/src/io/iter_image_recordio_2.cc:831: Create ImageRecordIter2 optimized for CPU backend.Use omp threads instead of preprocess_threads.
+[20:04:21] /home/ubuntu/mxnet/incubator-mxnet/src/io/iter_image_recordio_2.cc:178: ImageRecordIOParser2: None, use 24 threads for decoding..
+Traceback (most recent call last):
+
+  File "profile_mxnet.py", line 238, in <module>
+    **combine_mean_std)
+
+  File "/home/ubuntu/mxnet/incubator-mxnet/python/mxnet/io/io.py", line 960, in creator
+    ctypes.byref(iter_handle)))
+
+  File "/home/ubuntu/mxnet/incubator-mxnet/python/mxnet/base.py", line 278, in check_call
+    raise MXNetError(py_str(_LIB.MXGetLastError()))
+
+mxnet.base.MXNetError: [20:04:21] /home/ubuntu/mxnet/incubator-mxnet/3rdparty/dmlc-core/src/io/local_filesys.cc:86: LocalFileSystem.GetPathInfo: None error: No such file or directory
+Stack trace:
+  [bt] (0) /home/ubuntu/mxnet/incubator-mxnet/python/mxnet/../../build/libmxnet.so(dmlc::io::LocalFileSystem::GetPathInfo(dmlc::io::URI const&)+0x5df) [0x7fb846226c9f]
+  [bt] (1) /home/ubuntu/mxnet/incubator-mxnet/python/mxnet/../../build/libmxnet.so(dmlc::io::InputSplitBase::InitInputFileInfo(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, bool)+0x167) [0x7fb846215847]
+  [bt] (2) /home/ubuntu/mxnet/incubator-mxnet/python/mxnet/../../build/libmxnet.so(dmlc::io::InputSplitBase::Init(dmlc::io::FileSystem*, char const*, unsigned long, bool)+0x70) [0x7fb846215ef0]
+  [bt] (3) /home/ubuntu/mxnet/incubator-mxnet/python/mxnet/../../build/libmxnet.so(dmlc::InputSplit::Create(char const*, char const*, unsigned int, unsigned int, char const*, bool, int, unsigned long, bool)+0x888) [0x7fb8461f9218]
+  [bt] (4) /home/ubuntu/mxnet/incubator-mxnet/python/mxnet/../../build/libmxnet.so(dmlc::InputSplit::Create(char const*, unsigned int, unsigned int, char const*)+0x1e) [0x7fb8461f9abe]
+  [bt] (5) /home/ubuntu/mxnet/incubator-mxnet/python/mxnet/../../build/libmxnet.so(mxnet::io::ImageRecordIOParser2<float>::Init(std::vector<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > > > const&)+0x8bb) [0x7fb84527d7db]
+  [bt] (6) /home/ubuntu/mxnet/incubator-mxnet/python/mxnet/../../build/libmxnet.so(mxnet::io::ImageRecordIter2Wrapper::Init(std::vector<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > > > const&)+0x42d) [0x7fb84526ab9d]
+  [bt] (7) /home/ubuntu/mxnet/incubator-mxnet/python/mxnet/../../build/libmxnet.so(MXDataIterCreateIter+0x3b0) [0x7fb84539f5f0]
+  [bt] (8) /usr/lib/x86_64-linux-gnu/libffi.so.6(ffi_call_unix64+0x4c) [0x7fb84eb8ae40]
+
+
+
+INFO:logger:batch size = 1 for inference
+INFO:logger:rgb_mean = 0,0,0
+INFO:logger:rgb_std = 1,1,1
+INFO:logger:label_name = softmax_label
+INFO:logger:Input data shape = (3, 224, 224)
+INFO:logger:Running model ./model/mobilenet1.0-quantized-5batches-naive-symbol.json for inference
+Perf	Tvm	mobilenet1.0-quantized-5batches-naive-symbol	0.731827	0.70715	0.000103

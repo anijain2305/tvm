@@ -232,3 +232,9 @@ conda/pkg
 # antlr files
 *.tokens
 *.interp
+
+# scripts
+scripts_paper/data
+scripts_paper/perf.txt
+scripts_paper/tuned_perf.txt
+
