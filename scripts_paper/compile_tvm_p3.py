@@ -285,21 +285,21 @@ def compile_via_tvm(sym, arg_params, aux_params, symbol_file, data_shape):
         tune_and_evaluate(tuning_option, mod, params, input_shape, out_shape, log_file,
                 graph_opt_sch_file, input_name)
 
-    with autotvm.apply_history_best(log_file):
-        with relay.build_config(opt_level=3):
-            graph, lib, params = relay.build_module.build(
-                mod, target=target, params=params)
-            base = '/home/ubuntu/mxnet_compiled_models/tvm_' + symbol_file.split('/')[-1].replace('.json','')
-    
-            path_lib = base + '_deploy_lib.tar'
-            path_graph =  base + '_deploy_graph.json'
-            path_params = base + '_deploy_params.params'
-    
-            lib.export_library(path_lib)
-            with open(path_graph, 'w') as fo:
-                fo.write(graph)
-            with open(path_params, 'wb') as fo:
-                fo.write(relay.save_param_dict(params))
+    # with autotvm.apply_history_best(log_file):
+    #     with relay.build_config(opt_level=3):
+    #         graph, lib, params = relay.build_module.build(
+    #             mod, target=target, params=params)
+    #         base = '/home/ubuntu/mxnet_compiled_models/tvm_' + symbol_file.split('/')[-1].replace('.json','')
+    # 
+    #         path_lib = base + '_deploy_lib.tar'
+    #         path_graph =  base + '_deploy_graph.json'
+    #         path_params = base + '_deploy_params.params'
+    # 
+    #         lib.export_library(path_lib)
+    #         with open(path_graph, 'w') as fo:
+    #             fo.write(graph)
+    #         with open(path_params, 'wb') as fo:
+    #             fo.write(relay.save_param_dict(params))
 
 
 if __name__ == '__main__':

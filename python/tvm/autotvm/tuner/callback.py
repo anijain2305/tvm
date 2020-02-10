@@ -133,6 +133,10 @@ def progress_bar(total, prefix=''):
         sys.stdout.write('\r%s Current/Best: %7.2f/%7.2f GFLOPS | Progress: (%d/%d) '
                          '| %.2f s' % (prefix, 0, 0, 0, total, time.time() - tic))
         sys.stdout.flush()
+    else:
+        print('\r%s Current/Best: %7.2f/%7.2f GFLOPS | Progress: (%d/%d) '
+                '| %.2f s' % (prefix, 0, 0, 0, total, time.time() - tic))
+
 
     def _callback(tuner, inputs, results):
         ctx.ct += len(inputs)
@@ -151,5 +155,13 @@ def progress_bar(total, prefix=''):
                              (prefix, ctx.cur_flops/1e9, ctx.best_flops/1e9, ctx.ct, ctx.total,
                               time.time() - tic))
             sys.stdout.flush()
+        else:
+            ctx.cur_flops = flops
+            ctx.best_flops = tuner.best_flops
+
+            print('\r%s Current/Best: %7.2f/%7.2f GFLOPS | Progress: (%d/%d) '
+                    '| %.2f s' %
+                    (prefix, ctx.cur_flops/1e9, ctx.best_flops/1e9, ctx.ct, ctx.total,
+                        time.time() - tic))
 
     return _callback
