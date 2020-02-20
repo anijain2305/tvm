@@ -69,6 +69,10 @@ def tune_tasks(tasks,
     if try_winograd:
         for i in range(len(tasks)):
             try:  # try winograd template
+                dtype = tasks[i].workload[1][-1]
+                if dtype != 'float32':
+                    continue
+                assert False
                 tsk = autotvm.task.create(tasks[i].name, tasks[i].args,
                                           tasks[i].target, tasks[i].target_host, 'winograd')
                 input_channel = tsk.workload[1][1]
@@ -81,6 +85,9 @@ def tune_tasks(tasks,
     tmp_log_file = log_filename + ".tmp"
     if os.path.exists(tmp_log_file):
         os.remove(tmp_log_file)
+
+    if os.path.exists(log_filename):
+        os.remove(log_filename)
 
     for i, tsk in enumerate(reversed(tasks)):
         prefix = "[Task %2d/%2d] " %(i+1, len(tasks))
@@ -112,69 +119,10 @@ def tune_tasks(tasks,
 
     # pick best records to a cache file
     autotvm.record.pick_best(tmp_log_file, log_filename)
-    os.remove(tmp_log_file)
-
-def tune_kernels(tasks,
-                 measure_option,
-                 tuner='gridsearch',
-                 early_stopping=None,
-                 log_filename='tuning.log'):
-
-    for i, tsk in enumerate(tasks):
-        prefix = "[Task %2d/%2d] " % (i+1, len(tasks))
-
-        # converting conv2d tasks to conv2d_NCHWc tasks
-        op_name = tsk.workload[0]
-        if op_name == 'conv2d':
-            func_create = 'topi_x86_conv2d_NCHWc_int8'
-        elif op_name == 'depthwise_conv2d_nchw':
-            func_create = 'topi_x86_depthwise_conv2d_NCHWc_from_nchw'
-        else:
-            raise ValueError("Tuning {} is not supported on x86".format(op_name))
-
-        target = 'cuda'
-        task = autotvm.task.create(func_create, args=tsk.args,
-                                   target=target, template_key='direct')
-        task.workload = tsk.workload
-
-        # create tuner
-        if tuner == 'xgb' or tuner == 'xgb-rank':
-            tuner_obj = XGBTuner(task, loss_type='rank')
-        elif tuner == 'ga':
-            tuner_obj = GATuner(task, pop_size=50)
-        elif tuner == 'random':
-            tuner_obj = RandomTuner(task)
-        elif tuner == 'gridsearch':
-            tuner_obj = GridSearchTuner(task)
-        else:
-            raise ValueError("Invalid tuner: " + tuner)
-
-        # do tuning
-        n_trial=len(task.config_space)
-        tuner_obj.tune(n_trial=n_trial,
-                       early_stopping=early_stopping,
-                       measure_option=measure_option,
-                       callbacks=[
-                           autotvm.callback.progress_bar(n_trial, prefix=prefix),
-                           autotvm.callback.log_to_file(log_filename)])
+    # os.remove(tmp_log_file)
 
 
-# Use graph tuner to achieve graph level optimal schedules
-# Set use_DP=False if it takes too long to finish.
-def tune_graph(graph, dshape, records, opt_sch_file, input_name, use_DP=True):
-    target_op = [relay.nn.conv2d]
-    Tuner = DPTuner if use_DP else PBQPTuner
-    executor = Tuner(graph, {input_name: dshape}, records, target_op, target)
-    executor.benchmark_layout_transform(min_exec_num=2000)
-    executor.run()
-    executor.write_opt_sch2record_file(opt_sch_file)
-
-
-########################################################################
-# Finally, we launch tuning jobs and evaluate the end-to-end performance.
-
-def tune_and_evaluate(tuning_opt, mod, params, data_shape, out_shape, log_file, graph_opt_sch_file,
-        input_name):
+def tune_and_evaluate(tuning_opt, mod, params, data_shape, log_file, input_name):
     # extract workloads from relay program
     print("Extract tasks...")
     tasks = autotvm.task.extract_from_program(mod["main"], target=target,
@@ -185,6 +133,9 @@ def tune_and_evaluate(tuning_opt, mod, params, data_shape, out_shape, log_file, 
         tsk = tasks[i]
         if tsk.workload[0] != 'conv2d':
             continue
+        dtype = tsk.workload[1][-1]
+        if 'int8' not in dtype:
+            continue
         input_channel = tsk.workload[2][1]
         output_channel = tsk.workload[2][0]
         if output_channel % 4 == 0 and input_channel % 4 == 0:
@@ -194,12 +145,7 @@ def tune_and_evaluate(tuning_opt, mod, params, data_shape, out_shape, log_file, 
 
     # run tuning tasks
     print("Tuning...")
-    if target == 'cuda':
-        tune_tasks(tasks, **tuning_opt)
-    else:
-        tune_kernels(tasks, **tuning_opt)
-    if target != 'cuda':
-        tune_graph(mod["main"], data_shape, log_file, graph_opt_sch_file, input_name)
+    tune_tasks(tasks, **tuning_opt)
 
 def load_model(symbol_file, param_file, logger=None):
     cur_path = os.path.dirname(os.path.realpath(__file__))
@@ -245,61 +191,41 @@ def compile_via_tvm(sym, arg_params, aux_params, symbol_file, data_shape):
         mod = relay.transform.FoldConstant()(mod)
 
     model_name = symbol_file.split('/')[-1].replace('.json','')
-    log_file = "tuned_logs/" + "%s.log" % model_name
-    graph_opt_sch_file = "tuned_logs/" + "%s_graph_opt.log" % model_name
+    log_file = "tuned_logs_g4/" + "%s.log" % model_name
 
     Path(log_file).touch()
-    Path(graph_opt_sch_file).touch()
 
     if tune:
-        out_shape = (1, 64, 56, 56)
         tuning_option = {
             'log_filename': log_file,
-            'tuner': 'random',
-            'early_stopping': None,
+
+            'tuner': 'xgb',
+            'n_trial': 2000,
+            'early_stopping': 600,
 
             'measure_option': autotvm.measure_option(
-                builder=autotvm.LocalBuilder(),
-                runner=autotvm.LocalRunner(number=10, repeat=1,
-                                           min_repeat_ms=1000),
+                builder=autotvm.LocalBuilder(timeout=10),
+                runner=autotvm.LocalRunner(number=20, repeat=3, timeout=4, min_repeat_ms=150),
             ),
-        }
-        if target == 'cuda':
-            tuning_option = {
-                'log_filename': log_file,
+		}
 
-                'tuner': 'xgb',
-                'n_trial': 2000,
-                'early_stopping': 600,
+        tune_and_evaluate(tuning_option, mod, params, input_shape, log_file, input_name)
 
-                'measure_option': autotvm.measure_option(
-                    builder=autotvm.LocalBuilder(timeout=10),
-                    runner=autotvm.LocalRunner(number=20, repeat=3, timeout=4, min_repeat_ms=150),
-                    # runner=autotvm.RPCRunner(
-                    #     '1080ti',  # change the device key to your key
-                    #     '0.0.0.0', 9190,
-                    #     number=20, repeat=3, timeout=4, min_repeat_ms=150)
-                ),
-			}
-
-        tune_and_evaluate(tuning_option, mod, params, input_shape, out_shape, log_file,
-                graph_opt_sch_file, input_name)
-
-    # with autotvm.apply_history_best(log_file):
-    #     with relay.build_config(opt_level=3):
-    #         graph, lib, params = relay.build_module.build(
-    #             mod, target=target, params=params)
-    #         base = '/home/ubuntu/mxnet_compiled_models/tvm_' + symbol_file.split('/')[-1].replace('.json','')
-    # 
-    #         path_lib = base + '_deploy_lib.tar'
-    #         path_graph =  base + '_deploy_graph.json'
-    #         path_params = base + '_deploy_params.params'
-    # 
-    #         lib.export_library(path_lib)
-    #         with open(path_graph, 'w') as fo:
-    #             fo.write(graph)
-    #         with open(path_params, 'wb') as fo:
-    #             fo.write(relay.save_param_dict(params))
+    with autotvm.apply_history_best(log_file):
+        with relay.build_config(opt_level=3):
+            graph, lib, params = relay.build_module.build(
+                mod, target=target, params=params)
+            base = '/home/ubuntu/mxnet_compiled_models/tvm_' + symbol_file.split('/')[-1].replace('.json','')
+    
+            path_lib = base + '_deploy_lib.tar'
+            path_graph =  base + '_deploy_graph.json'
+            path_params = base + '_deploy_params.params'
+    
+            lib.export_library(path_lib)
+            with open(path_graph, 'w') as fo:
+                fo.write(graph)
+            with open(path_params, 'wb') as fo:
+                fo.write(relay.save_param_dict(params))
 
 
 if __name__ == '__main__':
