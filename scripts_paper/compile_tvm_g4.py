@@ -72,7 +72,6 @@ def tune_tasks(tasks,
                 dtype = tasks[i].workload[1][-1]
                 if dtype != 'float32':
                     continue
-                assert False
                 tsk = autotvm.task.create(tasks[i].name, tasks[i].args,
                                           tasks[i].target, tasks[i].target_host, 'winograd')
                 input_channel = tsk.workload[1][1]
