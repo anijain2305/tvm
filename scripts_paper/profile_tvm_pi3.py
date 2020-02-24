@@ -27,7 +27,7 @@ import tvm.contrib.graph_runtime as runtime
 
 
 def profile(data, symbol_file, num_inference_images, sym, devs, label_name):
-    debug = True
+    debug = False
     import tvm
     from tvm.contrib import graph_runtime
     from tvm.contrib.debugger import debug_runtime as debug_runtime
