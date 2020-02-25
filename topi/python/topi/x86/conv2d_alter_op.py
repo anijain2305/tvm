@@ -106,6 +106,7 @@ def _alter_conv2d_layout(attrs, inputs, tinfo, F):
         new_attrs['kernel_layout'] = 'OIHW1i%do' % oc_bn
         # Store altered operator's config
         new_kernel = tvm.placeholder((out_channel//oc_bn, 1, kh, kw, 1, oc_bn), dtype=kernel_dtype)
+        padding = (padding[0], padding[1], padding[0], padding[1])
         new_workload = autotvm.task.args_to_workload(
             [new_data, new_kernel, strides, padding, dilation, new_attrs[layout_name],
              new_attrs['out_layout'], out_dtype], depthwise_conv2d_NCHWc)
