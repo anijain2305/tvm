@@ -46,7 +46,7 @@ def profile(data, symbol_file, num_inference_images, sym, devs, label_name):
     path_params = base + '_deploy_params.params'
 
     graph = open(path_graph).read()
-    lib = tvm.module.load(path_lib)
+    lib = tvm.runtime.load_module(path_lib)
     params = bytearray(open(path_params, 'rb').read())
 
     if debug:

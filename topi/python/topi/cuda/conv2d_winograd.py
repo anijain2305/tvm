@@ -377,6 +377,8 @@ def _alter_conv2d_layout(attrs, inputs, tinfos, F):
                                        dtype=data.dtype)
             new_kernel = tvm.placeholder((CO // oc_block_factor, CI // ic_block_factor, KH, KW,\
                                          oc_block_factor, ic_block_factor), dtype=kernel.dtype)
+            # HACK to work with 4D padding
+            padding = (padding[0], padding[1], padding[0], padding[1])
             new_workload = autotvm.task.args_to_workload(
                 [new_data, new_kernel, strides, padding, dilation, new_layout, out_dtype],
                 conv2d

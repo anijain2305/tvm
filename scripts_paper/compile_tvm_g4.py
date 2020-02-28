@@ -169,7 +169,7 @@ def load_model(symbol_file, param_file, logger=None):
 
 
 def compile_via_tvm(sym, arg_params, aux_params, symbol_file, data_shape):
-    tune = True
+    tune = False
 
     input_shape = [1] + list(data_shape)
     input_dict = {'data': input_shape}
