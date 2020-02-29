@@ -30,8 +30,8 @@ for model in db:
     for fw in db[model]:
         db[model][fw].append(avg(db[model][fw]))
 
-print('', "FP32", "Int8", sep='\t')
+print('Model', "FP32", "Int8", 'Speedup',sep=',')
 for model in db:
     speedup = round(db[model]["FP32"][-1] / db[model]["Int8"][-1], 2)
-    print(model, db[model]["FP32"][-1], db[model]["Int8"][-1], speedup, sep='\t')
+    print(model, db[model]["FP32"][-1], db[model]["Int8"][-1], speedup, sep=',')
 print()
