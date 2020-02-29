@@ -1,0 +1,10 @@
+Model,FP32,Int8,Speedup
+mobilenet1.0-symbol,1.203244,0.713282,1.69
+imagenet1k-resnet-152-symbol,20.080471,10.29755,1.95
+resnet101_v1-symbol,13.426959,4.08719,3.29
+inceptionv3-symbol,11.618368,3.824995,3.04
+resnet50_v1b-symbol,6.487088,2.108138,3.08
+mobilenetv2_1.0-symbol,1.331218,0.988416,1.35
+imagenet1k-inception-bn-symbol,4.296908,1.847074,2.33
+resnet18_v1-symbol,2.108515,0.905228,2.33
+resnet50_v1-symbol,6.296103,2.141416,2.94
