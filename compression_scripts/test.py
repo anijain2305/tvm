@@ -145,7 +145,7 @@ def compile_run(mod, params, image_shape):
 
 # for model in ["resnet50_v1"]:
 models = ["resnet18_v1", "resnet50_v1", "inceptionv3", "mobilenet1.0", "mobilenetv2_1.0"]
-models = ["resnet50_v1"]
+models = ["resnet18_v1", "resnet50_v1", "inceptionv3"]
 
 model_shapes = dict()
 for model in models:
@@ -155,27 +155,31 @@ model_shapes["inceptionv3"] = (299, 299)
 
 
 # for model in ["resnet18_v1"]:
-for model in models:
-    block = get_model(model, pretrained=True)
-    image_shape = model_shapes[model]
-    shape_dict = {'data': (1, 3, image_shape[0], image_shape[1])}
-    mod, params = relay.frontend.from_mxnet(block, shape_dict)
+for skips in [[], ["input_layer"], ["input_layer", "1x1"]]:
+    for model in models:
+        block = get_model(model, pretrained=True)
+        image_shape = model_shapes[model]
+        shape_dict = {'data': (1, 3, image_shape[0], image_shape[1])}
+        mod, params = relay.frontend.from_mxnet(block, shape_dict)
 
-    mc = ModelCompressor()
-    mc.compress(params, mod['main'], None, "no_decomp")
-    compressed_params = mc._optimized_params
-    (top1, top5) = compile_run(mod, compressed_params, image_shape)
-    print("Result", model, 1.0, "original", top1, top5, mc._total_flops, mc._total_memory,
-            mc._l2_norm, sep=",")
+        mc = ModelCompressor()
+        mc.compress(params, mod['main'], None, "no_decomp")
+        compressed_params = mc._optimized_params
+        (top1, top5) = compile_run(mod, compressed_params, image_shape)
+        print("Result", model, 1.0, "original", top1, top5, mc._total_flops, mc._total_memory,
+                mc._l2_norm, 0, sep=",")
 
-    # # for method in ["weight_svd", "spatial_svd"]:
-    ratios = [1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0]
-    for ratio in ratios:
-        for method in ["tucker_decomp"]:
-            mc = ModelCompressor()
-            mc.compress(params, mod['main'], ratio, method)
-            compressed_params = mc._optimized_params
+        if len(skips) <= 1:
+            ratios = [1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0]
+        else:
+            ratios = [1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.2, 2.4, 2.6, 2.8, 3.0]
 
-            (top1, top5) = compile_run(mod, compressed_params, image_shape)
-            print("Result", model, ratio, method, top1, top5, mc._total_flops, mc._total_memory,
-                    mc._l2_norm, sep=",")
+        for ratio in ratios:
+            for method in ["weight_svd", "spatial_svd", "tucker_decomp"]:
+                mc = ModelCompressor()
+                mc.compress(params, mod['main'], ratio, method, skips=skips)
+                compressed_params = mc._optimized_params
+
+                (top1, top5) = compile_run(mod, compressed_params, image_shape)
+                print("Result", model, ratio, method, top1, top5, mc._total_flops, mc._total_memory,
+                        mc._l2_norm, len(skips), sep=",")

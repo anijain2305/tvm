@@ -20,11 +20,12 @@ class ModelCompressor(ExprVisitor):
         super().__init__()
         self._stats = {}
 
-    def compress(self, params, expr, compression_ratio, method):
+    def compress(self, params, expr, compression_ratio, method, skips=list()):
         self._params = params
         self._optimized_params = dict(params)
         self._compression_ratio = compression_ratio
         self._method = method
+        self._skips = skips
         self._stats = {}
         self.visit(expr)
         self._total_flops = reduce(lambda x, y: x + y, (map(lambda x : x[0], self._stats.values())))
@@ -79,11 +80,11 @@ class ModelCompressor(ExprVisitor):
             # FIXME - Add padding, stride, dilations -- all default for now
 
             skip = False
-            # if self._method == "tucker_decomp":
-            #     if data_shape[1] == 3:
-            #         skip = True
-            #     elif wkl['kh'] == 1:
-            #         skip = True
+            for criteria in self._skips:
+                if criteria == "first_conv" and data_shape[1] == 3:
+                    skip = True
+                elif criteria == "1x1" and wkl["kh"] == 1:
+                    skip = True
 
             if not skip:
                 del self._optimized_params[param_name]
