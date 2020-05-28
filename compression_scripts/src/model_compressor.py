@@ -3,10 +3,10 @@ from tvm import relay
 from tvm.relay.expr_functor import ExprVisitor
 from topi.util import get_const_tuple
 
+from functools import reduce
 from src.svd_decomposition import WeightSVD, SpatialSVD 
 from src.no_decomposition import NoDecomposition 
 from src.cp_decomposition import CPDecomposition 
-
 import time
 
 class ModelCompressor(ExprVisitor):
@@ -19,10 +19,11 @@ class ModelCompressor(ExprVisitor):
         self._optimized_params = dict(params)
         self._compression_ratio = compression_ratio
         self._method = method
+        self._stats = {}
         self.visit(expr)
-
-        for name in self._stats:
-            print(name, self._stats[name])
+        self._total_memory = reduce(lambda x, y: x + y, (map(lambda x : x[0], self._stats.values())))
+        self._total_flops = reduce(lambda x, y: x + y, (map(lambda x : x[1], self._stats.values())))
+        self._l2_norm = reduce(lambda x, y: x + y, (map(lambda x : x[2], self._stats.values())))
 
     def parse_shape(self, data_shape, kernel_shape, out_shape):
         oc, ic, kh, kw = kernel_shape

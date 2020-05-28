@@ -52,7 +52,6 @@ from PIL import Image
 from matplotlib import pyplot as plt
 
 
-import tensorflow as tf
 # from compress import ModelCompressor
 from src.model_compressor import ModelCompressor
 
@@ -109,7 +108,7 @@ def run_imagenet(m, image_shape):
             if gt in labels_sorted:
                 top5_score = top5_score + 1
 
-            if (num_images == 100):
+            if (num_images == 1000):
                 return (top1_score/num_images, top5_score/num_images)
                 # print("Results", str(top1_score/num_images), str(top5_score/num_images), sep="\t")
                 # return
@@ -124,7 +123,8 @@ def compile_run(mod, params, image_shape):
     
     ######################################################################
     # now compile the graph
-    target = 'llvm -mcpu=cascadelake'
+    # target = 'llvm -mcpu=cascadelake'
+    target = 'llvm -mcpu=skylake'
     with relay.build_config(opt_level=3):
         graph, lib, params = relay.build(func, target, params=params)
     
@@ -145,7 +145,7 @@ def compile_run(mod, params, image_shape):
 
 # for model in ["resnet50_v1"]:
 models = ["resnet18_v1", "resnet50_v1", "inceptionv3", "mobilenet1.0", "mobilenetv2_1.0"]
-models = ["resnet18_v1"]
+models = ["resnet50_v1", "inceptionv3"]
 
 model_shapes = dict()
 for model in models:
@@ -169,12 +169,14 @@ for model in models:
 
 
 
-    # ratios = [1.0, 1.1, 1.2, 1.3]
     # # for method in ["weight_svd", "spatial_svd"]: 
-    for method in ["cp_decomp"]: 
-        mc = ModelCompressor()
-        mc.compress(params, mod['main'], 1.1, method)
-        compressed_params = mc._optimized_params
+    ratios = [1.0, 1.1, 1.2, 1.3, 1.4, 1.5]
+    for ratio in ratios:
+        for method in ["cp_decomp"]: 
+            mc = ModelCompressor()
+            mc.compress(params, mod['main'], ratio, method)
+            compressed_params = mc._optimized_params
 
-        (top1, top5) = compile_run(mod, compressed_params, image_shape)
-        print(top1, top5)
+            (top1, top5) = compile_run(mod, compressed_params, image_shape)
+            print("Result", model, ratio, top1, top5, mc._total_flops, mc._total_memory,
+                    mc._l2_norm, sep=",")

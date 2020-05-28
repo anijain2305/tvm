@@ -3,7 +3,9 @@ import numpy as np
 import tensorly as tl
 from tensorly.decomposition import parafac, randomised_parafac
 import math
-
+import torch
+tl.set_backend('pytorch')
+device = 'cuda:0'
 class CPDecomposition(TensorDecomposition):
     """ Matricize the weight tensor. Perform SVD. """
     def preprocess_tensor(self, tensor):
@@ -12,10 +14,11 @@ class CPDecomposition(TensorDecomposition):
 
     def postprocess_tensor(self, new_tensor, shape):
         ## Go back to 4D shape
+        new_tensor = new_tensor.cpu().detach().numpy()
         return np.transpose(new_tensor, axes=(3, 0, 1, 2))
 
     def decompose(self, tensor):
-        tl_tensor = tl.tensor(tensor)
+        tl_tensor = tl.tensor(tl.tensor(tensor), device=device)
         # Without init random, there is a seg fault, likely memory explosion
         # https://github.com/tensorly/tensorly/issues/68
         factors = parafac(tl_tensor, rank=self.low_rank, init='random')
@@ -73,5 +76,4 @@ class CPDecomposition(TensorDecomposition):
         original = oc * ic * kh * kw
         new_wo_rank = oc + ic + kh + kw
         low_rank = math.ceil((original * 1.0)/(compression_ratio * new_wo_rank))
-        # low_rank = 4
         return low_rank
