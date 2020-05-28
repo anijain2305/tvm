@@ -7,6 +7,8 @@ from functools import reduce
 from src.svd_decomposition import WeightSVD, SpatialSVD 
 from src.no_decomposition import NoDecomposition 
 from src.cp_decomposition import CPDecomposition 
+from src.tucker_decomposition import TuckerDecomposition
+from src.tensor_train_decomposition import TensorTrainDecomposition
 import time
 
 class ModelCompressor(ExprVisitor):
@@ -73,10 +75,21 @@ class ModelCompressor(ExprVisitor):
             assert call.attrs.groups == 1
             # FIXME - Add padding, stride, dilations -- all default for now
 
+            skip = False
+            if self._method == "tucker_decomp":
+                if data_shape[1] == 3:
+                    skip = True
+                elif wkl['kh'] == 1:
+                    skip = True
+
             if self._method == "weight_svd":
                 obj = WeightSVD()
             elif self._method == "spatial_svd":
                 obj = SpatialSVD()
+            elif self._method == "tucker_decomp":
+                obj = TuckerDecomposition()
+            elif self._method == "tensor_train_decomp":
+                obj = TensorTrainDecomposition()
             elif self._method == "cp_decomp":
                 obj = CPDecomposition()
             elif self._method == "no_decomp":

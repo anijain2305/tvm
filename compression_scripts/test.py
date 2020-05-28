@@ -120,14 +120,14 @@ def compile_run(mod, params, image_shape):
     ## we want a probability so add a softmax operator
     func = mod["main"]
     func = relay.Function(func.params, relay.nn.softmax(func.body), None, func.type_params, func.attrs)
-    
+
     ######################################################################
     # now compile the graph
     # target = 'llvm -mcpu=cascadelake'
     target = 'llvm -mcpu=skylake'
     with relay.build_config(opt_level=3):
         graph, lib, params = relay.build(func, target, params=params)
-    
+
     ######################################################################
     # Execute the portable graph on TVM
     # ---------------------------------
@@ -138,14 +138,14 @@ def compile_run(mod, params, image_shape):
     m = graph_runtime.create(graph, lib, ctx)
     # set inputs
     m.set_input(**params)
-    
+
     # Run Imagenet
     return run_imagenet(m, image_shape)
 
 
 # for model in ["resnet50_v1"]:
 models = ["resnet18_v1", "resnet50_v1", "inceptionv3", "mobilenet1.0", "mobilenetv2_1.0"]
-models = ["resnet50_v1", "inceptionv3"]
+models = ["resnet18_v1"]
 
 model_shapes = dict()
 for model in models:
@@ -160,19 +160,18 @@ for model in models:
     image_shape = model_shapes[model]
     shape_dict = {'data': (1, 3, image_shape[0], image_shape[1])}
     mod, params = relay.frontend.from_mxnet(block, shape_dict)
-    
+
     mc = ModelCompressor()
     mc.compress(params, mod['main'], None, "no_decomp")
     compressed_params = mc._optimized_params
     (top1, top5) = compile_run(mod, compressed_params, image_shape)
-    print(top1, top5)
+    print("Result", model, 1.0, "original", top1, top5, mc._total_flops, mc._total_memory,
+            mc._l2_norm, sep=",")
 
-
-
-    # # for method in ["weight_svd", "spatial_svd"]: 
+    # # for method in ["weight_svd", "spatial_svd"]:
     ratios = [1.0, 1.1, 1.2, 1.3, 1.4, 1.5]
     for ratio in ratios:
-        for method in ["cp_decomp"]: 
+        for method in ["tucker_decomp"]:
             mc = ModelCompressor()
             mc.compress(params, mod['main'], ratio, method)
             compressed_params = mc._optimized_params
