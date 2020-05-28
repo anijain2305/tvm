@@ -145,7 +145,7 @@ def compile_run(mod, params, image_shape):
 
 # for model in ["resnet50_v1"]:
 models = ["resnet18_v1", "resnet50_v1", "inceptionv3", "mobilenet1.0", "mobilenetv2_1.0"]
-models = ["resnet18_v1"]
+models = ["resnet50_v1"]
 
 model_shapes = dict()
 for model in models:
@@ -169,7 +169,7 @@ for model in models:
             mc._l2_norm, sep=",")
 
     # # for method in ["weight_svd", "spatial_svd"]:
-    ratios = [1.0, 1.1, 1.2, 1.3, 1.4, 1.5]
+    ratios = [1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0]
     for ratio in ratios:
         for method in ["tucker_decomp"]:
             mc = ModelCompressor()
@@ -177,5 +177,5 @@ for model in models:
             compressed_params = mc._optimized_params
 
             (top1, top5) = compile_run(mod, compressed_params, image_shape)
-            print("Result", model, ratio, top1, top5, mc._total_flops, mc._total_memory,
+            print("Result", model, ratio, method, top1, top5, mc._total_flops, mc._total_memory,
                     mc._l2_norm, sep=",")

@@ -4,12 +4,16 @@ from tvm.relay.expr_functor import ExprVisitor
 from topi.util import get_const_tuple
 
 from functools import reduce
-from src.svd_decomposition import WeightSVD, SpatialSVD 
-from src.no_decomposition import NoDecomposition 
-from src.cp_decomposition import CPDecomposition 
+import operator
+
+from src.svd_decomposition import WeightSVD, SpatialSVD
+from src.no_decomposition import NoDecomposition
+from src.cp_decomposition import CPDecomposition
 from src.tucker_decomposition import TuckerDecomposition
 from src.tensor_train_decomposition import TensorTrainDecomposition
 import time
+
+import numpy as np
 
 class ModelCompressor(ExprVisitor):
     def __init__(self):
@@ -23,8 +27,8 @@ class ModelCompressor(ExprVisitor):
         self._method = method
         self._stats = {}
         self.visit(expr)
-        self._total_memory = reduce(lambda x, y: x + y, (map(lambda x : x[0], self._stats.values())))
-        self._total_flops = reduce(lambda x, y: x + y, (map(lambda x : x[1], self._stats.values())))
+        self._total_flops = reduce(lambda x, y: x + y, (map(lambda x : x[0], self._stats.values())))
+        self._total_memory = reduce(lambda x, y: x + y, (map(lambda x : x[1], self._stats.values())))
         self._l2_norm = reduce(lambda x, y: x + y, (map(lambda x : x[2], self._stats.values())))
 
     def parse_shape(self, data_shape, kernel_shape, out_shape):
@@ -67,7 +71,6 @@ class ModelCompressor(ExprVisitor):
             assert isinstance(kernel, tvm.relay.expr.Var)
             param_name = kernel.name_hint
             assert param_name in self._params
-            del self._optimized_params[param_name]
 
             # Checks for assumptions
             assert call.attrs.data_layout == "NCHW"
@@ -76,33 +79,45 @@ class ModelCompressor(ExprVisitor):
             # FIXME - Add padding, stride, dilations -- all default for now
 
             skip = False
-            if self._method == "tucker_decomp":
-                if data_shape[1] == 3:
-                    skip = True
-                elif wkl['kh'] == 1:
-                    skip = True
+            # if self._method == "tucker_decomp":
+            #     if data_shape[1] == 3:
+            #         skip = True
+            #     elif wkl['kh'] == 1:
+            #         skip = True
 
-            if self._method == "weight_svd":
-                obj = WeightSVD()
-            elif self._method == "spatial_svd":
-                obj = SpatialSVD()
-            elif self._method == "tucker_decomp":
-                obj = TuckerDecomposition()
-            elif self._method == "tensor_train_decomp":
-                obj = TensorTrainDecomposition()
-            elif self._method == "cp_decomp":
-                obj = CPDecomposition()
-            elif self._method == "no_decomp":
-                obj = NoDecomposition()
+            if not skip:
+                del self._optimized_params[param_name]
+                if self._method == "weight_svd":
+                    obj = WeightSVD()
+                elif self._method == "spatial_svd":
+                    obj = SpatialSVD()
+                elif self._method == "tucker_decomp":
+                    obj = TuckerDecomposition()
+                elif self._method == "tensor_train_decomp":
+                    obj = TensorTrainDecomposition()
+                elif self._method == "cp_decomp":
+                    obj = CPDecomposition()
+                elif self._method == "no_decomp":
+                    obj = NoDecomposition()
+                else:
+                    raise NotImplementedError(self._method)
+
+
+                time1 = time.time()
+                approx_weight = obj.simulate(self._params[param_name].asnumpy(), wkl, self._compression_ratio)
+                self._optimized_params[param_name] = approx_weight
+                self._stats[param_name] = (obj.flops, obj.memory, obj.l2_norm)
+                time2 = time.time()
+                print("Simulated for ", param_name, self._stats[param_name], time2 - time1)
             else:
-                raise NotImplementedError(self._method)
-
-
-            time1 = time.time()
-            approx_weight = obj.simulate(self._params[param_name].asnumpy(), wkl, self._compression_ratio)
-            self._optimized_params[param_name] = approx_weight
-            self._stats[param_name] = (obj.flops, obj.memory, obj.l2_norm)
-            time2 = time.time()
-            print("Simulated for ", param_name, self._stats[param_name], time2 - time1)
-
-
+                # Changes drastically for group conv
+                oc, ic, kh, kw = kernel_shape
+                n, test1, ih, iw = data_shape
+                _, test2, oh, ow = out_shape
+                flops = 2 * oc * ic * kh * kw * oh * ow 
+                memory = reduce(operator.mul, self._params[param_name].asnumpy().shape, 1)
+                l2_norm = np.linalg.norm(self._params[param_name].asnumpy())
+                self._stats[param_name] = (flops, memory, l2_norm)
+                print("Simulated for untouched ", param_name, self._stats[param_name], 0)
+                # self._total_flops += obj.flops
+                # self._l2_norm += obj.l2_norm
