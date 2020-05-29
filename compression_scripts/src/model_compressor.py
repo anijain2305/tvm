@@ -20,13 +20,13 @@ class ModelCompressor(ExprVisitor):
         super().__init__()
         self._stats = {}
 
-    def compress(self, params, expr, compression_ratio, method, skips=list()):
+    def compress(self, params, expr, compression_ratio, method):
         self._params = params
         self._optimized_params = dict(params)
         self._compression_ratio = compression_ratio
         self._method = method
-        self._skips = skips
         self._stats = {}
+        self._first_conv = None
         self.visit(expr)
         self._total_flops = reduce(lambda x, y: x + y, (map(lambda x : x[0], self._stats.values())))
         self._total_memory = reduce(lambda x, y: x + y, (map(lambda x : x[1], self._stats.values())))
@@ -79,46 +79,47 @@ class ModelCompressor(ExprVisitor):
             assert call.attrs.groups == 1
             # FIXME - Add padding, stride, dilations -- all default for now
 
-            skip = False
-            for criteria in self._skips:
-                if criteria == "first_conv" and data_shape[1] == 3:
-                    skip = True
-                elif criteria == "1x1" and wkl["kh"] == 1:
-                    skip = True
+            compression_method = self._method
 
-            if not skip:
-                del self._optimized_params[param_name]
-                if self._method == "weight_svd":
-                    obj = WeightSVD()
-                elif self._method == "spatial_svd":
-                    obj = SpatialSVD()
-                elif self._method == "tucker_decomp":
-                    obj = TuckerDecomposition()
-                elif self._method == "tensor_train_decomp":
-                    obj = TensorTrainDecomposition()
-                elif self._method == "cp_decomp":
-                    obj = CPDecomposition()
-                elif self._method == "no_decomp":
-                    obj = NoDecomposition()
-                else:
-                    raise NotImplementedError(self._method)
+            ## If we have 1x1 kernel, we can rely on simple SVD
+            ## Drastically improves Tucker
+            if wkl["kh"] == 1 and wkl["kw"] == 1:
+                compression_method = "spatial_svd"
 
 
-                time1 = time.time()
-                approx_weight = obj.simulate(self._params[param_name].asnumpy(), wkl, self._compression_ratio)
-                self._optimized_params[param_name] = approx_weight
-                self._stats[param_name] = (obj.flops, obj.memory, obj.l2_norm)
-                time2 = time.time()
-                print("Simulated for ", param_name, self._stats[param_name], time2 - time1)
-            else:
-                # Changes drastically for group conv
+            if wkl["ic"] == 3:
+                self._first_conv = param_name
+                self._first_conv_orig_stats = dict()
+
                 oc, ic, kh, kw = kernel_shape
                 n, test1, ih, iw = data_shape
                 _, test2, oh, ow = out_shape
                 flops = 2 * oc * ic * kh * kw * oh * ow 
                 memory = reduce(operator.mul, self._params[param_name].asnumpy().shape, 1)
                 l2_norm = np.linalg.norm(self._params[param_name].asnumpy())
-                self._stats[param_name] = (flops, memory, l2_norm)
-                print("Simulated for untouched ", param_name, self._stats[param_name], 0)
-                # self._total_flops += obj.flops
-                # self._l2_norm += obj.l2_norm
+                self._first_conv_orig_stats[param_name] = (flops, memory, l2_norm)
+
+
+            del self._optimized_params[param_name]
+            if compression_method == "weight_svd":
+                obj = WeightSVD()
+            elif compression_method == "spatial_svd":
+                obj = SpatialSVD()
+            elif compression_method == "tucker_decomp":
+                obj = TuckerDecomposition()
+            elif compression_method == "tensor_train_decomp":
+                obj = TensorTrainDecomposition()
+            elif compression_method == "cp_decomp":
+                obj = CPDecomposition()
+            elif compression_method == "no_decomp":
+                obj = NoDecomposition()
+            else:
+                raise NotImplementedError(compression_method)
+
+
+            time1 = time.time()
+            approx_weight = obj.simulate(self._params[param_name].asnumpy(), wkl, self._compression_ratio)
+            self._optimized_params[param_name] = approx_weight
+            self._stats[param_name] = (obj.flops, obj.memory, obj.l2_norm)
+            time2 = time.time()
+            print("Simulated for ", param_name, self._stats[param_name], time2 - time1)

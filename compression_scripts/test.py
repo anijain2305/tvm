@@ -108,7 +108,7 @@ def run_imagenet(m, image_shape):
             if gt in labels_sorted:
                 top5_score = top5_score + 1
 
-            if (num_images == 1000):
+            if (num_images == 100):
                 return (top1_score/num_images, top5_score/num_images)
                 # print("Results", str(top1_score/num_images), str(top5_score/num_images), sep="\t")
                 # return
@@ -154,32 +154,47 @@ for model in models:
 model_shapes["inceptionv3"] = (299, 299)
 
 
-# for model in ["resnet18_v1"]:
-for skips in [[], ["input_layer"], ["input_layer", "1x1"]]:
-    for model in models:
-        block = get_model(model, pretrained=True)
-        image_shape = model_shapes[model]
-        shape_dict = {'data': (1, 3, image_shape[0], image_shape[1])}
-        mod, params = relay.frontend.from_mxnet(block, shape_dict)
+for model in models:
+    block = get_model(model, pretrained=True)
+    image_shape = model_shapes[model]
+    shape_dict = {'data': (1, 3, image_shape[0], image_shape[1])}
+    mod, params = relay.frontend.from_mxnet(block, shape_dict)
 
-        mc = ModelCompressor()
-        mc.compress(params, mod['main'], None, "no_decomp")
-        compressed_params = mc._optimized_params
-        (top1, top5) = compile_run(mod, compressed_params, image_shape)
-        print("Result", model, 1.0, "original", top1, top5, mc._total_flops, mc._total_memory,
-                mc._l2_norm, 0, sep=",")
+    mc = ModelCompressor()
+    mc.compress(params, mod['main'], None, "no_decomp")
+    compressed_params = mc._optimized_params
+    (top1, top5) = compile_run(mod, compressed_params, image_shape)
+    print("Result", model, 1.0, "original", top1, top5, mc._total_flops, mc._total_memory,
+            mc._l2_norm, "no_skip", sep=",")
 
-        if len(skips) <= 1:
-            ratios = [1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0]
-        else:
-            ratios = [1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.2, 2.4, 2.6, 2.8, 3.0]
+    ratios = [1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.8, 2.0, 2.2, 2.5, 3.0, 4.0, 5.0]
 
-        for ratio in ratios:
-            for method in ["weight_svd", "spatial_svd", "tucker_decomp"]:
-                mc = ModelCompressor()
-                mc.compress(params, mod['main'], ratio, method, skips=skips)
-                compressed_params = mc._optimized_params
+    for ratio in ratios:
+        for method in ["weight_svd", "spatial_svd", "tucker_decomp", "tensor_train_decomp"]:
+            mc = ModelCompressor()
+            mc.compress(params, mod['main'], ratio, method)
+            compressed_params = mc._optimized_params
 
+            (top1, top5) = compile_run(mod, compressed_params, image_shape)
+            print("Result", model, ratio, method, top1, top5, mc._total_flops, mc._total_memory,
+                    mc._l2_norm, "no_skip", sep=",")
+
+            if mc._first_conv is not None:
+                assert mc._first_conv in compressed_params
+                compressed_params[mc._first_conv] = params[mc._first_conv]
+
+                compressed_first_conv_stats = mc._stats[mc._first_conv]
+                original_first_conv_staus = mc._first_conv_orig_stats[mc._first_conv]
+
+                total_flops = mc._total_flops \
+                              - compressed_first_conv_stats[0] \
+                              + original_first_conv_staus[0]
+                total_memory = mc._total_memory \
+                               - compressed_first_conv_stats[1] \
+                               + original_first_conv_staus[1]
+                total_l2_norm = mc._l2_norm \
+                               - compressed_first_conv_stats[2] \
+                               + original_first_conv_staus[2]
                 (top1, top5) = compile_run(mod, compressed_params, image_shape)
-                print("Result", model, ratio, method, top1, top5, mc._total_flops, mc._total_memory,
-                        mc._l2_norm, len(skips), sep=",")
+                print("Result", model, ratio, method, top1, top5, total_flops, total_memory,
+                       total_l2_norm, "first_conv_skip", sep=",")
