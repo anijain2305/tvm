@@ -85,8 +85,11 @@ class TensorTrainDecomposition(TensorDecomposition):
         ## https://jacobgil.github.io/deeplearning/tensor-decompositions-deep-learning
         ## We will have rank r1, r2 and r3
         ## Assume r1/ic = r2/kh = r3/oc then r1 = ic/oc * r3, r2 = kh/oc * r3
-        c1 = ic * 1.0/oc
-        c2 = kh * 1.0/oc
+        max_r1 = ic
+        max_r2 = kh * max_r1
+        max_r3 = kw * max_r2
+        c1 = max_r1/max_r2
+        c2 = max_r2/max_r3
 
         ## this leads to a quadratic equation for r2
         ## Total memory footprint = ic * r1 + kh * r1 * r2 + kw * r2 * r3 + oc * r3
@@ -94,8 +97,8 @@ class TensorTrainDecomposition(TensorDecomposition):
         original = oc * ic * kh * kw
 
         ## Forming ax^2 + bx + c = 0
-        a = float((kw * c2))
-        b = float((ic * c1 + kh * c1 * c2 + oc))
+        a = float((kw * c2 + kh * c1 * c2))
+        b = float((ic * c1 + oc))
         c = float(-original/compression_ratio)
 
         r = b**2 - 4*a*c
