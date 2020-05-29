@@ -108,7 +108,7 @@ def run_imagenet(m, image_shape):
             if gt in labels_sorted:
                 top5_score = top5_score + 1
 
-            if (num_images == 100):
+            if (num_images == 1000):
                 return (top1_score/num_images, top5_score/num_images)
                 # print("Results", str(top1_score/num_images), str(top5_score/num_images), sep="\t")
                 # return
