@@ -83,7 +83,7 @@ class ModelCompressor(ExprVisitor):
 
             ## If we have 1x1 kernel, we can rely on simple SVD
             ## Drastically improves Tucker
-            if wkl["kh"] == 1 and wkl["kw"] == 1:
+            if wkl["kh"] == 1 and wkl["kw"] == 1 and compression_method != "no_decomp":
                 compression_method = "spatial_svd"
 
 
