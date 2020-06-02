@@ -37,7 +37,7 @@ class TuckerDecomposition(TensorDecomposition):
         new_tensor = tl.tenalg.mode_dot(new_tensor, factors[1], mode=3)
         return new_tensor
 
-    def simulate(self, tensor, wkl, compression_ratio):
+    def simulate(self, tensor, wkl, compression_ratio, ctx):
         new_tensor = self.preprocess_tensor(tensor)
         # First get the low rank
         self._compute_low_rank(wkl, compression_ratio)

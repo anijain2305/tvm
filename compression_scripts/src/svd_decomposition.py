@@ -42,7 +42,7 @@ class WeightSVD(TensorDecomposition):
         matrix = matrix.astype("float32")
         return matrix
  
-    def simulate(self, tensor, wkl, compression_ratio):
+    def simulate(self, tensor, wkl, compression_ratio, ctx):
         matrix = self.preprocess_tensor(tensor)
         U, s, Vh = self.decompose(matrix)
         low_rank = self._compute_low_rank(wkl, compression_ratio)
@@ -139,7 +139,7 @@ class SpatialSVD(TensorDecomposition):
         matrix = matrix.astype("float32")
         return matrix
  
-    def simulate(self, tensor, wkl, compression_ratio):
+    def simulate(self, tensor, wkl, compression_ratio, ctx):
         matrix = self.preprocess_tensor(tensor)
         U, s, Vh = self.decompose(matrix)
         low_rank = self._compute_low_rank(wkl, compression_ratio)

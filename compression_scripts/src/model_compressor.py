@@ -20,10 +20,11 @@ class ModelCompressor(ExprVisitor):
         super().__init__()
         self._stats = {}
 
-    def compress(self, params, expr, compression_ratio, method):
+    def compress(self, params, expr, compression_ratio, method, ctx=None):
         self._params = params
         self._optimized_params = dict(params)
         self._compression_ratio = compression_ratio
+        self._ctx = ctx
         self._method = method
         self._stats = {}
         self._first_conv = None
@@ -118,8 +119,9 @@ class ModelCompressor(ExprVisitor):
 
 
             time1 = time.time()
-            approx_weight = obj.simulate(self._params[param_name].asnumpy(), wkl, self._compression_ratio)
+            approx_weight = obj.simulate(self._params[param_name].asnumpy(), wkl,
+                                         self._compression_ratio, self._ctx)
             self._optimized_params[param_name] = approx_weight
             self._stats[param_name] = (obj.flops, obj.memory, obj.l2_norm)
             time2 = time.time()
-            print("Simulated for ", param_name, self._stats[param_name], time2 - time1)
+            print("Simulated for", self._compression_ratio, param_name, self._stats[param_name], time2 - time1)

@@ -55,6 +55,7 @@ from matplotlib import pyplot as plt
 # from compress import ModelCompressor
 from src.model_compressor import ModelCompressor
 
+from multiprocessing import Process, Pool
 def preprocessing(image_instance, image_shape):
     image = Image.open(image_instance).resize(image_shape)
     image = np.array(image)
@@ -155,51 +156,58 @@ for model in models:
 
 model_shapes["inceptionv3"] = (299, 299)
 
+def f(model, ratio, method, ctx):
 
-for model in models:
     block = get_model(model, pretrained=True)
     image_shape = model_shapes[model]
     shape_dict = {'data': (1, 3, image_shape[0], image_shape[1])}
     mod, params = relay.frontend.from_mxnet(block, shape_dict)
 
     mc = ModelCompressor()
-    mc.compress(params, mod['main'], None, "no_decomp")
+    mc.compress(params, mod['main'], ratio, method, ctx)
     compressed_params = mc._optimized_params
+
     (top1, top5) = compile_run(mod, compressed_params, image_shape)
-    print("Result", model, 1.0, "original", top1, top5, mc._total_flops, mc._total_memory,
+    print("Result", model, ratio, method, top1, top5, mc._total_flops, mc._total_memory,
             mc._l2_norm, "no_skip", sep=",")
+
+    if mc._first_conv is not None:
+        assert mc._first_conv in compressed_params
+
+        mod, params = relay.frontend.from_mxnet(block, shape_dict)
+        compressed_params[mc._first_conv] = params[mc._first_conv]
+
+        compressed_first_conv_stats = mc._stats[mc._first_conv]
+        original_first_conv_staus = mc._first_conv_orig_stats[mc._first_conv]
+
+        total_flops = mc._total_flops \
+                      - compressed_first_conv_stats[0] \
+                      + original_first_conv_staus[0]
+        total_memory = mc._total_memory \
+                       - compressed_first_conv_stats[1] \
+                       + original_first_conv_staus[1]
+        total_l2_norm = mc._l2_norm \
+                       - compressed_first_conv_stats[2] \
+                       + original_first_conv_staus[2]
+        (top1, top5) = compile_run(mod, compressed_params, image_shape)
+        print("Result", model, ratio, method, top1, top5, total_flops, total_memory,
+               total_l2_norm, "first_conv_skip", sep=",")
+
+for model in models:
+
+    # mc = ModelCompressor()
+    # mc.compress(params, mod['main'], None, "no_decomp")
+    # compressed_params = mc._optimized_params
+    # (top1, top5) = compile_run(mod, compressed_params, image_shape)
+    # print("Result", model, 1.0, "original", top1, top5, mc._total_flops, mc._total_memory,
+    #         mc._l2_norm, "no_skip", sep=",")
 
     ratios = [1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.8, 2.0, 2.2, 2.5, 3.0, 4.0, 5.0]
 
-    for ratio in ratios:
-        for method in ["weight_svd", "spatial_svd", "tucker_decomp", "tensor_train_decomp"]:
-            mod, params = relay.frontend.from_mxnet(block, shape_dict)
-            mc = ModelCompressor()
-            mc.compress(params, mod['main'], ratio, method)
-            compressed_params = mc._optimized_params
+    tasks = list()
+    for (i, ratio) in enumerate(ratios):
+        tasks.append((model, ratio, "cp_decomp", "cuda:"+str(i%4)))
 
-            (top1, top5) = compile_run(mod, compressed_params, image_shape)
-            print("Result", model, ratio, method, top1, top5, mc._total_flops, mc._total_memory,
-                    mc._l2_norm, "no_skip", sep=",")
+    pool = Pool(processes=16)
+    pool.starmap(f, tasks)
 
-            if mc._first_conv is not None:
-                assert mc._first_conv in compressed_params
-
-                mod, params = relay.frontend.from_mxnet(block, shape_dict)
-                compressed_params[mc._first_conv] = params[mc._first_conv]
-
-                compressed_first_conv_stats = mc._stats[mc._first_conv]
-                original_first_conv_staus = mc._first_conv_orig_stats[mc._first_conv]
-
-                total_flops = mc._total_flops \
-                              - compressed_first_conv_stats[0] \
-                              + original_first_conv_staus[0]
-                total_memory = mc._total_memory \
-                               - compressed_first_conv_stats[1] \
-                               + original_first_conv_staus[1]
-                total_l2_norm = mc._l2_norm \
-                               - compressed_first_conv_stats[2] \
-                               + original_first_conv_staus[2]
-                (top1, top5) = compile_run(mod, compressed_params, image_shape)
-                print("Result", model, ratio, method, top1, top5, total_flops, total_memory,
-                       total_l2_norm, "first_conv_skip", sep=",")

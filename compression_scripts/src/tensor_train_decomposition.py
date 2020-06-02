@@ -31,7 +31,7 @@ class TensorTrainDecomposition(TensorDecomposition):
         new_tensor = tl.mps_to_tensor(factors)
         return new_tensor
 
-    def simulate(self, tensor, wkl, compression_ratio):
+    def simulate(self, tensor, wkl, compression_ratio, ctx):
         new_tensor = self.preprocess_tensor(tensor)
         # First get the low rank
         self._compute_low_rank(wkl, compression_ratio)

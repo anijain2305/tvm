@@ -42,7 +42,7 @@ class NoDecomposition(TensorDecomposition):
         matrix = matrix.astype("float32")
         return matrix
  
-    def simulate(self, tensor, wkl, compression_ratio):
+    def simulate(self, tensor, wkl, compression_ratio, ctx):
         assert compression_ratio is None
         matrix = self.preprocess_tensor(tensor)
         U, s, Vh = self.decompose(matrix)
