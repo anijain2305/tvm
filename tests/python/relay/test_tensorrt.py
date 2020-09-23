@@ -557,9 +557,76 @@ def test_tensorrt_serialize():
     for i in range(10):
         mod.run(data=i_data)
 
+def test_tensorrt_simple_cpu_io():
+    if should_skip():
+        return
+    dtype = 'float32'
+    xshape = (1, 3, 2, 2)
+    yshape = (1, 3,  1,  1)
+    zshape = (1,  1,  1,  1)
+    x = relay.var('x', shape=(xshape), dtype=dtype)
+    y = relay.var('y', shape=(yshape), dtype=dtype)
+    z = relay.var('z', shape=(zshape), dtype=dtype)
+    w = z * (x + y)
+    out = relay.nn.relu(w)
+    f = relay.Function([x, y, z], out)
+
+    mod = tvm.IRModule()
+    mod['main'] = f
+    mod = relay.tensorrt.EnableTrt(mod)
+    # Changed target to 'llvm' and ctx to tvm.cpu()
+    with relay.build_config(opt_level=3):
+        graph, lib, params = relay.build(mod, "llvm")
+    mod = graph_runtime.create(graph, lib, ctx=tvm.cpu())
+    x_data = np.random.uniform(-1, 1, xshape).astype(dtype)
+    y_data = np.random.uniform(-1, 1, yshape).astype(dtype)
+    z_data = np.random.uniform(-1, 1, zshape).astype(dtype)
+    mod.run(x=x_data, y=y_data, z=z_data)
+    results = [mod.get_output(i).asnumpy() for i in range(mod.get_num_outputs())]
+
+def test_tensorrt_cpu_op_in_middle():
+    if should_skip():
+        return
+    dtype = 'float32'
+    xshape = (1, 3, 2, 2)
+    yshape = (1, 3,  1,  1)
+    zshape = (1,  1,  1,  1)
+    x = relay.var('x', shape=(xshape), dtype=dtype)
+    y = relay.var('y', shape=(yshape), dtype=dtype)
+    z = relay.var('z', shape=(zshape), dtype=dtype)
+    w = z * (x + y)
+    # Erf wont work
+    w = relay.erf(w)
+    out = relay.nn.relu(w)
+    f = relay.Function([x, y, z], out)
+
+    mod = tvm.IRModule()
+    mod['main'] = f
+    mod = relay.tensorrt.EnableTrt(mod)
+    with relay.build_config(opt_level=3):
+        graph, lib, params = relay.build(mod, "llvm")
+    mod = graph_runtime.create(graph, lib, ctx=tvm.cpu())
+    x_data = np.random.uniform(-1, 1, xshape).astype(dtype)
+    y_data = np.random.uniform(-1, 1, yshape).astype(dtype)
+    z_data = np.random.uniform(-1, 1, zshape).astype(dtype)
+    mod.run(x=x_data, y=y_data, z=z_data)
+    results = [mod.get_output(i).asnumpy() for i in range(mod.get_num_outputs())]
+
+
+
+
 if __name__ == '__main__':
     test_tensorrt_ops()
     test_tensorrt_simple()
     test_tensorrt_not_compatible()
     test_tensorrt_integration()
     test_tensorrt_serialize()
+    
+    # Task 3 - Missing CPU-TRT data transfer
+    # Test setting - Static + GraphRuntime + TRT
+    # Move this to using Rohan's code - Static + RelayVM + TRT
+    test_tensorrt_simple_cpu_io()
+    test_tensorrt_cpu_op_in_middle()
+
+    # Task 4 - Cache keys
+    # Just use all the tests
