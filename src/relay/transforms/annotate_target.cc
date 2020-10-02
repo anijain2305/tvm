@@ -248,7 +248,6 @@ class AnnotateTargetRewriter : public ExprRewriter {
       new_expr = Let(let->var, std::get<1>(target_n_args)[0], new_body);
     }
     // op_expr_to_target_[new_expr] = std::get<0>(target_n_args);
-
     return std::move(new_expr);
   }
 
