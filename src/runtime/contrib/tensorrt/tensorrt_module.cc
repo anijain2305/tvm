@@ -21,6 +21,9 @@
  * \brief TensorRTModule is the runtime module for tensorrt backend.
  */
 
+#include "tensorrt_module.h"
+
+#include <cuda_runtime_api.h>
 #include <stdlib.h>
 #include <tvm/node/serialization.h>
 #include <tvm/relay/expr_functor.h>
@@ -31,8 +34,8 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+
 #include "../../file_util.h"
-#include "tensorrt_module.h"
 #ifdef TVM_GRAPH_RUNTIME_TENSORRT
 #include "NvInfer.h"
 #include "tensorrt_builder.h"
@@ -197,7 +200,16 @@ class TensorRTModule : public runtime::ModuleNode {
       if (!runtime::TypeMatch(arg->dtype, kDLFloat, 32)) {
         LOG(FATAL) << "Only float32 inputs are supported.";
       }
-      bindings[binding_index] = reinterpret_cast<float*>(arg->data);
+      if (inputs[i]->ctx.device_type == kDLCPU) {
+        DLContext gpu_ctx = {kDLGPU, 0};
+        void* gpu_mem;
+        TVMDeviceAllocDataSpace(gpu_ctx, tvm::runtime::GetDataSize(*inputs[i]), 256, inputs[i]->dtype, &gpu_mem);
+        TVMDeviceCopyDataFromTo(inputs[i]->data, 0, gpu_mem, 0, tvm::runtime::GetDataSize(*inputs[i]),
+                                inputs[i]->ctx, gpu_ctx, inputs[i]->dtype, nullptr);
+        bindings[binding_index] = reinterpret_cast<float*>(gpu_mem);
+      } else {
+        bindings[binding_index] = reinterpret_cast<float*>(arg->data);
+      }
 #if TRT_VERSION_GE(6, 0, 1)
       // Set binding dimensions for INetworkV2 explicit batch mode engines.
       if (!use_implicit_batch_) {
@@ -218,7 +230,15 @@ class TensorRTModule : public runtime::ModuleNode {
       int binding_index =
           engine->getBindingIndex(engine_and_context.outputs[i].c_str());
       CHECK_NE(binding_index, -1);
-      bindings[binding_index] = reinterpret_cast<float*>(out_arg->data);
+      if (out_arg->ctx.device_type == kDLCPU) {
+        DLContext gpu_ctx = {kDLGPU, 0};
+        std::cout << "Found output buffer on host" << std::endl;
+        void * gpu_mem;
+        TVMDeviceAllocDataSpace(gpu_ctx, tvm::runtime::GetDataSize(*out_arg), 256, out_arg->dtype, &gpu_mem);
+        bindings[binding_index] = reinterpret_cast<float*>(gpu_mem);
+      } else {
+        bindings[binding_index] = reinterpret_cast<float*>(out_arg->data);
+      }
     }
 #if TRT_VERSION_GE(6, 0, 1)
     if (use_implicit_batch_) {
@@ -227,6 +247,18 @@ class TensorRTModule : public runtime::ModuleNode {
       CHECK(context->execute(batch_size, bindings.data())) << "Running TensorRT failed.";
     } else {
       CHECK(context->executeV2(bindings.data())) << "Running TensorRT failed.";
+    }
+    for (size_t i = 0; i < num_outputs; ++i) {
+      const int index_in_inputs = inputs.size() - num_outputs + i;
+      DLTensor* out_arg = inputs[index_in_inputs];
+      int binding_index = engine->getBindingIndex(engine_and_context.outputs[i].c_str());
+      CHECK_NE(binding_index, -1);
+      if (out_arg->ctx.device_type == kDLCPU) {
+        DLContext gpu_ctx = {kDLGPU, 0};
+        void* gpu_mem = bindings[binding_index];
+        TVMDeviceCopyDataFromTo(gpu_mem, 0, out_arg->data, 0, tvm::runtime::GetDataSize(*out_arg),
+                                gpu_ctx, out_arg->ctx, out_arg->dtype, nullptr);
+      }
     }
 #else
     // Use batch size from first input.
