@@ -66,6 +66,17 @@ TensorRTBuilder::TensorRTBuilder(TensorRTLogger* logger,
 #endif
 }
 
+nvinfer1::DataType TensorRTBuilder::GetNvDataType(const DLDataType type) {
+ if (TypeMatch(type, kDLFloat, 32)) {
+   return nvinfer1::DataType::kFLOAT;
+ } else if (TypeMatch(type, kDLInt, 8)) {
+   return nvinfer1::DataType::kINT8;
+ } else if (TypeMatch(type, kDLInt, 32)) {
+   return nvinfer1::DataType::kINT32;
+ }
+ LOG(FATAL) << "Unknown datatype " << type;
+}
+
 void TensorRTBuilder::AddInput(int nid, uint32_t entry_id, const JSONGraphNode& node) {
   auto node_name = node.GetOpName();
   auto shapes = node.GetOpShape();
@@ -80,8 +91,10 @@ void TensorRTBuilder::AddInput(int nid, uint32_t entry_id, const JSONGraphNode& 
       shape.erase(shape.begin());
     }
     nvinfer1::Dims dims = VectorToTrtDims(shape);
-    ICHECK(TypeMatch(dtypes[i], kDLFloat, 32)) << "Only FP32 inputs are supported.";
-    auto input_tensor = network_->addInput(name.c_str(), nvinfer1::DataType::kFLOAT, dims);
+    // ICHECK(TypeMatch(dtypes[i], kDLFloat, 32)) << "Only FP32 inputs are supported.";
+    auto dtype = GetNvDataType(dtypes[i]);
+    // auto input_tensor = network_->addInput(name.c_str(), nvinfer1::DataType::kFLOAT, dims);
+    auto input_tensor = network_->addInput(name.c_str(), dtype, dims);
     node_output_map_[nid].push_back(TensorRTOpInput(input_tensor));
     network_input_names_.push_back(name);
     entry_id_map_[name] = entry_id + i;
@@ -188,18 +201,19 @@ TensorRTEngineAndContext TensorRTBuilder::BuildEngine() {
 nvinfer1::Weights TensorRTBuilder::GetDLTensorAsWeights(const DLTensor* dptr,
                                                         DLDeviceType src_device) {
   ICHECK_EQ(dptr->ctx.device_type, src_device);
-  ICHECK(static_cast<int>(dptr->dtype.code) == kDLFloat ||
-         static_cast<int>(dptr->dtype.code) == kDLInt);
-  const auto trt_dtype = static_cast<int>(dptr->dtype.code) == kDLFloat
-                             ? nvinfer1::DataType::kFLOAT
-                             : nvinfer1::DataType::kINT32;
+  const auto trt_dtype = GetNvDataType(dptr->dtype);
   const size_t weight_bytes = GetDataSize(*dptr);
   nvinfer1::Weights weight{trt_dtype, nullptr, 0};
   size_t count = 1;
   for (tvm_index_t i = 0; i < dptr->ndim; ++i) {
     count *= dptr->shape[i];
   }
-  ICHECK_EQ(count * 4, weight_bytes);
+
+  if (trt_dtype == nvinfer1::DataType::kINT8) {
+    ICHECK_EQ(count, weight_bytes);
+  } else {
+    ICHECK_EQ(count * 4, weight_bytes);
+  }
   weight.count = count;
   weight.values = new float[count];
   ICHECK_EQ(TVMArrayCopyToBytes(const_cast<DLTensor*>(dptr), const_cast<void*>(weight.values),

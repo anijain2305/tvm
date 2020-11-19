@@ -58,9 +58,9 @@ def run_and_verify_func(config, target="cuda"):
     if skip_codegen_test():
         return
     f, input_shapes, is_param = config
-    params = {x: np.random.uniform(-1, 1, input_shapes[x]).astype(np.float32) for x in is_param}
+    params = {x: np.random.uniform(-1, 1, input_shapes[x]).astype(np.int8) for x in is_param}
     input_dict = {
-        k: np.random.uniform(-1, 1, v).astype(np.float32)
+        k: np.random.uniform(-1, 1, v).astype(np.int8)
         for k, v in input_shapes.items()
         if k not in is_param
     }
@@ -69,6 +69,8 @@ def run_and_verify_func(config, target="cuda"):
     mod = tvm.IRModule()
     mod["main"] = f
     mod, config = tensorrt.partition_for_tensorrt(mod, params)
+    print(mod)
+
     with tvm.transform.PassContext(opt_level=3, config={"relay.ext.tensorrt.options": config}):
         graph, lib, graph_params = relay.build(mod, target, params=params)
     if skip_runtime_test():
@@ -263,9 +265,12 @@ def test_conv2d():
         padding=(0, 0),
         strides=(1, 1),
         dilation=(1, 1),
+        data_dtype="float32",
+        kernel_dtype="float32",
+        out_dtype="float32",
     ):
-        x = relay.var("x", shape=(x_shape), dtype="float32")
-        kernel = relay.var("kernel", shape=(k_shape), dtype="float32")
+        x = relay.var("x", shape=(x_shape), dtype=data_dtype)
+        kernel = relay.var("kernel", shape=(k_shape), dtype=kernel_dtype)
         out = relay.nn.conv2d(
             x,
             kernel,
@@ -274,23 +279,29 @@ def test_conv2d():
             padding=padding,
             strides=strides,
             dilation=dilation,
+            out_dtype=out_dtype,
         )
         f = relay.Function([x, kernel], out)
         return f, {"x": x_shape, "kernel": k_shape}, ["kernel"]
 
-    for k_shape, groups in [((16, 32, 3, 3), 1), ((32, 1, 3, 3), 32)]:
-        for padding in [(0, 0), (1, 1)]:
-            for strides in [(1, 1), (2, 2)]:
-                for dilation in [(1, 1), (2, 2)]:
-                    run_and_verify_func(
-                        get_graph(
-                            k_shape=k_shape,
-                            groups=groups,
-                            padding=padding,
-                            strides=strides,
-                            dilation=dilation,
+    for in_dtype in ["int8", "float32"]:
+        for k_shape, groups in [((16, 32, 3, 3), 1), ((32, 1, 3, 3), 32)]:
+            for padding in [(0, 0), (1, 1)]:
+                for strides in [(1, 1), (2, 2)]:
+                    for dilation in [(1, 1), (2, 2)]:
+                        run_and_verify_func(
+                            get_graph(
+                                k_shape=k_shape,
+                                groups=groups,
+                                padding=padding,
+                                strides=strides,
+                                dilation=dilation,
+                                data_dtype=in_dtype,
+                                kernel_dtype=in_dtype,
+                                out_dtype="float32" if in_dtype == "float32" else "int32",
+                            )
                         )
-                    )
+                        assert False
 
 
 def test_conv2d_nhwc():

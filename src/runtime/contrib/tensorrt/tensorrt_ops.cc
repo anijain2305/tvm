@@ -242,6 +242,7 @@ class Conv2DOpConverter : public TensorRTOpConverter {
     auto str_dilation = params->node.GetAttr<std::vector<std::string>>("dilation");
     auto str_padding = params->node.GetAttr<std::vector<std::string>>("padding");
     int groups = std::stoi(params->node.GetAttr<std::vector<std::string>>("groups")[0]);
+    auto str_out_dtype = params->node.GetAttr<std::vector<std::string>>("out_dtype")[0];
     int channels = weight_shape[0];
     // TRT conv2d op doesn't support asymmetric padding before 5.1, so we
     // workaround by adding a padding layer before the pooling op.
@@ -279,6 +280,13 @@ class Conv2DOpConverter : public TensorRTOpConverter {
     const auto dilation = nvinfer1::DimsHW(std::stoi(str_dilation[0]), std::stoi(str_dilation[1]));
     conv_layer->setDilation(dilation);
     conv_layer->setNbGroups(groups);
+    if (str_out_dtype == "int32") {
+      conv_layer->setOutputType(0, nvinfer1::DataType::kINT32);
+    } else if (str_out_dtype == "float32") {
+      conv_layer->setOutputType(0, nvinfer1::DataType::kFLOAT);
+    } else {
+      LOG(FATAL) << "Unsupported out dtype";
+    }
     params->outputs.push_back(conv_layer->getOutput(0));
   }
 };

@@ -132,8 +132,15 @@ def partition_for_tensorrt(
             linked_version = (6, 0, 1)
         config["tensorrt_version"] = linked_version
 
+    print("########## 1 ########")
+    print(mod)
+    print("##################")
     if params:
         mod["main"] = bind_params_by_name(mod["main"], params)
+
+    print("########## 2 ########")
+    print(transform.InferType()(mod))
+    print("##################")
     seq = tvm.transform.Sequential(
         [
             transform.InferType(),
@@ -245,9 +252,9 @@ def conv2d_annotate_fn(expr):  # pylint: disable=unused-variable
     """Check if nn.conv2d is supported by TensorRT."""
 
     attrs, args = expr.attrs, expr.args
-    if any([x.checked_type.dtype != "float32" for x in args]):
-        logger.info("Only float32 inputs are supported for TensorRT.")
-        return False
+    # if any([x.checked_type.dtype != "float32" for x in args]):
+    #     logger.info("Only float32 inputs are supported for TensorRT.")
+    #     return False
     if attrs.data_layout != "NCHW":
         logger.info("nn.conv2d: data_layout is %s but must be NCHW.", attrs.data_layout)
         return False

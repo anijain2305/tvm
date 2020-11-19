@@ -106,6 +106,7 @@ class TensorRTBuilder {
    */
   void AddOutput(const JSONGraphNodeEntry& entry, uint32_t entry_id);
 
+  nvinfer1::DataType GetNvDataType(const DLDataType type);
   /*!
    * \brief Takes network definition and "compiles" a TensorRT engine which can be used for
    * inference. This step is time confusing.
